@@ -20,24 +20,26 @@ import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
 public abstract class Recognizer<T> {
-  protected int outputLayerSize;
+  private int outputLayerSize;
   private BasicNetwork network;
   private int inputLayerSize;
 
   protected Recognizer() {
+    this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
+    this.outputLayerSize = getOutputLayerSize();
+
     this.network = new BasicNetwork();
     this.network.addLayer(new BasicLayer(null, true, inputLayerSize));
     this.network.addLayer(new BasicLayer(new ActivationSigmoid(), true, inputLayerSize / 4));
     this.network.addLayer(new BasicLayer(new ActivationSigmoid(), false, outputLayerSize));
     this.network.getStructure().finalizeStructure();
     this.network.reset();
-
-    this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
   }
 
   protected Recognizer(File trainedNetwork) {
-    this.network = (BasicNetwork) loadObject(trainedNetwork);
     this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
+    this.outputLayerSize = getOutputLayerSize();
+    this.network = (BasicNetwork) loadObject(trainedNetwork);
   }
 
   public T recognize(IncomingCall incomingCall) {
@@ -64,7 +66,7 @@ public abstract class Recognizer<T> {
 
     MLDataSet trainingData = new BasicMLDataSet(input, ideal);
     ResilientPropagation train = new ResilientPropagation(network, trainingData);
-    train.setThreadCount(1);
+    train.setThreadCount(16);
 
     do {
       train.iteration();
@@ -78,6 +80,8 @@ public abstract class Recognizer<T> {
   public void saveTrainedNetwork(File trainedNetwork) {
     saveObject(trainedNetwork, network);
   }
+
+  protected abstract int getOutputLayerSize();
 
   protected abstract double[] getCatalogValueVector(IncomingCall incomingCall);
 
