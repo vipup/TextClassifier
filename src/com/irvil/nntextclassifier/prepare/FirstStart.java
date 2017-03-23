@@ -1,12 +1,12 @@
 package com.irvil.nntextclassifier.prepare;
 
-import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
-import com.irvil.nntextclassifier.ngram.NGramStrategy;
-import com.irvil.nntextclassifier.ngram.Unigram;
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.dao.jdbc.*;
 import com.irvil.nntextclassifier.model.*;
+import com.irvil.nntextclassifier.ngram.NGramStrategy;
+import com.irvil.nntextclassifier.ngram.Unigram;
+import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,8 +79,8 @@ public class FirstStart {
 //
 //    fs.fillVocabulary();
 //    fs.fillReferenceData();
-    //fs.trainNeuralNetwork();
+    fs.trainNeuralNetwork();
 
-    ModuleRecognizer m = new ModuleRecognizer(new File("./db/TrainedNetwork"));
+    //ModuleRecognizer m = new ModuleRecognizer(new File("./db/TrainedNetwork"));
   }
 }

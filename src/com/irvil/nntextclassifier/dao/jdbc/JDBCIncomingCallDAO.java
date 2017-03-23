@@ -23,12 +23,23 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     List<IncomingCall> list = new ArrayList<>();
 
     try (Connection con = DBConnector.getDBConnection()) {
-      String sql = "SELECT IncomingCalls.Text, Modules.* FROM IncomingCalls LEFT JOIN Modules " +
-          "ON IncomingCalls.Module = Modules.Value";
+      String sql =
+          "SELECT IncomingCalls.Text, " +
+              "Modules.Id AS ModuleId, Modules.Value AS ModuleValue," +
+              "Handlers.Id AS HandlerId, Handlers.Value AS HandlerValue, " +
+              "Categories.Id AS CategoryId, Categories.Value AS CategoryValue FROM IncomingCalls " +
+              "LEFT JOIN Modules ON IncomingCalls.Module = Modules.Value " +
+              "LEFT JOIN Categories ON IncomingCalls.Category = Categories.Value " +
+              "LEFT JOIN Handlers ON IncomingCalls.Handler = Handlers.Value";
+
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {
-        list.add(new IncomingCall(rs.getString("Text"), new Module(rs.getInt("Id"), rs.getString("Value"))));
+        Module module = new Module(rs.getInt("ModuleId"), rs.getString("ModuleValue"));
+        Handler handler = new Handler(rs.getInt("HandlerId"), rs.getString("HandlerValue"));
+        Category category = new Category(rs.getInt("CategoryId"), rs.getString("CategoryValue"));
+
+        list.add(new IncomingCall(rs.getString("Text"), module, handler, category));
       }
     } catch (SQLException e) {
       e.printStackTrace();

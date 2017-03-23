@@ -50,7 +50,7 @@ public abstract class Recognizer<T> {
 
   public void train() {
     List<IncomingCall> incomingCalls = new JDBCIncomingCallDAO().getAll();
-    List<IncomingCall> incomingCallsTrain = new ArrayList<>(incomingCalls.subList(0, 100));
+    List<IncomingCall> incomingCallsTrain = new ArrayList<>(incomingCalls.subList(0, 1));
 
     double[][] input = new double[incomingCallsTrain.size()][inputLayerSize];
     double[][] ideal = new double[incomingCallsTrain.size()][outputLayerSize];
@@ -64,7 +64,7 @@ public abstract class Recognizer<T> {
 
     MLDataSet trainingData = new BasicMLDataSet(input, ideal);
     ResilientPropagation train = new ResilientPropagation(network, trainingData);
-    train.setThreadCount(16);
+    train.setThreadCount(1);
 
     do {
       train.iteration();
