@@ -23,7 +23,7 @@ public class CategoryRecognizer extends Recognizer<Category> {
 
   @Override
   protected double[] getCatalogValueVector(IncomingCall incomingCall) {
-    return incomingCall.getModule().asVector();
+    return incomingCall.getCategory().asVector();
   }
 
   private void initializeDAO() {

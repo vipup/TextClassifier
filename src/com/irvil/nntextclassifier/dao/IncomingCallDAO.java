@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface IncomingCallDAO extends GenericDAO<IncomingCall> {
   List<Module> getAllModules();
+
   List<Handler> getAllHandlers();
+
   List<Category> getAllCategories();
 }

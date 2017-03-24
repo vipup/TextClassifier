@@ -23,7 +23,7 @@ public class HandlerRecognizer extends Recognizer<Handler> {
 
   @Override
   protected double[] getCatalogValueVector(IncomingCall incomingCall) {
-    return incomingCall.getModule().asVector();
+    return incomingCall.getHandler().asVector();
   }
 
   private void initializeDAO() {
