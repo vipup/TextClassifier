@@ -31,4 +31,9 @@ public class CategoryRecognizer extends Recognizer<Category> {
       categoryDAO = new JDBCCategoryDAO();
     }
   }
+
+  @Override
+  public String toString() {
+    return "CategoryRecognizer";
+  }
 }

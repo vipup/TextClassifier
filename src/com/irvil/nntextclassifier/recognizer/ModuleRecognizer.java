@@ -31,4 +31,9 @@ public class ModuleRecognizer extends Recognizer<Module> {
       moduleDAO = new JDBCModuleDAO();
     }
   }
+
+  @Override
+  public String toString() {
+    return "ModuleRecognizer";
+  }
 }

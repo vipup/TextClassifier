@@ -51,8 +51,7 @@ public abstract class Recognizer<T> {
   }
 
   public void train() {
-    List<IncomingCall> incomingCalls = new JDBCIncomingCallDAO().getAll();
-    List<IncomingCall> incomingCallsTrain = new ArrayList<>(incomingCalls.subList(0, 1));
+    List<IncomingCall> incomingCallsTrain = new JDBCIncomingCallDAO().getAll();
 
     double[][] input = new double[incomingCallsTrain.size()][inputLayerSize];
     double[][] ideal = new double[incomingCallsTrain.size()][outputLayerSize];

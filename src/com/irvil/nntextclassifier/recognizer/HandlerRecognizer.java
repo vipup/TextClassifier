@@ -31,4 +31,9 @@ public class HandlerRecognizer extends Recognizer<Handler> {
       handlerDAO = new JDBCHandlerDAO();
     }
   }
+
+  @Override
+  public String toString() {
+    return "HandlerRecognizer";
+  }
 }
