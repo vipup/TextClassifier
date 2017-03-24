@@ -5,7 +5,6 @@ import com.irvil.nntextclassifier.dao.jdbc.JDBCModuleDAO;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.Module;
 
-// todo: check in translate
 public class ModuleRecognizer extends Recognizer<Module> {
   private ModuleDAO moduleDAO;
 

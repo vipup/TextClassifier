@@ -5,7 +5,6 @@ import com.irvil.nntextclassifier.dao.jdbc.JDBCCategoryDAO;
 import com.irvil.nntextclassifier.model.Category;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
-// todo: check in translate
 public class CategoryRecognizer extends Recognizer<Category> {
   private CategoryDAO categoryDAO;
 

@@ -13,7 +13,6 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.encog.persist.EncogDirectoryPersistence.loadObject;
@@ -73,7 +72,6 @@ public abstract class Recognizer<T> {
     } while (train.getError() > 0.01);
 
     train.finishTraining();
-    Encog.getInstance().shutdown();
   }
 
   public void saveTrainedNetwork(File trainedNetwork) {

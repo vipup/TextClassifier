@@ -5,7 +5,6 @@ import com.irvil.nntextclassifier.dao.jdbc.JDBCHandlerDAO;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
-// todo: check in translate
 public class HandlerRecognizer extends Recognizer<Handler> {
   private HandlerDAO handlerDAO;
 
