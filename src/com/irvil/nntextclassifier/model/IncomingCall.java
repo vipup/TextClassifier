@@ -19,6 +19,13 @@ public class IncomingCall {
     this.category = category;
   }
 
+  public IncomingCall(String text) {
+    this.text = text;
+    this.module = null;
+    this.handler = null;
+    this.category = null;
+  }
+
   public String getText() {
     return text;
   }

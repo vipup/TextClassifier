@@ -10,6 +10,10 @@ import java.io.File;
 public class ModuleRecognizer extends Recognizer<Module> {
   private ModuleDAO moduleDAO;
 
+  public ModuleRecognizer() {
+    super();
+  }
+
   public ModuleRecognizer(File file) {
     super(file);
   }

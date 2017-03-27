@@ -10,6 +10,10 @@ import java.io.File;
 public class CategoryRecognizer extends Recognizer<Category> {
   private CategoryDAO categoryDAO;
 
+  public CategoryRecognizer() {
+    super();
+  }
+
   public CategoryRecognizer(File file) {
     super(file);
   }

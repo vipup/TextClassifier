@@ -10,6 +10,10 @@ import java.io.File;
 public class HandlerRecognizer extends Recognizer<Handler> {
   private HandlerDAO handlerDAO;
 
+  public HandlerRecognizer() {
+    super();
+  }
+
   public HandlerRecognizer(File file) {
     super(file);
   }
