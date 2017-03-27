@@ -5,8 +5,14 @@ import com.irvil.nntextclassifier.dao.jdbc.JDBCHandlerDAO;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
+import java.io.File;
+
 public class HandlerRecognizer extends Recognizer<Handler> {
   private HandlerDAO handlerDAO;
+
+  public HandlerRecognizer(File file) {
+    super(file);
+  }
 
   @Override
   protected int getOutputLayerSize() {

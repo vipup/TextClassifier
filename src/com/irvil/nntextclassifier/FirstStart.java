@@ -5,12 +5,7 @@ import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.dao.jdbc.*;
 import com.irvil.nntextclassifier.model.*;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
-import com.irvil.nntextclassifier.ngram.Unigram;
-import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
-import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
-import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
-import org.encog.Encog;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,10 +71,10 @@ public class FirstStart {
 //    fs.fillVocabulary(new Unigram());
 //    fs.fillReferenceData();
     //fs.trainRecognizer(new ModuleRecognizer());
-    fs.trainRecognizer(new CategoryRecognizer());
-    fs.trainRecognizer(new HandlerRecognizer());
-    Encog.getInstance().shutdown();
+//    fs.trainRecognizer(new CategoryRecognizer());
+//    fs.trainRecognizer(new HandlerRecognizer());
+//    Encog.getInstance().shutdown();
 
-    //ModuleRecognizer m = new ModuleRecognizer(new File("./db/TrainedNetwork"));
+    //fs.testTrainedNetwork();
   }
 }

@@ -50,4 +50,9 @@ public class IncomingCall {
 
     return vector;
   }
+
+  @Override
+  public String toString() {
+    return text + " (Module: " + module + ", Category: " + category + ", Handler: " + handler + ")";
+  }
 }
