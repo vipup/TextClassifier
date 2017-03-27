@@ -23,6 +23,8 @@ public abstract class Recognizer<T> {
   private BasicNetwork network;
   private int inputLayerSize;
 
+  //todo: move dao here and change constructor
+
   protected Recognizer() {
     this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
     this.outputLayerSize = getOutputLayerSize();

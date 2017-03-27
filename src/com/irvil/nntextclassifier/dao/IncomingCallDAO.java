@@ -7,7 +7,9 @@ import com.irvil.nntextclassifier.model.Module;
 
 import java.util.List;
 
-public interface IncomingCallDAO extends GenericDAO<IncomingCall> {
+public interface IncomingCallDAO {
+  List<IncomingCall> getAll();
+
   List<Module> getAllModules();
 
   List<Handler> getAllHandlers();

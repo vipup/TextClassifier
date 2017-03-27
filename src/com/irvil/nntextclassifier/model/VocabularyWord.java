@@ -1,19 +1,9 @@
 package com.irvil.nntextclassifier.model;
 
-public class VocabularyWord {
-  private int id;
-  private String value;
+import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
 
+public class VocabularyWord extends Catalog {
   public VocabularyWord(int id, String value) {
-    this.id = id;
-    this.value = value;
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public String getValue() {
-    return value;
+    super(id, value, new JDBCVocabularyWordDAO());
   }
 }

@@ -1,6 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.dao.ModuleDAO;
+import com.irvil.nntextclassifier.dao.CatalogDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCModuleDAO;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.Module;
@@ -8,7 +8,7 @@ import com.irvil.nntextclassifier.model.Module;
 import java.io.File;
 
 public class ModuleRecognizer extends Recognizer<Module> {
-  private ModuleDAO moduleDAO;
+  private CatalogDAO<Module> moduleDAO;
 
   public ModuleRecognizer() {
     super();

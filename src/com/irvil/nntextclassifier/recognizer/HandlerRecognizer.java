@@ -1,6 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.dao.HandlerDAO;
+import com.irvil.nntextclassifier.dao.CatalogDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCHandlerDAO;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
@@ -8,7 +8,7 @@ import com.irvil.nntextclassifier.model.IncomingCall;
 import java.io.File;
 
 public class HandlerRecognizer extends Recognizer<Handler> {
-  private HandlerDAO handlerDAO;
+  private CatalogDAO<Handler> handlerDAO;
 
   public HandlerRecognizer() {
     super();

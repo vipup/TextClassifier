@@ -42,6 +42,7 @@ public class IncomingCall {
     return category;
   }
 
+  // todo: refactor this method
   public double[] getTextAsWordVector(NGramStrategy nGram) {
     VocabularyWordDAO vocabularyWordDAO = new JDBCVocabularyWordDAO();
     double[] vector = new double[vocabularyWordDAO.getCount()];

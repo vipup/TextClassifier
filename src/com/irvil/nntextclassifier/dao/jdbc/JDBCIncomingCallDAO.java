@@ -14,11 +14,6 @@ import java.util.List;
 
 public class JDBCIncomingCallDAO implements IncomingCallDAO {
   @Override
-  public int getCount() {
-    return 0;
-  }
-
-  @Override
   public List<IncomingCall> getAll() {
     List<IncomingCall> list = new ArrayList<>();
 
@@ -46,21 +41,6 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     }
 
     return list;
-  }
-
-  @Override
-  public IncomingCall findByID(int id) {
-    return null;
-  }
-
-  @Override
-  public IncomingCall findByValue(String value) {
-    return null;
-  }
-
-  @Override
-  public void add(IncomingCall object) {
-
   }
 
   @Override

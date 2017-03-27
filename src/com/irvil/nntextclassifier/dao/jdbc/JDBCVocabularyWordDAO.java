@@ -7,36 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
-public class JDBCVocabularyWordDAO implements VocabularyWordDAO {
-  @Override
-  public int getCount() {
-    int count = 0;
-
-    try (Connection con = DBConnector.getDBConnection()) {
-      ResultSet rs = con.createStatement().executeQuery("SELECT COUNT(*) FROM Vocabulary AS Count");
-
-      if (rs.next()) {
-        count = rs.getInt(1);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-
-    return count;
-  }
-
-  @Override
-  public List<VocabularyWord> getAll() {
-    return null;
-  }
-
-  @Override
-  public VocabularyWord findByID(int id) {
-    throw new UnsupportedOperationException();
-  }
-
+public class JDBCVocabularyWordDAO extends JDBCGenericDAO<VocabularyWord> implements VocabularyWordDAO {
   @Override
   public VocabularyWord findByValue(String value) {
     try (Connection con = DBConnector.getDBConnection()) {
@@ -56,13 +28,20 @@ public class JDBCVocabularyWordDAO implements VocabularyWordDAO {
   }
 
   @Override
-  public void add(VocabularyWord object) {
-    try (Connection con = DBConnector.getDBConnection()) {
-      PreparedStatement insertStatement = con.prepareStatement("INSERT INTO Vocabulary (value) VALUES (?)");
-      insertStatement.setString(1, object.getValue());
-      insertStatement.executeUpdate();
+  protected String getTableName() {
+    return "Vocabulary";
+  }
+
+  @Override
+  public VocabularyWord findByID(int id) {
+    ResultSet rs = getResultSetByID(id);
+
+    try {
+      return new VocabularyWord(rs.getInt("Id"), rs.getString("Value"));
     } catch (SQLException e) {
       e.printStackTrace();
     }
+
+    return null;
   }
 }
