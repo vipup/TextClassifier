@@ -33,15 +33,7 @@ public class JDBCVocabularyWordDAO extends JDBCGenericDAO<VocabularyWord> implem
   }
 
   @Override
-  public VocabularyWord findByID(int id) {
-    ResultSet rs = getResultSetByID(id);
-
-    try {
-      return new VocabularyWord(rs.getInt("Id"), rs.getString("Value"));
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-
-    return null;
+  protected VocabularyWord createObject(int id, String value) {
+    return new VocabularyWord(id, value);
   }
 }

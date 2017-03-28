@@ -4,10 +4,7 @@ import com.irvil.nntextclassifier.dao.jdbc.JDBCCategoryDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCHandlerDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCModuleDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
-import com.irvil.nntextclassifier.model.Category;
-import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
-import com.irvil.nntextclassifier.model.Module;
 import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
 import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
 import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
@@ -37,9 +34,9 @@ public class MainWindow extends Application {
   private Label categoryLbl;
   private Label handlerLbl;
 
-  private Recognizer<Module> moduleRecognizer;
-  private Recognizer<Category> categoryRecognizer;
-  private Recognizer<Handler> handlerRecognizer;
+  private Recognizer moduleRecognizer;
+  private Recognizer categoryRecognizer;
+  private Recognizer handlerRecognizer;
 
   public static void main(String[] args) {
     launch(args);

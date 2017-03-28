@@ -7,10 +7,10 @@ import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import java.util.Set;
 
 public class IncomingCall {
-  private String text;
-  private Module module;
-  private Handler handler;
-  private Category category;
+  private final String text;
+  private final Module module;
+  private final Handler handler;
+  private final Category category;
 
   public IncomingCall(String text, Module module, Handler handler, Category category) {
     this.text = text;

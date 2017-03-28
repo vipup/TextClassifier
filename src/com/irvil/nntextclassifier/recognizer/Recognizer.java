@@ -1,7 +1,9 @@
 package com.irvil.nntextclassifier.recognizer;
 
+import com.irvil.nntextclassifier.dao.CatalogDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCIncomingCallDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
+import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.ngram.Unigram;
 import org.encog.Encog;
@@ -18,16 +20,16 @@ import java.util.List;
 import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
-public abstract class Recognizer<T> {
-  private int outputLayerSize;
-  private BasicNetwork network;
-  private int inputLayerSize;
+public abstract class Recognizer {
+  private final int outputLayerSize;
+  private final BasicNetwork network;
+  private final int inputLayerSize;
+  private final CatalogDAO dao;
 
-  //todo: move dao here and change constructor
-
-  protected Recognizer() {
+  protected Recognizer(CatalogDAO dao) {
     this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
-    this.outputLayerSize = getOutputLayerSize();
+    this.outputLayerSize = dao.getCount();
+    this.dao = dao;
 
     this.network = new BasicNetwork();
     this.network.addLayer(new BasicLayer(null, true, inputLayerSize));
@@ -37,18 +39,20 @@ public abstract class Recognizer<T> {
     this.network.reset();
   }
 
-  protected Recognizer(File trainedNetwork) {
+  protected Recognizer(File trainedNetwork, CatalogDAO dao) {
     this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
-    this.outputLayerSize = getOutputLayerSize();
+    this.outputLayerSize = dao.getCount();
+    this.dao = dao;
+
     this.network = (BasicNetwork) loadObject(trainedNetwork);
   }
 
-  public T recognize(IncomingCall incomingCall) {
+  public Catalog recognize(IncomingCall incomingCall) {
     double[] output = new double[outputLayerSize];
     network.compute(incomingCall.getTextAsWordVector(new Unigram()), output);
     Encog.getInstance().shutdown();
 
-    return convertVectorToValue(output);
+    return dao.findByVector(output);
   }
 
   public void train() {
@@ -80,9 +84,5 @@ public abstract class Recognizer<T> {
     saveObject(trainedNetwork, network);
   }
 
-  protected abstract int getOutputLayerSize();
-
   protected abstract double[] getCatalogValueVector(IncomingCall incomingCall);
-
-  protected abstract T convertVectorToValue(double[] output);
 }

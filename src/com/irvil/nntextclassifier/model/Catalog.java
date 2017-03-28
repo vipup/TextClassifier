@@ -2,10 +2,11 @@ package com.irvil.nntextclassifier.model;
 
 import com.irvil.nntextclassifier.dao.GenericDAO;
 
+// todo: rename to Characteristic and delete Category, Module...etc
 public abstract class Catalog {
-  private int id;
-  private String value;
-  private GenericDAO dao;
+  private final int id;
+  private final String value;
+  private final GenericDAO dao;
 
   protected Catalog(int id, String value, GenericDAO dao) {
     this.id = id;

@@ -26,15 +26,15 @@ public abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T>
     return count;
   }
 
-  // todo: refactor this method
-  protected ResultSet getResultSetByID(int id) {
+  @Override
+  public T findByID(int id) {
     try (Connection con = DBConnector.getDBConnection()) {
       PreparedStatement statement = con.prepareStatement("SELECT * FROM " + getTableName() + " WHERE Id = ?");
       statement.setInt(1, id);
       ResultSet rs = statement.executeQuery();
 
       if (rs.next()) {
-        return rs;
+        return createObject(rs.getInt("Id"), rs.getString("Value"));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -55,4 +55,6 @@ public abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T>
   }
 
   protected abstract String getTableName();
+
+  protected abstract T createObject(int id, String value);
 }
