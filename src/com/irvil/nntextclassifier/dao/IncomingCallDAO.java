@@ -10,9 +10,9 @@ import java.util.List;
 public interface IncomingCallDAO {
   List<IncomingCall> getAll();
 
-  List<Module> getAllModules();
+  List<Module> getUniqueModules();
 
-  List<Handler> getAllHandlers();
+  List<Handler> getUniqueHandlers();
 
-  List<Category> getAllCategories();
+  List<Category> getUniqueCategories();
 }

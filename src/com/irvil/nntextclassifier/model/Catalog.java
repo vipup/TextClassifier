@@ -22,15 +22,13 @@ public abstract class Catalog {
     return value;
   }
 
+  // example:
+  // count = 5; id = 4;
+  // vector = {0, 0, 0, 1, 0}
   public double[] asVector() {
     double[] vector = new double[dao.getCount()];
     vector[id - 1] = 1;
 
     return vector;
-  }
-
-  @Override
-  public String toString() {
-    return value;
   }
 }

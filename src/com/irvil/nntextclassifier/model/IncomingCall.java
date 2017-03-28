@@ -20,10 +20,7 @@ public class IncomingCall {
   }
 
   public IncomingCall(String text) {
-    this.text = text;
-    this.module = null;
-    this.handler = null;
-    this.category = null;
+    this(text, null, null, null);
   }
 
   public String getText() {
@@ -42,12 +39,15 @@ public class IncomingCall {
     return category;
   }
 
-  // todo: refactor this method
+  // todo: use asVector from VocabularyWord
   public double[] getTextAsWordVector(NGramStrategy nGram) {
     VocabularyWordDAO vocabularyWordDAO = new JDBCVocabularyWordDAO();
     double[] vector = new double[vocabularyWordDAO.getCount()];
+
+    // convert text to nGram
     Set<String> uniqueValues = nGram.getNGram(text);
 
+    // create vector
     for (String word : uniqueValues) {
       VocabularyWord vw = vocabularyWordDAO.findByValue(word);
 

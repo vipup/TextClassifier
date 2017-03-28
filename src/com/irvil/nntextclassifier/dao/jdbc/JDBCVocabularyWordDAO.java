@@ -11,15 +11,16 @@ import java.sql.SQLException;
 public class JDBCVocabularyWordDAO extends JDBCGenericDAO<VocabularyWord> implements VocabularyWordDAO {
   @Override
   public VocabularyWord findByValue(String value) {
+    String sql = "SELECT Id FROM Vocabulary WHERE Value = ?";
+
     try (Connection con = DBConnector.getDBConnection()) {
-      PreparedStatement statement = con.prepareStatement("SELECT Id FROM Vocabulary WHERE Value = ?");
+      PreparedStatement statement = con.prepareStatement(sql);
       statement.setString(1, value);
       ResultSet rs = statement.executeQuery();
 
       if (rs.next()) {
         return new VocabularyWord(rs.getInt("Id"), value);
       }
-
     } catch (SQLException e) {
       e.printStackTrace();
     }

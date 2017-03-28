@@ -10,16 +10,16 @@ public abstract class JDBCCatalogDAO<T extends Catalog> extends JDBCGenericDAO<T
   }
 
   private int getIndexOfMaxValue(double[] vector) {
-    int maxIndex = 0;
+    int indexOfMaxValue = 0;
     double maxValue = vector[0];
 
     for (int i = 1; i < vector.length; i++) {
       if (vector[i] > maxValue) {
         maxValue = vector[i];
-        maxIndex = i;
+        indexOfMaxValue = i;
       }
     }
 
-    return maxIndex;
+    return indexOfMaxValue;
   }
 }

@@ -12,9 +12,10 @@ public abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T>
   @Override
   public int getCount() {
     int count = 0;
+    String sql = "SELECT COUNT(*) FROM " + getTableName();
 
     try (Connection con = DBConnector.getDBConnection()) {
-      ResultSet rs = con.createStatement().executeQuery("SELECT COUNT(*) FROM " + getTableName() + " AS Count");
+      ResultSet rs = con.createStatement().executeQuery(sql);
 
       if (rs.next()) {
         count = rs.getInt(1);
@@ -28,13 +29,15 @@ public abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T>
 
   @Override
   public T findByID(int id) {
+    String sql = "SELECT Value FROM " + getTableName() + " WHERE Id = ?";
+
     try (Connection con = DBConnector.getDBConnection()) {
-      PreparedStatement statement = con.prepareStatement("SELECT * FROM " + getTableName() + " WHERE Id = ?");
+      PreparedStatement statement = con.prepareStatement(sql);
       statement.setInt(1, id);
       ResultSet rs = statement.executeQuery();
 
       if (rs.next()) {
-        return createObject(rs.getInt("Id"), rs.getString("Value"));
+        return createObject(id, rs.getString("Value"));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -45,8 +48,10 @@ public abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T>
 
   @Override
   public void add(T object) {
+    String sql = "INSERT INTO " + getTableName() + " (Value) VALUES (?)";
+
     try (Connection con = DBConnector.getDBConnection()) {
-      PreparedStatement insertStatement = con.prepareStatement("INSERT INTO " + getTableName() + " (value) VALUES (?)");
+      PreparedStatement insertStatement = con.prepareStatement(sql);
       insertStatement.setString(1, object.getValue());
       insertStatement.executeUpdate();
     } catch (SQLException e) {

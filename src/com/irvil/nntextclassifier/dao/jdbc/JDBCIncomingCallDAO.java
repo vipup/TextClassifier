@@ -16,17 +16,16 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
   @Override
   public List<IncomingCall> getAll() {
     List<IncomingCall> list = new ArrayList<>();
+    String sql =
+        "SELECT IncomingCalls.Text, " +
+            "Modules.Id AS ModuleId, Modules.Value AS ModuleValue," +
+            "Handlers.Id AS HandlerId, Handlers.Value AS HandlerValue, " +
+            "Categories.Id AS CategoryId, Categories.Value AS CategoryValue FROM IncomingCalls " +
+            "LEFT JOIN Modules ON IncomingCalls.Module = Modules.Value " +
+            "LEFT JOIN Categories ON IncomingCalls.Category = Categories.Value " +
+            "LEFT JOIN Handlers ON IncomingCalls.Handler = Handlers.Value";
 
     try (Connection con = DBConnector.getDBConnection()) {
-      String sql =
-          "SELECT IncomingCalls.Text, " +
-              "Modules.Id AS ModuleId, Modules.Value AS ModuleValue," +
-              "Handlers.Id AS HandlerId, Handlers.Value AS HandlerValue, " +
-              "Categories.Id AS CategoryId, Categories.Value AS CategoryValue FROM IncomingCalls " +
-              "LEFT JOIN Modules ON IncomingCalls.Module = Modules.Value " +
-              "LEFT JOIN Categories ON IncomingCalls.Category = Categories.Value " +
-              "LEFT JOIN Handlers ON IncomingCalls.Handler = Handlers.Value";
-
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {
@@ -44,11 +43,10 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
   }
 
   @Override
-  public List<Module> getAllModules() {
+  public List<Module> getUniqueModules() {
     List<Module> modules = new ArrayList<>();
-    List<String> catalog = getCatalog("Module");
 
-    for (String value : catalog) {
+    for (String value : getUniqueCatalog("Module")) {
       modules.add(new Module(0, value));
     }
 
@@ -56,11 +54,10 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
   }
 
   @Override
-  public List<Handler> getAllHandlers() {
+  public List<Handler> getUniqueHandlers() {
     List<Handler> handlers = new ArrayList<>();
-    List<String> catalog = getCatalog("Handler");
 
-    for (String value : catalog) {
+    for (String value : getUniqueCatalog("Handler")) {
       handlers.add(new Handler(0, value));
     }
 
@@ -68,22 +65,22 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
   }
 
   @Override
-  public List<Category> getAllCategories() {
+  public List<Category> getUniqueCategories() {
     List<Category> categories = new ArrayList<>();
-    List<String> catalog = getCatalog("Category");
 
-    for (String value : catalog) {
+    for (String value : getUniqueCatalog("Category")) {
       categories.add(new Category(0, value));
     }
 
     return categories;
   }
 
-  private List<String> getCatalog(String fieldName) {
+  private List<String> getUniqueCatalog(String fieldName) {
     List<String> catalog = new ArrayList<>();
+    String sql = "SELECT DISTINCT " + fieldName + " FROM IncomingCalls";
 
     try (Connection con = DBConnector.getDBConnection()) {
-      ResultSet rs = con.createStatement().executeQuery("SELECT DISTINCT " + fieldName + " FROM IncomingCalls");
+      ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {
         catalog.add(rs.getString(fieldName));

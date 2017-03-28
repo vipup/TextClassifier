@@ -8,10 +8,10 @@ import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.ngram.Unigram;
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
-import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import java.io.File;
@@ -21,42 +21,60 @@ import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
 public abstract class Recognizer {
+  private final int inputLayerSize;
   private final int outputLayerSize;
   private final BasicNetwork network;
-  private final int inputLayerSize;
-  private final CatalogDAO dao;
+  private final CatalogDAO catalogDAO;
 
-  protected Recognizer(CatalogDAO dao) {
+  protected Recognizer(CatalogDAO catalogDAO) {
     this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
-    this.outputLayerSize = dao.getCount();
-    this.dao = dao;
+    this.outputLayerSize = catalogDAO.getCount();
+    this.catalogDAO = catalogDAO;
 
+    // create neural network
     this.network = new BasicNetwork();
+
+    // input layer
     this.network.addLayer(new BasicLayer(null, true, inputLayerSize));
+
+    // hidden layer
     this.network.addLayer(new BasicLayer(new ActivationSigmoid(), true, inputLayerSize / 4));
+
+    // output layer
     this.network.addLayer(new BasicLayer(new ActivationSigmoid(), false, outputLayerSize));
+
     this.network.getStructure().finalizeStructure();
     this.network.reset();
   }
 
-  protected Recognizer(File trainedNetwork, CatalogDAO dao) {
+  protected Recognizer(File trainedNetwork, CatalogDAO catalogDAO) {
     this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
-    this.outputLayerSize = dao.getCount();
-    this.dao = dao;
+    this.outputLayerSize = catalogDAO.getCount();
+    this.catalogDAO = catalogDAO;
 
+    // load neural network from file
     this.network = (BasicNetwork) loadObject(trainedNetwork);
   }
 
   public Catalog recognize(IncomingCall incomingCall) {
     double[] output = new double[outputLayerSize];
+
+    // calculate output vector
     network.compute(incomingCall.getTextAsWordVector(new Unigram()), output);
     Encog.getInstance().shutdown();
 
-    return dao.findByVector(output);
+    // convert output vector to characteristic
+    return catalogDAO.findByVector(output);
   }
 
   public void train() {
     List<IncomingCall> incomingCallsTrain = new JDBCIncomingCallDAO().getAll();
+
+    // prepare input and ideal vectors
+    // input <- IncomingCall text vector
+    // ideal <- characteristic vector
+    // todo: extract to other method
+    //
 
     double[][] input = new double[incomingCallsTrain.size()][inputLayerSize];
     double[][] ideal = new double[incomingCallsTrain.size()][outputLayerSize];
@@ -68,8 +86,10 @@ public abstract class Recognizer {
       i++;
     }
 
-    MLDataSet trainingData = new BasicMLDataSet(input, ideal);
-    ResilientPropagation train = new ResilientPropagation(network, trainingData);
+    // train
+    //
+
+    Propagation train = new ResilientPropagation(network, new BasicMLDataSet(input, ideal));
     train.setThreadCount(16);
 
     do {
@@ -80,7 +100,7 @@ public abstract class Recognizer {
     train.finishTraining();
   }
 
-  public void saveTrainedNetwork(File trainedNetwork) {
+  public void saveTrainedRecognizer(File trainedNetwork) {
     saveObject(trainedNetwork, network);
   }
 

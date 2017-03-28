@@ -11,30 +11,42 @@ import java.util.List;
 public class JDBCDBCreator implements StorageCreator {
   @Override
   public void createStorage() {
-    List<String> sql = new ArrayList<>();
+    List<String> sqlQueries = new ArrayList<>();
 
-    sql.add("CREATE TABLE IF NOT EXISTS IncomingCalls " +
+    // create database structure
+    //
+
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS IncomingCalls " +
         "( Text TEXT, Category TEXT, Module TEXT, Handler TEXT )");
-    sql.add("CREATE TABLE IF NOT EXISTS Vocabulary " +
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS Vocabulary " +
         "( Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT UNIQUE )");
-    sql.add("CREATE TABLE IF NOT EXISTS Modules " +
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS Modules " +
         "( Id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT )");
-    sql.add("CREATE TABLE IF NOT EXISTS Categories " +
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS Categories " +
         "( Id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT )");
-    sql.add("CREATE TABLE IF NOT EXISTS Handlers " +
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS Handlers " +
         "( Id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT )");
 
-    sql.add("DELETE FROM Modules");
-    sql.add("DELETE FROM Categories");
-    sql.add("DELETE FROM Handlers");
-    sql.add("DELETE FROM Vocabulary");
-    sql.add("DELETE FROM sqlite_sequence WHERE name IN ('Modules', 'Categories', 'Handlers', 'Vocabulary')");
+    // delete all records if tables already exists
+    //
 
+    sqlQueries.add("DELETE FROM Modules");
+    sqlQueries.add("DELETE FROM Categories");
+    sqlQueries.add("DELETE FROM Handlers");
+    sqlQueries.add("DELETE FROM Vocabulary");
+
+    // reset autoincrement keys
+    sqlQueries.add("DELETE FROM sqlite_sequence WHERE name IN ('Modules', 'Categories', 'Handlers', 'Vocabulary')");
+
+    executeQueries(sqlQueries);
+  }
+
+  private void executeQueries(List<String> sqlQueries) {
     try (Connection con = DBConnector.getDBConnection()) {
       Statement stmnt = con.createStatement();
 
-      for (String query : sql) {
-        stmnt.execute(query);
+      for (String sqlQuery : sqlQueries) {
+        stmnt.execute(sqlQuery);
       }
     } catch (SQLException e) {
       e.printStackTrace();

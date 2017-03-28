@@ -27,9 +27,10 @@ public class FirstStart {
   }
 
   private void fillVocabulary(NGramStrategy nGram) {
-    List<IncomingCall> incomingCalls = new JDBCIncomingCallDAO().getAll();
-    Set<String> vocabulary = getVocabulary(nGram, incomingCalls);
+    // build vocabulary from all IncomingCalls
+    Set<String> vocabulary = getVocabulary(nGram, new JDBCIncomingCallDAO().getAll());
 
+    // save vocabulary words in Storage
     for (String word : vocabulary) {
       new JDBCVocabularyWordDAO().add(new VocabularyWord(0, word));
     }
@@ -40,6 +41,7 @@ public class FirstStart {
   private Set<String> getVocabulary(NGramStrategy nGram, List<IncomingCall> incomingCalls) {
     Set<String> vocabulary = new LinkedHashSet<>();
 
+    // add words (converted to n-gram) from all IncomingCalls to vocabulary
     for (IncomingCall ic : incomingCalls) {
       vocabulary.addAll(nGram.getNGram(ic.getText()));
     }
@@ -50,20 +52,17 @@ public class FirstStart {
   private void fillReferenceData() {
     IncomingCallDAO icDAO = new JDBCIncomingCallDAO();
 
-    List<Module> modules = icDAO.getAllModules();
-    List<Category> categories = icDAO.getAllCategories();
-    List<Handler> handlers = icDAO.getAllHandlers();
-
-    modules.forEach((module) -> new JDBCModuleDAO().add(module));
-    categories.forEach((category) -> new JDBCCategoryDAO().add(category));
-    handlers.forEach((handler) -> new JDBCHandlerDAO().add(handler));
+    // save characteristics in Storage
+    icDAO.getUniqueModules().forEach((module) -> new JDBCModuleDAO().add(module));
+    icDAO.getUniqueCategories().forEach((category) -> new JDBCCategoryDAO().add(category));
+    icDAO.getUniqueHandlers().forEach((handler) -> new JDBCHandlerDAO().add(handler));
 
     System.out.println("Modules, Categories, Handlers filled");
   }
 
   private void trainRecognizer(Recognizer recognizer) {
     recognizer.train();
-    recognizer.saveTrainedNetwork(new File("./db/" + recognizer.toString() + "TrainedNetwork"));
+    recognizer.saveTrainedRecognizer(new File("./db/" + recognizer.toString() + "TrainedNetwork"));
   }
 
   private void createDbFolder(String path) {
@@ -72,6 +71,7 @@ public class FirstStart {
 
   public static void main(String[] args) throws IOException {
     FirstStart fs = new FirstStart();
+    
     fs.createDbFolder("./db");
     fs.createStorage();
 

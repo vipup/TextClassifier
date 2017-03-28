@@ -28,11 +28,11 @@ public class MainWindow extends Application {
   private boolean error;
 
   private FlowPane root;
-  private TextArea textArea;
-  private Button btn;
-  private Label moduleLbl;
-  private Label categoryLbl;
-  private Label handlerLbl;
+  private TextArea textAreaIncomingCall;
+  private Button btnRecognize;
+  private Label lblModule;
+  private Label lblCategory;
+  private Label lblHandler;
 
   private Recognizer moduleRecognizer;
   private Recognizer categoryRecognizer;
@@ -48,10 +48,6 @@ public class MainWindow extends Application {
     error = (!isDBFolderExists() || !isDBFilled() || !loadLearnedRecognizers());
   }
 
-  private boolean isDBFolderExists() {
-    return new File("./db").exists();
-  }
-
   @Override
   public void start(Stage primaryStage) {
     if (error) {
@@ -64,30 +60,33 @@ public class MainWindow extends Application {
   }
 
   private void buildForm(Stage primaryStage) {
-    textArea = new TextArea();
-    textArea.setWrapText(true);
+    textAreaIncomingCall = new TextArea();
+    textAreaIncomingCall.setWrapText(true);
 
-    btn = new Button("Recognize");
-    btn.setOnAction(new RecognizeBtnPressEvent());
+    btnRecognize = new Button("Recognize");
+    btnRecognize.setOnAction(new RecognizeBtnPressEvent());
 
-    moduleLbl = new Label("");
-    categoryLbl = new Label("");
-    handlerLbl = new Label("");
+    lblModule = new Label("");
+    lblCategory = new Label("");
+    lblHandler = new Label("");
 
     root = new FlowPane(Orientation.VERTICAL, 10, 10);
     root.setAlignment(Pos.BASELINE_CENTER);
-    root.getChildren().addAll(textArea, btn, moduleLbl, categoryLbl, handlerLbl);
+    root.getChildren().addAll(textAreaIncomingCall, btnRecognize, lblModule, lblCategory, lblHandler);
 
     primaryStage.setScene(new Scene(root, 500, 300));
     primaryStage.show();
   }
 
+  private boolean isDBFolderExists() {
+    return new File("./db").exists();
+  }
 
   private boolean isDBFilled() {
-    return !(new JDBCVocabularyWordDAO().getCount() == 0 ||
-        new JDBCModuleDAO().getCount() == 0 ||
-        new JDBCCategoryDAO().getCount() == 0 ||
-        new JDBCHandlerDAO().getCount() == 0);
+    return (new JDBCVocabularyWordDAO().getCount() != 0 &&
+        new JDBCModuleDAO().getCount() != 0 &&
+        new JDBCCategoryDAO().getCount() != 0 &&
+        new JDBCHandlerDAO().getCount() != 0);
   }
 
   private boolean loadLearnedRecognizers() {
@@ -102,14 +101,18 @@ public class MainWindow extends Application {
     return true;
   }
 
+  // Event handlers
+  //
+
   private class RecognizeBtnPressEvent implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
-      IncomingCall ic = new IncomingCall(textArea.getText());
+      IncomingCall ic = new IncomingCall(textAreaIncomingCall.getText());
 
-      moduleLbl.setText(moduleRecognizer.recognize(ic).toString());
-      categoryLbl.setText(categoryRecognizer.recognize(ic).toString());
-      handlerLbl.setText(handlerRecognizer.recognize(ic).toString());
+      // recognize characteristics
+      lblModule.setText(moduleRecognizer.recognize(ic).getValue());
+      lblCategory.setText(categoryRecognizer.recognize(ic).getValue());
+      lblHandler.setText(handlerRecognizer.recognize(ic).getValue());
     }
   }
 }
