@@ -1,9 +1,10 @@
 package com.irvil.nntextclassifier;
 
+import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.StorageCreator;
-import com.irvil.nntextclassifier.dao.jdbc.*;
-import com.irvil.nntextclassifier.model.*;
+import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import com.irvil.nntextclassifier.ngram.Unigram;
 import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
@@ -20,7 +21,7 @@ import java.util.Set;
 
 public class FirstStart {
   private void createStorage() {
-    StorageCreator sc = new JDBCDBCreator();
+    StorageCreator sc = DAOFactory.storageCreator("jdbc");
     sc.createStorage();
 
     System.out.println("Storage created");
@@ -28,11 +29,11 @@ public class FirstStart {
 
   private void fillVocabulary(NGramStrategy nGram) {
     // build vocabulary from all IncomingCalls
-    Set<String> vocabulary = getVocabulary(nGram, new JDBCIncomingCallDAO().getAll());
+    Set<String> vocabulary = getVocabulary(nGram, DAOFactory.incomingCallDAO("jdbc").getAll());
 
     // save vocabulary words in Storage
     for (String word : vocabulary) {
-      new JDBCVocabularyWordDAO().add(new VocabularyWord(0, word));
+      DAOFactory.vocabularyWordDAO("jdbc").add(new VocabularyWord(0, word));
     }
 
     System.out.println("Vocabulary filled");
@@ -50,12 +51,12 @@ public class FirstStart {
   }
 
   private void fillReferenceData() {
-    IncomingCallDAO icDAO = new JDBCIncomingCallDAO();
+    IncomingCallDAO icDAO = DAOFactory.incomingCallDAO("jdbc");
 
     // save characteristics in Storage
-    icDAO.getUniqueModules().forEach((module) -> new JDBCModuleDAO().add(module));
-    icDAO.getUniqueCategories().forEach((category) -> new JDBCCategoryDAO().add(category));
-    icDAO.getUniqueHandlers().forEach((handler) -> new JDBCHandlerDAO().add(handler));
+    icDAO.getUniqueModules().forEach((module) -> DAOFactory.moduleDAO("jdbc").add(module));
+    icDAO.getUniqueCategories().forEach((category) -> DAOFactory.categoryDAO("jdbc").add(category));
+    icDAO.getUniqueHandlers().forEach((handler) -> DAOFactory.handlerDAO("jdbc").add(handler));
 
     System.out.println("Modules, Categories, Handlers filled");
   }
@@ -71,7 +72,7 @@ public class FirstStart {
 
   public static void main(String[] args) throws IOException {
     FirstStart fs = new FirstStart();
-    
+
     fs.createDbFolder("./db");
     fs.createStorage();
 

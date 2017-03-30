@@ -1,8 +1,7 @@
 package com.irvil.nntextclassifier.recognizer;
 
 import com.irvil.nntextclassifier.dao.CatalogDAO;
-import com.irvil.nntextclassifier.dao.jdbc.JDBCIncomingCallDAO;
-import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
+import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.ngram.Unigram;
@@ -27,7 +26,7 @@ public abstract class Recognizer {
   private final CatalogDAO catalogDAO;
 
   protected Recognizer(CatalogDAO catalogDAO) {
-    this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
+    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc").getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -48,7 +47,7 @@ public abstract class Recognizer {
   }
 
   protected Recognizer(File trainedNetwork, CatalogDAO catalogDAO) {
-    this.inputLayerSize = new JDBCVocabularyWordDAO().getCount();
+    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc").getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -68,7 +67,7 @@ public abstract class Recognizer {
   }
 
   public void train() {
-    List<IncomingCall> incomingCallsTrain = new JDBCIncomingCallDAO().getAll();
+    List<IncomingCall> incomingCallsTrain = DAOFactory.incomingCallDAO("jdbc").getAll();
 
     // prepare input and ideal vectors
     // input <- IncomingCall text vector

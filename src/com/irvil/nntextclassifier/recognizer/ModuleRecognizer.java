@@ -1,17 +1,17 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.dao.jdbc.JDBCModuleDAO;
+import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
 import java.io.File;
 
 public class ModuleRecognizer extends Recognizer {
   public ModuleRecognizer() {
-    super(new JDBCModuleDAO());
+    super(DAOFactory.moduleDAO("jdbc"));
   }
 
   public ModuleRecognizer(File file) {
-    super(file, new JDBCModuleDAO());
+    super(file, DAOFactory.moduleDAO("jdbc"));
   }
 
   @Override

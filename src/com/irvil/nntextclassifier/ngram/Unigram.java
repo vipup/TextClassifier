@@ -3,7 +3,6 @@ package com.irvil.nntextclassifier.ngram;
 import com.irvil.nntextclassifier.PorterStemmer;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

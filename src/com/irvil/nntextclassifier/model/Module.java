@@ -1,9 +1,9 @@
 package com.irvil.nntextclassifier.model;
 
-import com.irvil.nntextclassifier.dao.jdbc.JDBCModuleDAO;
+import com.irvil.nntextclassifier.dao.DAOFactory;
 
 public class Module extends Catalog {
   public Module(int id, String value) {
-    super(id, value, new JDBCModuleDAO());
+    super(id, value, DAOFactory.moduleDAO("jdbc"));
   }
 }

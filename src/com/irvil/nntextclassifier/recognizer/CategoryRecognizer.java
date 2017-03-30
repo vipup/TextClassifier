@@ -1,17 +1,17 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.dao.jdbc.JDBCCategoryDAO;
+import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
 import java.io.File;
 
 public class CategoryRecognizer extends Recognizer {
   public CategoryRecognizer() {
-    super(new JDBCCategoryDAO());
+    super(DAOFactory.categoryDAO("jdbc"));
   }
 
   public CategoryRecognizer(File file) {
-    super(file, new JDBCCategoryDAO());
+    super(file, DAOFactory.categoryDAO("jdbc"));
   }
 
   @Override

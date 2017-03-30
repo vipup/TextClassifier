@@ -1,7 +1,7 @@
 package com.irvil.nntextclassifier.model;
 
+import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
-import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
 
 import java.util.Set;
@@ -41,7 +41,7 @@ public class IncomingCall {
 
   // todo: use asVector from VocabularyWord
   public double[] getTextAsWordVector(NGramStrategy nGram) {
-    VocabularyWordDAO vocabularyWordDAO = new JDBCVocabularyWordDAO();
+    VocabularyWordDAO vocabularyWordDAO = DAOFactory.vocabularyWordDAO("jdbc");
     double[] vector = new double[vocabularyWordDAO.getCount()];
 
     // convert text to nGram

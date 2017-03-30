@@ -1,9 +1,6 @@
 package com.irvil.nntextclassifier;
 
-import com.irvil.nntextclassifier.dao.jdbc.JDBCCategoryDAO;
-import com.irvil.nntextclassifier.dao.jdbc.JDBCHandlerDAO;
-import com.irvil.nntextclassifier.dao.jdbc.JDBCModuleDAO;
-import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
+import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
 import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
@@ -83,10 +80,10 @@ public class MainWindow extends Application {
   }
 
   private boolean isDBFilled() {
-    return (new JDBCVocabularyWordDAO().getCount() != 0 &&
-        new JDBCModuleDAO().getCount() != 0 &&
-        new JDBCCategoryDAO().getCount() != 0 &&
-        new JDBCHandlerDAO().getCount() != 0);
+    return (DAOFactory.vocabularyWordDAO("jdbc").getCount() != 0 &&
+        DAOFactory.moduleDAO("jdbc").getCount() != 0 &&
+        DAOFactory.categoryDAO("jdbc").getCount() != 0 &&
+        DAOFactory.handlerDAO("jdbc").getCount() != 0);
   }
 
   private boolean loadLearnedRecognizers() {
