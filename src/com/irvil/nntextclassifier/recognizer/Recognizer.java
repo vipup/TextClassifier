@@ -93,7 +93,8 @@ public abstract class Recognizer {
 
     do {
       train.iteration();
-      System.out.println("Error: " + train.getError());
+      // todo: add observer
+      //System.out.println("Error: " + train.getError());
     } while (train.getError() > 0.01);
 
     train.finishTraining();

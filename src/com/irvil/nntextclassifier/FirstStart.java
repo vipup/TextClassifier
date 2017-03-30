@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Set;
 
 public class FirstStart {
-  private void createStorage() {
+  private boolean createStorage() {
     StorageCreator sc = DAOFactory.storageCreator("jdbc");
     sc.createStorage();
 
-    System.out.println("Storage created");
+    return true;
   }
 
-  private void fillVocabulary(NGramStrategy nGram) {
+  private boolean fillVocabulary(NGramStrategy nGram) {
     // build vocabulary from all IncomingCalls
     Set<String> vocabulary = getVocabulary(nGram, DAOFactory.incomingCallDAO("jdbc").getAll());
 
@@ -36,7 +36,7 @@ public class FirstStart {
       DAOFactory.vocabularyWordDAO("jdbc").add(new VocabularyWord(0, word));
     }
 
-    System.out.println("Vocabulary filled");
+    return true;
   }
 
   private Set<String> getVocabulary(NGramStrategy nGram, List<IncomingCall> incomingCalls) {
@@ -50,7 +50,7 @@ public class FirstStart {
     return vocabulary;
   }
 
-  private void fillReferenceData() {
+  private boolean fillReferenceData() {
     IncomingCallDAO icDAO = DAOFactory.incomingCallDAO("jdbc");
 
     // save characteristics in Storage
@@ -58,7 +58,7 @@ public class FirstStart {
     icDAO.getUniqueCategories().forEach((category) -> DAOFactory.categoryDAO("jdbc").add(category));
     icDAO.getUniqueHandlers().forEach((handler) -> DAOFactory.handlerDAO("jdbc").add(handler));
 
-    System.out.println("Modules, Categories, Handlers filled");
+    return true;
   }
 
   private void trainRecognizer(Recognizer recognizer) {
@@ -66,21 +66,40 @@ public class FirstStart {
     recognizer.saveTrainedRecognizer(new File("./db/" + recognizer.toString() + "TrainedNetwork"));
   }
 
-  private void createDbFolder(String path) {
-    new File(path).mkdir();
+  private boolean createDbFolder(String path) {
+    return new File(path).mkdir();
   }
 
   public static void main(String[] args) throws IOException {
     FirstStart fs = new FirstStart();
 
-    fs.createDbFolder("./db");
-    fs.createStorage();
+    // create Storage
+    //
+
+    if (fs.createDbFolder("./db")) {
+      System.out.println("Folder created");
+    }
+
+    if (fs.createStorage()) {
+      System.out.println("Storage created");
+    }
+
+    // fill data
+    //
 
     System.out.println("Fill IncomingCalls and press Enter");
     System.in.read();
 
-    fs.fillVocabulary(new Unigram());
-    fs.fillReferenceData();
+    if (fs.fillVocabulary(new Unigram())) {
+      System.out.println("Vocabulary filled");
+    }
+
+    if (fs.fillReferenceData()) {
+      System.out.println("Modules, Categories, Handlers filled");
+    }
+
+    // train recognizers
+    //
 
     fs.trainRecognizer(new ModuleRecognizer());
     fs.trainRecognizer(new CategoryRecognizer());
