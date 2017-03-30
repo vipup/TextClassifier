@@ -7,56 +7,32 @@ import com.irvil.nntextclassifier.model.Module;
 
 public class DAOFactory {
   public static IncomingCallDAO incomingCallDAO(String type) {
-    switch (type) {
-      case "jdbc":
-        return new JDBCIncomingCallDAO();
-      default:
-        return null;
-    }
+    // switch (type) ...
+    return new JDBCIncomingCallDAO();
   }
 
   public static CatalogDAO<Category> categoryDAO(String type) {
-    switch (type) {
-      case "jdbc":
-        return new JDBCCategoryDAO();
-      default:
-        return null;
-    }
+    // switch (type) ...
+    return new JDBCCategoryDAO();
   }
 
   public static CatalogDAO<Module> moduleDAO(String type) {
-    switch (type) {
-      case "jdbc":
-        return new JDBCModuleDAO();
-      default:
-        return null;
-    }
+    // switch (type) ...
+    return new JDBCModuleDAO();
   }
 
   public static CatalogDAO<Handler> handlerDAO(String type) {
-    switch (type) {
-      case "jdbc":
-        return new JDBCHandlerDAO();
-      default:
-        return null;
-    }
+    // switch (type) ...
+    return new JDBCHandlerDAO();
   }
 
   public static VocabularyWordDAO vocabularyWordDAO(String type) {
-    switch (type) {
-      case "jdbc":
-        return new JDBCVocabularyWordDAO();
-      default:
-        return null;
-    }
+    // switch (type) ...
+    return new JDBCVocabularyWordDAO();
   }
 
   public static StorageCreator storageCreator(String type) {
-    switch (type) {
-      case "jdbc":
-        return new JDBCDBCreator();
-      default:
-        return null;
-    }
+    // switch (type) ...
+    return new JDBCDBCreator();
   }
 }
