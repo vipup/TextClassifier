@@ -29,7 +29,11 @@ public class Unigram implements NGramStrategy {
 
   private String clean(String text) {
     // remove all digits and punctuation marks
-    return text.toLowerCase().replaceAll("[\\pP\\d]", " ");
+    if (text != null) {
+      return text.toLowerCase().replaceAll("[\\pP\\d]", " ");
+    } else {
+      return "";
+    }
   }
 
   private String doStem(String word) {
