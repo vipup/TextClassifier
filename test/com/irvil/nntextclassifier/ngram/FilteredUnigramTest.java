@@ -8,19 +8,19 @@ import java.util.Set;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class UnigramTest {
+public class FilteredUnigramTest {
   private NGramStrategy nGramStrategy;
   private Set<String> uniqueValues;
 
   @Before
   public void setUp() {
-    nGramStrategy = new Unigram();
+    nGramStrategy = new FilteredUnigram();
   }
 
   @Test
   public void getNGramCyrillicText() throws Exception {
     uniqueValues = nGramStrategy.getNGram("Привет. Хотела бы сделать 235.2 тест метода. Тест,.. Хотел сделал.");
-    String[] ideal = {"привет", "хотела", "бы", "сделать", "235", "2", "тест", "метода", "хотел", "сделал"};
+    String[] ideal = {"привет", "хотел", "бы", "сдела", "тест", "метод"};
 
     assertArrayEquals(ideal, uniqueValues.toArray());
   }
@@ -28,7 +28,7 @@ public class UnigramTest {
   @Test
   public void getNGramLatinText() throws Exception {
     uniqueValues = nGramStrategy.getNGram("Hello! This is method 23 test. Test methods hello");
-    String[] ideal = {"hello", "this", "is", "method", "23", "test", "methods"};
+    String[] ideal = {"hello", "this", "is", "method", "test", "methods"};
 
     assertArrayEquals(ideal, uniqueValues.toArray());
   }

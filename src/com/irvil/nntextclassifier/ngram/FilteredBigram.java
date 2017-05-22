@@ -5,10 +5,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Bigram implements NGramStrategy {
+class FilteredBigram implements NGramStrategy {
   @Override
   public Set<String> getNGram(String text) {
-    List<String> unigram = new ArrayList<>(new Unigram().getNGram(text));
+    List<String> unigram = new ArrayList<>(new FilteredUnigram().getNGram(text));
 
     // concatenate words to bigrams
     // example: "How are you doing?" => {"how are", "are you", "you doing"}

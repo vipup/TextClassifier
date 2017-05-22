@@ -6,7 +6,7 @@ import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
-import com.irvil.nntextclassifier.ngram.Unigram;
+import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
 import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
 import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
@@ -90,7 +90,7 @@ public class FirstStart {
     System.out.println("Fill IncomingCalls and press Enter");
     System.in.read();
 
-    if (fs.fillVocabulary(new Unigram())) {
+    if (fs.fillVocabulary(new FilteredUnigram())) {
       System.out.println("Vocabulary filled");
     }
 

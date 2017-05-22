@@ -4,7 +4,7 @@ import com.irvil.nntextclassifier.dao.CatalogDAO;
 import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
-import com.irvil.nntextclassifier.ngram.Unigram;
+import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.basic.BasicMLDataSet;
@@ -59,7 +59,7 @@ public abstract class Recognizer {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
-    network.compute(incomingCall.getTextAsWordVector(new Unigram()), output);
+    network.compute(incomingCall.getTextAsWordVector(new FilteredUnigram()), output);
     Encog.getInstance().shutdown();
 
     // convert output vector to characteristic
@@ -80,7 +80,7 @@ public abstract class Recognizer {
     int i = 0;
 
     for (IncomingCall incomingCall : incomingCallsTrain) {
-      input[i] = incomingCall.getTextAsWordVector(new Unigram());
+      input[i] = incomingCall.getTextAsWordVector(new FilteredUnigram());
       ideal[i] = getCatalogValueVector(incomingCall);
       i++;
     }

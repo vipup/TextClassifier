@@ -8,13 +8,13 @@ import java.util.Set;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class BigramTest {
+public class FilteredBigramTest {
   private NGramStrategy nGramStrategy;
   private Set<String> uniqueValues;
 
   @Before
   public void setUp() {
-    nGramStrategy = new Bigram();
+    nGramStrategy = new FilteredBigram();
   }
 
   @Test
