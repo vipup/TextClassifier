@@ -7,11 +7,11 @@ import java.io.File;
 
 public class HandlerRecognizer extends Recognizer {
   public HandlerRecognizer() {
-    super(DAOFactory.handlerDAO("jdbc"));
+    super(DAOFactory.handlerDAO("jdbc", "SQLite"));
   }
 
   public HandlerRecognizer(File file) {
-    super(file, DAOFactory.handlerDAO("jdbc"));
+    super(file, DAOFactory.handlerDAO("jdbc", "SQLite"));
   }
 
   @Override

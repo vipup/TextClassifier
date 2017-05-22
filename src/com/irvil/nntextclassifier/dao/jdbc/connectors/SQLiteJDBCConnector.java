@@ -1,13 +1,11 @@
-package com.irvil.nntextclassifier.dao.jdbc;
+package com.irvil.nntextclassifier.dao.jdbc.connectors;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-// todo: create DBConnector strategy. Make getDBConnection non static
-// todo: DependencyInjection pattern
-public class DBConnector {
-  public static Connection getDBConnection() {
+class SQLiteJDBCConnector implements JDBCConnector {
+  public Connection getDBConnection() {
     Connection dbConnection = null;
 
     try {

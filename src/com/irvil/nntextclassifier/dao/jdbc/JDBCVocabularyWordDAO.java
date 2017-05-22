@@ -1,6 +1,7 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 
 import java.sql.Connection;
@@ -9,11 +10,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class JDBCVocabularyWordDAO extends JDBCGenericDAO<VocabularyWord> implements VocabularyWordDAO {
+  public JDBCVocabularyWordDAO(JDBCConnector connector) {
+    super(connector);
+  }
+
   @Override
   public VocabularyWord findByValue(String value) {
     String sql = "SELECT Id FROM Vocabulary WHERE Value = ?";
 
-    try (Connection con = DBConnector.getDBConnection()) {
+    try (Connection con = connector.getDBConnection()) {
       PreparedStatement statement = con.prepareStatement(sql);
       statement.setString(1, value);
       ResultSet rs = statement.executeQuery();

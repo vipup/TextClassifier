@@ -7,11 +7,11 @@ import java.io.File;
 
 public class CategoryRecognizer extends Recognizer {
   public CategoryRecognizer() {
-    super(DAOFactory.categoryDAO("jdbc"));
+    super(DAOFactory.categoryDAO("jdbc", "SQLite"));
   }
 
   public CategoryRecognizer(File file) {
-    super(file, DAOFactory.categoryDAO("jdbc"));
+    super(file, DAOFactory.categoryDAO("jdbc", "SQLite"));
   }
 
   @Override

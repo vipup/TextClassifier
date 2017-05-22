@@ -7,11 +7,11 @@ import java.io.File;
 
 public class ModuleRecognizer extends Recognizer {
   public ModuleRecognizer() {
-    super(DAOFactory.moduleDAO("jdbc"));
+    super(DAOFactory.moduleDAO("jdbc", "SQLite"));
   }
 
   public ModuleRecognizer(File file) {
-    super(file, DAOFactory.moduleDAO("jdbc"));
+    super(file, DAOFactory.moduleDAO("jdbc", "SQLite"));
   }
 
   @Override

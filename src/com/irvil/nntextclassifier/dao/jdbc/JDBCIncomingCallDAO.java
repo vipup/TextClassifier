@@ -1,6 +1,7 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.model.Category;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
@@ -13,6 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JDBCIncomingCallDAO implements IncomingCallDAO {
+  private JDBCConnector connector;
+
+  public JDBCIncomingCallDAO(JDBCConnector connector) {
+    this.connector = connector;
+  }
+
   @Override
   public List<IncomingCall> getAll() {
     List<IncomingCall> list = new ArrayList<>();
@@ -25,7 +32,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
             "LEFT JOIN Categories ON IncomingCalls.Category = Categories.Value " +
             "LEFT JOIN Handlers ON IncomingCalls.Handler = Handlers.Value";
 
-    try (Connection con = DBConnector.getDBConnection()) {
+    try (Connection con = connector.getDBConnection()) {
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {
@@ -79,7 +86,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     List<String> catalog = new ArrayList<>();
     String sql = "SELECT DISTINCT " + fieldName + " FROM IncomingCalls";
 
-    try (Connection con = DBConnector.getDBConnection()) {
+    try (Connection con = connector.getDBConnection()) {
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {

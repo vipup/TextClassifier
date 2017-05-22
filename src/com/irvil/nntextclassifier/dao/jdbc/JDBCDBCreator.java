@@ -1,6 +1,7 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.StorageCreator;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,6 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JDBCDBCreator implements StorageCreator {
+  private JDBCConnector connector;
+
+  public JDBCDBCreator(JDBCConnector connector) {
+    this.connector = connector;
+  }
+
   @Override
   public void createStorage() {
     List<String> sqlQueries = new ArrayList<>();
@@ -42,7 +49,7 @@ public class JDBCDBCreator implements StorageCreator {
   }
 
   private void executeQueries(List<String> sqlQueries) {
-    try (Connection con = DBConnector.getDBConnection()) {
+    try (Connection con = connector.getDBConnection()) {
       Statement stmnt = con.createStatement();
 
       for (String sqlQuery : sqlQueries) {

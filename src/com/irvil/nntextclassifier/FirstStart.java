@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class FirstStart {
   private boolean createStorage() {
-    StorageCreator sc = DAOFactory.storageCreator("jdbc");
+    StorageCreator sc = DAOFactory.storageCreator("jdbc", "SQLite");
     sc.createStorage();
 
     return true;
@@ -29,11 +29,11 @@ public class FirstStart {
 
   private boolean fillVocabulary(NGramStrategy nGram) {
     // build vocabulary from all IncomingCalls
-    Set<String> vocabulary = getVocabulary(nGram, DAOFactory.incomingCallDAO("jdbc").getAll());
+    Set<String> vocabulary = getVocabulary(nGram, DAOFactory.incomingCallDAO("jdbc", "SQLite").getAll());
 
     // save vocabulary words in Storage
     for (String word : vocabulary) {
-      DAOFactory.vocabularyWordDAO("jdbc").add(new VocabularyWord(0, word));
+      DAOFactory.vocabularyWordDAO("jdbc", "SQLite").add(new VocabularyWord(0, word));
     }
 
     return true;
@@ -51,12 +51,12 @@ public class FirstStart {
   }
 
   private boolean fillReferenceData() {
-    IncomingCallDAO icDAO = DAOFactory.incomingCallDAO("jdbc");
+    IncomingCallDAO icDAO = DAOFactory.incomingCallDAO("jdbc", "SQLite");
 
     // save characteristics in Storage
-    icDAO.getUniqueModules().forEach((module) -> DAOFactory.moduleDAO("jdbc").add(module));
-    icDAO.getUniqueCategories().forEach((category) -> DAOFactory.categoryDAO("jdbc").add(category));
-    icDAO.getUniqueHandlers().forEach((handler) -> DAOFactory.handlerDAO("jdbc").add(handler));
+    icDAO.getUniqueModules().forEach((module) -> DAOFactory.moduleDAO("jdbc", "SQLite").add(module));
+    icDAO.getUniqueCategories().forEach((category) -> DAOFactory.categoryDAO("jdbc", "SQLite").add(category));
+    icDAO.getUniqueHandlers().forEach((handler) -> DAOFactory.handlerDAO("jdbc", "SQLite").add(handler));
 
     return true;
   }

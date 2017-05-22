@@ -80,10 +80,10 @@ public class MainWindow extends Application {
   }
 
   private boolean isDBFilled() {
-    return (DAOFactory.vocabularyWordDAO("jdbc").getCount() != 0 &&
-        DAOFactory.moduleDAO("jdbc").getCount() != 0 &&
-        DAOFactory.categoryDAO("jdbc").getCount() != 0 &&
-        DAOFactory.handlerDAO("jdbc").getCount() != 0);
+    return (DAOFactory.vocabularyWordDAO("jdbc", "SQLite").getCount() != 0 &&
+        DAOFactory.moduleDAO("jdbc", "SQLite").getCount() != 0 &&
+        DAOFactory.categoryDAO("jdbc", "SQLite").getCount() != 0 &&
+        DAOFactory.handlerDAO("jdbc", "SQLite").getCount() != 0);
   }
 
   private boolean loadLearnedRecognizers() {

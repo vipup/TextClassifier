@@ -1,9 +1,14 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.CatalogDAO;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.model.Catalog;
 
-public abstract class JDBCCatalogDAO<T extends Catalog> extends JDBCGenericDAO<T> implements CatalogDAO<T> {
+abstract class JDBCCatalogDAO<T extends Catalog> extends JDBCGenericDAO<T> implements CatalogDAO<T> {
+  JDBCCatalogDAO(JDBCConnector connector) {
+    super(connector);
+  }
+
   @Override
   public T findByVector(double[] vector) {
     return findByID(getIndexOfMaxValue(vector) + 1);

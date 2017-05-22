@@ -41,7 +41,7 @@ public class IncomingCall {
 
   // todo: use asVector from VocabularyWord
   public double[] getTextAsWordVector(NGramStrategy nGram) {
-    VocabularyWordDAO vocabularyWordDAO = DAOFactory.vocabularyWordDAO("jdbc");
+    VocabularyWordDAO vocabularyWordDAO = DAOFactory.vocabularyWordDAO("jdbc", "SQLite");
     double[] vector = new double[vocabularyWordDAO.getCount()];
 
     // convert text to nGram

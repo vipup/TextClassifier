@@ -25,8 +25,8 @@ public abstract class Recognizer {
   private final BasicNetwork network;
   private final CatalogDAO catalogDAO;
 
-  protected Recognizer(CatalogDAO catalogDAO) {
-    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc").getCount();
+  Recognizer(CatalogDAO catalogDAO) {
+    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc", "SQLite").getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -46,8 +46,8 @@ public abstract class Recognizer {
     this.network.reset();
   }
 
-  protected Recognizer(File trainedNetwork, CatalogDAO catalogDAO) {
-    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc").getCount();
+  Recognizer(File trainedNetwork, CatalogDAO catalogDAO) {
+    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc", "SQLite").getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -67,7 +67,7 @@ public abstract class Recognizer {
   }
 
   public void train() {
-    List<IncomingCall> incomingCallsTrain = DAOFactory.incomingCallDAO("jdbc").getAll();
+    List<IncomingCall> incomingCallsTrain = DAOFactory.incomingCallDAO("jdbc", "SQLite").getAll();
 
     // prepare input and ideal vectors
     // input <- IncomingCall text vector
