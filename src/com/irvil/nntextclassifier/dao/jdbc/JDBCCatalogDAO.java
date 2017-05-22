@@ -11,7 +11,11 @@ abstract class JDBCCatalogDAO<T extends Catalog> extends JDBCGenericDAO<T> imple
 
   @Override
   public T findByVector(double[] vector) {
-    return findByID(getIndexOfMaxValue(vector) + 1);
+    if (vector != null && vector.length > 0) {
+      return findByID(getIndexOfMaxValue(vector) + 1);
+    }
+
+    return null;
   }
 
   private int getIndexOfMaxValue(double[] vector) {
