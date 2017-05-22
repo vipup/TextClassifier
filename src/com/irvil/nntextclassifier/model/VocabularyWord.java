@@ -1,9 +1,10 @@
 package com.irvil.nntextclassifier.model;
 
+import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.DAOFactory;
 
 public class VocabularyWord extends Catalog {
   public VocabularyWord(int id, String value) {
-    super(id, value, DAOFactory.vocabularyWordDAO("jdbc", "SQLite"));
+    super(id, value, DAOFactory.vocabularyWordDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
   }
 }

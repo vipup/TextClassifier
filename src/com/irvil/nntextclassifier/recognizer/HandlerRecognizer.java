@@ -1,5 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
+import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
@@ -7,11 +8,11 @@ import java.io.File;
 
 public class HandlerRecognizer extends Recognizer {
   public HandlerRecognizer() {
-    super(DAOFactory.handlerDAO("jdbc", "SQLite"));
+    super(DAOFactory.handlerDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
   }
 
   public HandlerRecognizer(File file) {
-    super(file, DAOFactory.handlerDAO("jdbc", "SQLite"));
+    super(file, DAOFactory.handlerDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
   }
 
   @Override

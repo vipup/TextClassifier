@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 import java.io.File;
 
 public class MainWindow extends Application {
+  private Config config = Config.getInstance();
   private boolean error;
 
   private FlowPane root;
@@ -42,7 +43,7 @@ public class MainWindow extends Application {
   @Override
   public void init() throws Exception {
     super.init();
-    error = (!isDBFolderExists() || !isDBFilled() || !loadLearnedRecognizers());
+    error = (!config.isLoaded() || !isDBFolderExists() || !isDBFilled() || !loadLearnedRecognizers());
   }
 
   @Override
@@ -76,21 +77,21 @@ public class MainWindow extends Application {
   }
 
   private boolean isDBFolderExists() {
-    return new File("./db").exists();
+    return new File(config.getDbPath()).exists();
   }
 
   private boolean isDBFilled() {
-    return (DAOFactory.vocabularyWordDAO("jdbc", "SQLite").getCount() != 0 &&
-        DAOFactory.moduleDAO("jdbc", "SQLite").getCount() != 0 &&
-        DAOFactory.categoryDAO("jdbc", "SQLite").getCount() != 0 &&
-        DAOFactory.handlerDAO("jdbc", "SQLite").getCount() != 0);
+    return (DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
+        DAOFactory.moduleDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
+        DAOFactory.categoryDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
+        DAOFactory.handlerDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0);
   }
 
   private boolean loadLearnedRecognizers() {
     try {
-      moduleRecognizer = new ModuleRecognizer(new File("./db/ModuleRecognizerTrainedNetwork"));
-      categoryRecognizer = new CategoryRecognizer(new File("./db/CategoryRecognizerTrainedNetwork"));
-      handlerRecognizer = new HandlerRecognizer(new File("./db/HandlerRecognizerTrainedNetwork"));
+      moduleRecognizer = new ModuleRecognizer(new File(config.getDbPath() + "/ModuleRecognizerTrainedNetwork"));
+      categoryRecognizer = new CategoryRecognizer(new File(config.getDbPath() + "/CategoryRecognizerTrainedNetwork"));
+      handlerRecognizer = new HandlerRecognizer(new File(config.getDbPath() + "/HandlerRecognizerTrainedNetwork"));
     } catch (RuntimeException e) {
       return false;
     }

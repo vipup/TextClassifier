@@ -1,5 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
+import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
@@ -7,11 +8,11 @@ import java.io.File;
 
 public class ModuleRecognizer extends Recognizer {
   public ModuleRecognizer() {
-    super(DAOFactory.moduleDAO("jdbc", "SQLite"));
+    super(DAOFactory.moduleDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
   }
 
   public ModuleRecognizer(File file) {
-    super(file, DAOFactory.moduleDAO("jdbc", "SQLite"));
+    super(file, DAOFactory.moduleDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
   }
 
   @Override

@@ -1,5 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
+import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
@@ -7,11 +8,11 @@ import java.io.File;
 
 public class CategoryRecognizer extends Recognizer {
   public CategoryRecognizer() {
-    super(DAOFactory.categoryDAO("jdbc", "SQLite"));
+    super(DAOFactory.categoryDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
   }
 
   public CategoryRecognizer(File file) {
-    super(file, DAOFactory.categoryDAO("jdbc", "SQLite"));
+    super(file, DAOFactory.categoryDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
   }
 
   @Override

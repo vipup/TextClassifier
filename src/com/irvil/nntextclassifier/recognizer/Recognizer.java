@@ -1,5 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
+import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.CatalogDAO;
 import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.Catalog;
@@ -20,13 +21,15 @@ import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
 public abstract class Recognizer {
+  private Config config = Config.getInstance();
+
   private final int inputLayerSize;
   private final int outputLayerSize;
   private final BasicNetwork network;
   private final CatalogDAO catalogDAO;
 
   Recognizer(CatalogDAO catalogDAO) {
-    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc", "SQLite").getCount();
+    this.inputLayerSize = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -47,7 +50,7 @@ public abstract class Recognizer {
   }
 
   Recognizer(File trainedNetwork, CatalogDAO catalogDAO) {
-    this.inputLayerSize = DAOFactory.vocabularyWordDAO("jdbc", "SQLite").getCount();
+    this.inputLayerSize = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -67,7 +70,7 @@ public abstract class Recognizer {
   }
 
   public void train() {
-    List<IncomingCall> incomingCallsTrain = DAOFactory.incomingCallDAO("jdbc", "SQLite").getAll();
+    List<IncomingCall> incomingCallsTrain = DAOFactory.incomingCallDAO(config.getDaoType(), config.getDBMSType()).getAll();
 
     // prepare input and ideal vectors
     // input <- IncomingCall text vector

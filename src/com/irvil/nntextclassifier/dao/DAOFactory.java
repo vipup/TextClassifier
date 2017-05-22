@@ -7,55 +7,55 @@ import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.Module;
 
 public class DAOFactory {
-  public static IncomingCallDAO incomingCallDAO(String DAOType, String DBType) {
-    switch (DAOType) {
+  public static IncomingCallDAO incomingCallDAO(String daoType, String dbmsType) {
+    switch (daoType) {
       case "jdbc":
-        return new JDBCIncomingCallDAO(JDBCConnectorFactory.getJDBCConnector(DBType));
+        return new JDBCIncomingCallDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
       default:
         throw new IllegalArgumentException();
     }
   }
 
-  public static CatalogDAO<Category> categoryDAO(String DAOType, String DBType) {
-    switch (DAOType) {
+  public static CatalogDAO<Category> categoryDAO(String daoType, String dbmsType) {
+    switch (daoType) {
       case "jdbc":
-        return new JDBCCategoryDAO(JDBCConnectorFactory.getJDBCConnector(DBType));
+        return new JDBCCategoryDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
       default:
         throw new IllegalArgumentException();
     }
   }
 
-  public static CatalogDAO<Module> moduleDAO(String DAOType, String DBType) {
-    switch (DAOType) {
+  public static CatalogDAO<Module> moduleDAO(String daoType, String dbmsType) {
+    switch (daoType) {
       case "jdbc":
-        return new JDBCModuleDAO(JDBCConnectorFactory.getJDBCConnector(DBType));
+        return new JDBCModuleDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
       default:
         throw new IllegalArgumentException();
     }
   }
 
-  public static CatalogDAO<Handler> handlerDAO(String DAOType, String DBType) {
-    switch (DAOType) {
+  public static CatalogDAO<Handler> handlerDAO(String daoType, String dbmsType) {
+    switch (daoType) {
       case "jdbc":
-        return new JDBCHandlerDAO(JDBCConnectorFactory.getJDBCConnector(DBType));
+        return new JDBCHandlerDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
       default:
         throw new IllegalArgumentException();
     }
   }
 
-  public static VocabularyWordDAO vocabularyWordDAO(String DAOType, String DBType) {
-    switch (DAOType) {
+  public static VocabularyWordDAO vocabularyWordDAO(String daoType, String dbmsType) {
+    switch (daoType) {
       case "jdbc":
-        return new JDBCVocabularyWordDAO(JDBCConnectorFactory.getJDBCConnector(DBType));
+        return new JDBCVocabularyWordDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
       default:
         throw new IllegalArgumentException();
     }
   }
 
-  public static StorageCreator storageCreator(String DAOType, String DBType) {
-    switch (DAOType) {
+  public static StorageCreator storageCreator(String daoType, String dbmsType) {
+    switch (daoType) {
       case "jdbc":
-        return new JDBCDBCreator(JDBCConnectorFactory.getJDBCConnector(DBType));
+        return new JDBCDBCreator(JDBCConnectorFactory.getJDBCConnector(dbmsType));
       default:
         throw new IllegalArgumentException();
     }

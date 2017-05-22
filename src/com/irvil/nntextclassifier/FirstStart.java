@@ -5,8 +5,8 @@ import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
-import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
+import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
 import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
 import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Set;
 
 public class FirstStart {
+  private Config config = Config.getInstance();
+
   private boolean createStorage() {
-    StorageCreator sc = DAOFactory.storageCreator("jdbc", "SQLite");
+    StorageCreator sc = DAOFactory.storageCreator(config.getDaoType(), config.getDBMSType());
     sc.createStorage();
 
     return true;
@@ -29,11 +31,11 @@ public class FirstStart {
 
   private boolean fillVocabulary(NGramStrategy nGram) {
     // build vocabulary from all IncomingCalls
-    Set<String> vocabulary = getVocabulary(nGram, DAOFactory.incomingCallDAO("jdbc", "SQLite").getAll());
+    Set<String> vocabulary = getVocabulary(nGram, DAOFactory.incomingCallDAO(config.getDaoType(), config.getDBMSType()).getAll());
 
     // save vocabulary words in Storage
     for (String word : vocabulary) {
-      DAOFactory.vocabularyWordDAO("jdbc", "SQLite").add(new VocabularyWord(0, word));
+      DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).add(new VocabularyWord(0, word));
     }
 
     return true;
@@ -51,19 +53,19 @@ public class FirstStart {
   }
 
   private boolean fillReferenceData() {
-    IncomingCallDAO icDAO = DAOFactory.incomingCallDAO("jdbc", "SQLite");
+    IncomingCallDAO icDAO = DAOFactory.incomingCallDAO(config.getDaoType(), config.getDBMSType());
 
     // save characteristics in Storage
-    icDAO.getUniqueModules().forEach((module) -> DAOFactory.moduleDAO("jdbc", "SQLite").add(module));
-    icDAO.getUniqueCategories().forEach((category) -> DAOFactory.categoryDAO("jdbc", "SQLite").add(category));
-    icDAO.getUniqueHandlers().forEach((handler) -> DAOFactory.handlerDAO("jdbc", "SQLite").add(handler));
+    icDAO.getUniqueModules().forEach((module) -> DAOFactory.moduleDAO(config.getDaoType(), config.getDBMSType()).add(module));
+    icDAO.getUniqueCategories().forEach((category) -> DAOFactory.categoryDAO(config.getDaoType(), config.getDBMSType()).add(category));
+    icDAO.getUniqueHandlers().forEach((handler) -> DAOFactory.handlerDAO(config.getDaoType(), config.getDBMSType()).add(handler));
 
     return true;
   }
 
   private void trainRecognizer(Recognizer recognizer) {
     recognizer.train();
-    recognizer.saveTrainedRecognizer(new File("./db/" + recognizer.toString() + "TrainedNetwork"));
+    recognizer.saveTrainedRecognizer(new File(config.getDbPath() + "/" + recognizer.toString() + "TrainedNetwork"));
   }
 
   private boolean createDbFolder(String path) {
@@ -76,7 +78,7 @@ public class FirstStart {
     // create Storage
     //
 
-    if (fs.createDbFolder("./db")) {
+    if (fs.createDbFolder(Config.getInstance().getDbPath())) {
       System.out.println("Folder created");
     }
 
