@@ -7,7 +7,6 @@ import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
-import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
 import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
 import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
@@ -57,7 +56,6 @@ public class FirstStart {
 
     // save characteristics in Storage
     icDAO.getUniqueModules().forEach((module) -> DAOFactory.moduleDAO(config.getDaoType(), config.getDBMSType()).add(module));
-    icDAO.getUniqueCategories().forEach((category) -> DAOFactory.categoryDAO(config.getDaoType(), config.getDBMSType()).add(category));
     icDAO.getUniqueHandlers().forEach((handler) -> DAOFactory.handlerDAO(config.getDaoType(), config.getDBMSType()).add(handler));
 
     return true;
@@ -104,7 +102,6 @@ public class FirstStart {
     //
 
     fs.trainRecognizer(new ModuleRecognizer());
-    fs.trainRecognizer(new CategoryRecognizer());
     fs.trainRecognizer(new HandlerRecognizer());
     Encog.getInstance().shutdown();
   }

@@ -2,7 +2,6 @@ package com.irvil.nntextclassifier.dao;
 
 import com.irvil.nntextclassifier.dao.jdbc.*;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnectorFactory;
-import com.irvil.nntextclassifier.model.Category;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.Module;
 
@@ -11,15 +10,6 @@ public class DAOFactory {
     switch (daoType) {
       case "jdbc":
         return new JDBCIncomingCallDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
-      default:
-        throw new IllegalArgumentException();
-    }
-  }
-
-  public static CatalogDAO<Category> categoryDAO(String daoType, String dbmsType) {
-    switch (daoType) {
-      case "jdbc":
-        return new JDBCCategoryDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
       default:
         throw new IllegalArgumentException();
     }

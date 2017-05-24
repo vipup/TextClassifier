@@ -1,6 +1,5 @@
 package com.irvil.nntextclassifier.dao;
 
-import com.irvil.nntextclassifier.model.Category;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.Module;
@@ -13,6 +12,4 @@ public interface IncomingCallDAO {
   List<Module> getUniqueModules();
 
   List<Handler> getUniqueHandlers();
-
-  List<Category> getUniqueCategories();
 }

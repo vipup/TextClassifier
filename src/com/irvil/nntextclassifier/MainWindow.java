@@ -2,7 +2,6 @@ package com.irvil.nntextclassifier;
 
 import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
-import com.irvil.nntextclassifier.recognizer.CategoryRecognizer;
 import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
 import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
@@ -29,11 +28,9 @@ public class MainWindow extends Application {
   private TextArea textAreaIncomingCall;
   private Button btnRecognize;
   private Label lblModule;
-  private Label lblCategory;
   private Label lblHandler;
 
   private Recognizer moduleRecognizer;
-  private Recognizer categoryRecognizer;
   private Recognizer handlerRecognizer;
 
   public static void main(String[] args) {
@@ -65,12 +62,11 @@ public class MainWindow extends Application {
     btnRecognize.setOnAction(new RecognizeBtnPressEvent());
 
     lblModule = new Label("");
-    lblCategory = new Label("");
     lblHandler = new Label("");
 
     root = new FlowPane(Orientation.VERTICAL, 10, 10);
     root.setAlignment(Pos.BASELINE_CENTER);
-    root.getChildren().addAll(textAreaIncomingCall, btnRecognize, lblModule, lblCategory, lblHandler);
+    root.getChildren().addAll(textAreaIncomingCall, btnRecognize, lblModule, lblHandler);
 
     primaryStage.setScene(new Scene(root, 500, 300));
     primaryStage.show();
@@ -83,14 +79,12 @@ public class MainWindow extends Application {
   private boolean isDBFilled() {
     return (DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
         DAOFactory.moduleDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
-        DAOFactory.categoryDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
         DAOFactory.handlerDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0);
   }
 
   private boolean loadLearnedRecognizers() {
     try {
       moduleRecognizer = new ModuleRecognizer(new File(config.getDbPath() + "/ModuleRecognizerTrainedNetwork"));
-      categoryRecognizer = new CategoryRecognizer(new File(config.getDbPath() + "/CategoryRecognizerTrainedNetwork"));
       handlerRecognizer = new HandlerRecognizer(new File(config.getDbPath() + "/HandlerRecognizerTrainedNetwork"));
     } catch (RuntimeException e) {
       return false;
@@ -109,7 +103,6 @@ public class MainWindow extends Application {
 
       // recognize characteristics
       lblModule.setText(moduleRecognizer.recognize(ic).getValue());
-      lblCategory.setText(categoryRecognizer.recognize(ic).getValue());
       lblHandler.setText(handlerRecognizer.recognize(ic).getValue());
     }
   }

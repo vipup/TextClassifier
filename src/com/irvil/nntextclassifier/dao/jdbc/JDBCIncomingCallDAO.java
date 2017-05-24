@@ -2,7 +2,6 @@ package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.model.Category;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.Module;
@@ -38,9 +37,8 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       while (rs.next()) {
         Module module = new Module(rs.getInt("ModuleId"), rs.getString("ModuleValue"));
         Handler handler = new Handler(rs.getInt("HandlerId"), rs.getString("HandlerValue"));
-        Category category = new Category(rs.getInt("CategoryId"), rs.getString("CategoryValue"));
 
-        list.add(new IncomingCall(rs.getString("Text"), module, handler, category));
+        list.add(new IncomingCall(rs.getString("Text"), module, handler));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -69,17 +67,6 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     }
 
     return handlers;
-  }
-
-  @Override
-  public List<Category> getUniqueCategories() {
-    List<Category> categories = new ArrayList<>();
-
-    for (String value : getUniqueCatalog("Category")) {
-      categories.add(new Category(0, value));
-    }
-
-    return categories;
   }
 
   private List<String> getUniqueCatalog(String fieldName) {
