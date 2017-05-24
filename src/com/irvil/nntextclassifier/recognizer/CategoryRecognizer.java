@@ -16,8 +16,8 @@ public class CategoryRecognizer extends Recognizer {
   }
 
   @Override
-  protected double[] getCatalogValueVector(IncomingCall incomingCall) {
-    return incomingCall.getCategory().asVector();
+  protected int getCatalogId(IncomingCall incomingCall) {
+    return incomingCall.getCategory().getId();
   }
 
   @Override

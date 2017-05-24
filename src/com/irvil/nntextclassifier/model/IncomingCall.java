@@ -1,15 +1,6 @@
 package com.irvil.nntextclassifier.model;
 
-import com.irvil.nntextclassifier.Config;
-import com.irvil.nntextclassifier.dao.DAOFactory;
-import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
-import com.irvil.nntextclassifier.ngram.NGramStrategy;
-
-import java.util.Set;
-
 public class IncomingCall {
-  private Config config = Config.getInstance();
-
   private final String text;
   private final Module module;
   private final Handler handler;
@@ -40,26 +31,6 @@ public class IncomingCall {
 
   public Category getCategory() {
     return category;
-  }
-
-  // todo: use asVector from VocabularyWord
-  public double[] getTextAsWordVector(NGramStrategy nGram) {
-    VocabularyWordDAO vocabularyWordDAO = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType());
-    double[] vector = new double[vocabularyWordDAO.getCount()];
-
-    // convert text to nGram
-    Set<String> uniqueValues = nGram.getNGram(text);
-
-    // create vector
-    for (String word : uniqueValues) {
-      VocabularyWord vw = vocabularyWordDAO.findByValue(word);
-
-      if (vw != null) {
-        vector[vw.getId() - 1] = 1;
-      }
-    }
-
-    return vector;
   }
 
   @Override

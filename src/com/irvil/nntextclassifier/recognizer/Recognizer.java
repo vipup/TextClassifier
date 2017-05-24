@@ -3,9 +3,12 @@ package com.irvil.nntextclassifier.recognizer;
 import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.CatalogDAO;
 import com.irvil.nntextclassifier.dao.DAOFactory;
+import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
 import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
+import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.basic.BasicMLDataSet;
@@ -16,10 +19,12 @@ import org.encog.neural.networks.training.propagation.resilient.ResilientPropaga
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
+// todo: make Recognizer independent from DAOs
 public abstract class Recognizer {
   private Config config = Config.getInstance();
 
@@ -62,7 +67,7 @@ public abstract class Recognizer {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
-    network.compute(incomingCall.getTextAsWordVector(new FilteredUnigram()), output);
+    network.compute(getTextAsWordVector(incomingCall, new FilteredUnigram()), output);
     Encog.getInstance().shutdown();
 
     // convert output vector to characteristic
@@ -83,8 +88,8 @@ public abstract class Recognizer {
     int i = 0;
 
     for (IncomingCall incomingCall : incomingCallsTrain) {
-      input[i] = incomingCall.getTextAsWordVector(new FilteredUnigram());
-      ideal[i] = getCatalogValueVector(incomingCall);
+      input[i] = getTextAsWordVector(incomingCall, new FilteredUnigram());
+      ideal[i] = getCatalogValueAsVector(incomingCall);
       i++;
     }
 
@@ -107,5 +112,34 @@ public abstract class Recognizer {
     saveObject(trainedNetwork, network);
   }
 
-  protected abstract double[] getCatalogValueVector(IncomingCall incomingCall);
+  // example:
+  // count = 5; id = 4;
+  // vector = {0, 0, 0, 1, 0}
+  private double[] getCatalogValueAsVector(IncomingCall incomingCall) {
+    double[] vector = new double[outputLayerSize];
+    vector[getCatalogId(incomingCall) - 1] = 1;
+
+    return vector;
+  }
+
+  private double[] getTextAsWordVector(IncomingCall incomingCall, NGramStrategy nGram) {
+    VocabularyWordDAO vocabularyWordDAO = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType());
+    double[] vector = new double[vocabularyWordDAO.getCount()];
+
+    // convert text to nGram
+    Set<String> uniqueValues = nGram.getNGram(incomingCall.getText());
+
+    // create vector
+    for (String word : uniqueValues) {
+      VocabularyWord vw = vocabularyWordDAO.findByValue(word);
+
+      if (vw != null) {
+        vector[vw.getId() - 1] = 1;
+      }
+    }
+
+    return vector;
+  }
+
+  protected abstract int getCatalogId(IncomingCall incomingCall);
 }

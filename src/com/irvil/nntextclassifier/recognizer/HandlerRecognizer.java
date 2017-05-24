@@ -16,8 +16,8 @@ public class HandlerRecognizer extends Recognizer {
   }
 
   @Override
-  protected double[] getCatalogValueVector(IncomingCall incomingCall) {
-    return incomingCall.getHandler().asVector();
+  protected int getCatalogId(IncomingCall incomingCall) {
+    return incomingCall.getHandler().getId();
   }
 
   @Override

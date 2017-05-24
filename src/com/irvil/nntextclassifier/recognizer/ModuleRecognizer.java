@@ -16,8 +16,8 @@ public class ModuleRecognizer extends Recognizer {
   }
 
   @Override
-  protected double[] getCatalogValueVector(IncomingCall incomingCall) {
-    return incomingCall.getModule().asVector();
+  protected int getCatalogId(IncomingCall incomingCall) {
+    return incomingCall.getModule().getId();
   }
 
   @Override
