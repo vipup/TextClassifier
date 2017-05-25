@@ -2,12 +2,44 @@ package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.GenericDAO;
 import com.irvil.nntextclassifier.model.Catalog;
+import com.irvil.nntextclassifier.model.Handler;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 
 import static org.junit.Assert.assertEquals;
 
 public class JDBCHandlerDAOTest {
-  private GenericDAO<Catalog> handlerDAO = new JDBCHandlerDAO(new SQLiteJDBCTestConnector());
+  private GenericDAO<Catalog> handlerDAO;
+
+  @Before
+  public void initializeTable() throws Exception {
+    handlerDAO = new JDBCHandlerDAO(new SQLiteJDBCTestConnector());
+
+    cleanTable();
+    insert(new Handler(1, "User 1"));
+    insert(new Handler(2, "User 2"));
+  }
+
+  // todo: move to separate Class
+  private void cleanTable() throws Exception {
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      Statement statement = con.createStatement();
+      statement.executeUpdate("DELETE FROM Handlers");
+    }
+  }
+
+  private void insert(Handler handler) throws Exception {
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      PreparedStatement statement = con.prepareStatement("INSERT INTO Handlers (id, value) VALUES (?, ?)");
+      statement.setInt(1, handler.getId());
+      statement.setString(2, handler.getValue());
+      statement.executeUpdate();
+    }
+  }
 
   @Test
   public void getCount() throws Exception {
@@ -82,9 +114,14 @@ public class JDBCHandlerDAOTest {
     assertEquals(handler, null);
   }
 
-  // todo: add test
   @Test
   public void add() throws Exception {
+    int beforeCount = handlerDAO.getCount();
 
+    String value = "Test add()";
+    handlerDAO.add(new Handler(0, value));
+
+    assertEquals(handlerDAO.getCount(), beforeCount + 1);
+    assertEquals(handlerDAO.findByValue(value).getValue(), value);
   }
 }

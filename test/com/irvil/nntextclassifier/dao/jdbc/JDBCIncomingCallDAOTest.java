@@ -4,14 +4,46 @@ import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.model.Handler;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.Module;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class JDBCIncomingCallDAOTest {
-  private IncomingCallDAO incomingCallDAO = new JDBCIncomingCallDAO(new SQLiteJDBCTestConnector());
+  private IncomingCallDAO incomingCallDAO;
+
+  @Before
+  public void initializeTable() throws Exception {
+    incomingCallDAO = new JDBCIncomingCallDAO(new SQLiteJDBCTestConnector());
+
+    cleanTable();
+    insert(new IncomingCall("text text", new Module(0, "PM"), new Handler(0, "User 1")));
+    insert(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
+    insert(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
+  }
+
+  private void cleanTable() throws Exception {
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      Statement statement = con.createStatement();
+      statement.executeUpdate("DELETE FROM IncomingCalls");
+    }
+  }
+
+  private void insert(IncomingCall incomingCall) throws Exception {
+    String sql = "INSERT INTO IncomingCalls (Text, Module, Handler) VALUES (?, ?, ?)";
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      PreparedStatement statement = con.prepareStatement(sql);
+      statement.setString(1, incomingCall.getText());
+      statement.setString(2, incomingCall.getModule().getValue());
+      statement.setString(3, incomingCall.getHandler().getValue());
+      statement.executeUpdate();
+    }
+  }
 
   @Test
   public void getAll() throws Exception {
@@ -21,9 +53,9 @@ public class JDBCIncomingCallDAOTest {
     assertEquals(incomingCalls.size(), 3);
 
     // check text
-    assertEquals(incomingCalls.get(0).getText(), "test test test test");
-    assertEquals(incomingCalls.get(1).getText(), "test1 test1 test1 test1");
-    assertEquals(incomingCalls.get(2).getText(), "test1 test1 test1 test1");
+    assertEquals(incomingCalls.get(0).getText(), "text text");
+    assertEquals(incomingCalls.get(1).getText(), "text1 text1");
+    assertEquals(incomingCalls.get(2).getText(), "text1 text1");
 
     // check modules
     assertEquals(incomingCalls.get(0).getModule().getValue(), "PM");

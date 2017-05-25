@@ -2,12 +2,43 @@ package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.GenericDAO;
 import com.irvil.nntextclassifier.model.Catalog;
+import com.irvil.nntextclassifier.model.Module;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 
 import static org.junit.Assert.assertEquals;
 
 public class JDBCModuleDAOTest {
-  private GenericDAO<Catalog> moduleDAO = new JDBCModuleDAO(new SQLiteJDBCTestConnector());
+  private GenericDAO<Catalog> moduleDAO;
+
+  @Before
+  public void initializeTable() throws Exception {
+    moduleDAO = new JDBCModuleDAO(new SQLiteJDBCTestConnector());
+
+    cleanTable();
+    insert(new Module(1, "PM"));
+    insert(new Module(2, "MM"));
+  }
+
+  private void cleanTable() throws Exception {
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      Statement statement = con.createStatement();
+      statement.executeUpdate("DELETE FROM Modules");
+    }
+  }
+
+  private void insert(Module module) throws Exception {
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      PreparedStatement statement = con.prepareStatement("INSERT INTO Modules (id, value) VALUES (?, ?)");
+      statement.setInt(1, module.getId());
+      statement.setString(2, module.getValue());
+      statement.executeUpdate();
+    }
+  }
 
   @Test
   public void getCount() throws Exception {
@@ -54,13 +85,13 @@ public class JDBCModuleDAOTest {
 
   @Test
   public void findByID() throws Exception {
-    Catalog module = (Catalog) moduleDAO.findByID(1);
+    Catalog module = moduleDAO.findByID(1);
     assertEquals(module.getValue(), "PM");
   }
 
   @Test
   public void findByIDNonexistent() throws Exception {
-    Catalog module = (Catalog) moduleDAO.findByID(10);
+    Catalog module = moduleDAO.findByID(10);
     assertEquals(module, null);
   }
 
@@ -82,9 +113,14 @@ public class JDBCModuleDAOTest {
     assertEquals(module, null);
   }
 
-  // todo: add test
   @Test
   public void add() throws Exception {
+    int beforeCount = moduleDAO.getCount();
 
+    String value = "Test add()";
+    moduleDAO.add(new Module(0, value));
+
+    assertEquals(moduleDAO.getCount(), beforeCount + 1);
+    assertEquals(moduleDAO.findByValue(value).getValue(), value);
   }
 }

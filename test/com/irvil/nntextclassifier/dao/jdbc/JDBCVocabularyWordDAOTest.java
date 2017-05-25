@@ -2,12 +2,44 @@ package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.GenericDAO;
 import com.irvil.nntextclassifier.model.VocabularyWord;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 
 import static org.junit.Assert.assertEquals;
 
 public class JDBCVocabularyWordDAOTest {
-  private GenericDAO<VocabularyWord> vocabularyWordDAO = new JDBCVocabularyWordDAO(new SQLiteJDBCTestConnector());
+  private GenericDAO<VocabularyWord> vocabularyWordDAO;
+
+  @Before
+  public void initializeTable() throws Exception {
+    vocabularyWordDAO = new JDBCVocabularyWordDAO(new SQLiteJDBCTestConnector());
+
+    cleanTable();
+    insert(new VocabularyWord(1, "test 1"));
+    insert(new VocabularyWord(2, "test 2"));
+    insert(new VocabularyWord(3, "test 3"));
+    insert(new VocabularyWord(4, "test 4"));
+  }
+
+  private void cleanTable() throws Exception {
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      Statement statement = con.createStatement();
+      statement.executeUpdate("DELETE FROM Vocabulary");
+    }
+  }
+
+  private void insert(VocabularyWord vw) throws Exception {
+    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
+      PreparedStatement statement = con.prepareStatement("INSERT INTO Vocabulary (id, value) VALUES (?, ?)");
+      statement.setInt(1, vw.getId());
+      statement.setString(2, vw.getValue());
+      statement.executeUpdate();
+    }
+  }
 
   @Test
   public void getCount() throws Exception {
@@ -82,9 +114,14 @@ public class JDBCVocabularyWordDAOTest {
     assertEquals(vw, null);
   }
 
-  // todo: add test
   @Test
   public void add() throws Exception {
+    int beforeCount = vocabularyWordDAO.getCount();
 
+    String value = "Test add()";
+    vocabularyWordDAO.add(new VocabularyWord(0, value));
+
+    assertEquals(vocabularyWordDAO.getCount(), beforeCount + 1);
+    assertEquals(vocabularyWordDAO.findByValue(value).getValue(), value);
   }
 }
