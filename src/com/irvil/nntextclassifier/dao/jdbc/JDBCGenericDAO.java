@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+// todo: simplify DAO class hierarchy
 abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
   JDBCConnector connector;
 
@@ -53,6 +54,7 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
     return null;
   }
 
+  // todo: save vectors to DB
   @Override
   public void add(T object) {
     String sql = "INSERT INTO " + getTableName() + " (Value) VALUES (?)";
