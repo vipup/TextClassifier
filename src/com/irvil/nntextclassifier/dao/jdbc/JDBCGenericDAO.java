@@ -9,9 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-// todo: simplify DAO class hierarchy
 abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
-  JDBCConnector connector;
+  private JDBCConnector connector;
 
   JDBCGenericDAO(JDBCConnector connector) {
     this.connector = connector;
@@ -54,7 +53,34 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
     return null;
   }
 
-  // todo: save vectors to DB
+  @Override
+  public T findByValue(String value) {
+    String sql = "SELECT Id FROM " + getTableName() + " WHERE Value = ?";
+
+    try (Connection con = connector.getDBConnection()) {
+      PreparedStatement statement = con.prepareStatement(sql);
+      statement.setString(1, value);
+      ResultSet rs = statement.executeQuery();
+
+      if (rs.next()) {
+        return createObject(rs.getInt("Id"), value);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  @Override
+  public T findByVector(double[] vector) {
+    if (vector != null && vector.length > 0) {
+      return findByID(getIndexOfMaxValue(vector) + 1);
+    }
+
+    return null;
+  }
+
   @Override
   public void add(T object) {
     String sql = "INSERT INTO " + getTableName() + " (Value) VALUES (?)";
@@ -66,6 +92,20 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+  }
+
+  private int getIndexOfMaxValue(double[] vector) {
+    int indexOfMaxValue = 0;
+    double maxValue = vector[0];
+
+    for (int i = 1; i < vector.length; i++) {
+      if (vector[i] > maxValue) {
+        maxValue = vector[i];
+        indexOfMaxValue = i;
+      }
+    }
+
+    return indexOfMaxValue;
   }
 
   protected abstract String getTableName();

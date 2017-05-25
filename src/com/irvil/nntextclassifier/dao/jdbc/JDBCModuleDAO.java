@@ -1,9 +1,10 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
+import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.Module;
 
-public class JDBCModuleDAO extends JDBCCatalogDAO<Module> {
+public class JDBCModuleDAO extends JDBCGenericDAO<Catalog> {
   public JDBCModuleDAO(JDBCConnector connector) {
     super(connector);
   }

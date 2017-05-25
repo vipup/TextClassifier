@@ -2,8 +2,8 @@ package com.irvil.nntextclassifier.dao;
 
 import com.irvil.nntextclassifier.dao.jdbc.*;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnectorFactory;
-import com.irvil.nntextclassifier.model.Handler;
-import com.irvil.nntextclassifier.model.Module;
+import com.irvil.nntextclassifier.model.Catalog;
+import com.irvil.nntextclassifier.model.VocabularyWord;
 
 public class DAOFactory {
   public static IncomingCallDAO incomingCallDAO(String daoType, String dbmsType) {
@@ -15,7 +15,7 @@ public class DAOFactory {
     }
   }
 
-  public static CatalogDAO<Module> moduleDAO(String daoType, String dbmsType) {
+  public static GenericDAO<Catalog> moduleDAO(String daoType, String dbmsType) {
     switch (daoType) {
       case "jdbc":
         return new JDBCModuleDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
@@ -24,7 +24,7 @@ public class DAOFactory {
     }
   }
 
-  public static CatalogDAO<Handler> handlerDAO(String daoType, String dbmsType) {
+  public static GenericDAO<Catalog> handlerDAO(String daoType, String dbmsType) {
     switch (daoType) {
       case "jdbc":
         return new JDBCHandlerDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));
@@ -33,7 +33,7 @@ public class DAOFactory {
     }
   }
 
-  public static VocabularyWordDAO vocabularyWordDAO(String daoType, String dbmsType) {
+  public static GenericDAO<VocabularyWord> vocabularyWordDAO(String daoType, String dbmsType) {
     switch (daoType) {
       case "jdbc":
         return new JDBCVocabularyWordDAO(JDBCConnectorFactory.getJDBCConnector(dbmsType));

@@ -1,9 +1,8 @@
 package com.irvil.nntextclassifier.recognizer;
 
 import com.irvil.nntextclassifier.Config;
-import com.irvil.nntextclassifier.dao.CatalogDAO;
 import com.irvil.nntextclassifier.dao.DAOFactory;
-import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
+import com.irvil.nntextclassifier.dao.GenericDAO;
 import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
@@ -31,9 +30,9 @@ public abstract class Recognizer {
   private final int inputLayerSize;
   private final int outputLayerSize;
   private final BasicNetwork network;
-  private final CatalogDAO catalogDAO;
+  private final GenericDAO<Catalog> catalogDAO;
 
-  Recognizer(CatalogDAO catalogDAO) {
+  Recognizer(GenericDAO<Catalog> catalogDAO) {
     this.inputLayerSize = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
@@ -54,7 +53,7 @@ public abstract class Recognizer {
     this.network.reset();
   }
 
-  Recognizer(File trainedNetwork, CatalogDAO catalogDAO) {
+  Recognizer(File trainedNetwork, GenericDAO<Catalog> catalogDAO) {
     this.inputLayerSize = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
@@ -123,7 +122,7 @@ public abstract class Recognizer {
   }
 
   private double[] getTextAsWordVector(IncomingCall incomingCall, NGramStrategy nGram) {
-    VocabularyWordDAO vocabularyWordDAO = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType());
+    GenericDAO<VocabularyWord> vocabularyWordDAO = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType());
     double[] vector = new double[vocabularyWordDAO.getCount()];
 
     // convert text to nGram
