@@ -6,10 +6,6 @@ import com.irvil.nntextclassifier.model.Module;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-
 import static org.junit.Assert.assertEquals;
 
 public class JDBCModuleDAOTest {
@@ -19,25 +15,10 @@ public class JDBCModuleDAOTest {
   public void initializeTable() throws Exception {
     moduleDAO = new JDBCModuleDAO(new SQLiteJDBCTestConnector());
 
-    cleanTable();
-    insert(new Module(1, "PM"));
-    insert(new Module(2, "MM"));
-  }
-
-  private void cleanTable() throws Exception {
-    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
-      Statement statement = con.createStatement();
-      statement.executeUpdate("DELETE FROM Modules");
-    }
-  }
-
-  private void insert(Module module) throws Exception {
-    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
-      PreparedStatement statement = con.prepareStatement("INSERT INTO Modules (id, value) VALUES (?, ?)");
-      statement.setInt(1, module.getId());
-      statement.setString(2, module.getValue());
-      statement.executeUpdate();
-    }
+    String tableName = "Modules";
+    JDBCDatabaseUtilities.cleanTable(tableName);
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(1, "PM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(2, "MM"));
   }
 
   @Test

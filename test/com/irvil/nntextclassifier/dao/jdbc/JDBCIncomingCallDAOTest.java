@@ -7,9 +7,6 @@ import com.irvil.nntextclassifier.model.Module;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -21,28 +18,21 @@ public class JDBCIncomingCallDAOTest {
   public void initializeTable() throws Exception {
     incomingCallDAO = new JDBCIncomingCallDAO(new SQLiteJDBCTestConnector());
 
-    cleanTable();
-    insert(new IncomingCall("text text", new Module(0, "PM"), new Handler(0, "User 1")));
-    insert(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
-    insert(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
-  }
+    String tableName = "IncomingCalls";
+    JDBCDatabaseUtilities.cleanTable(tableName);
+    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text text", new Module(0, "PM"), new Handler(0, "User 1")));
+    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
+    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
 
-  private void cleanTable() throws Exception {
-    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
-      Statement statement = con.createStatement();
-      statement.executeUpdate("DELETE FROM IncomingCalls");
-    }
-  }
+    tableName = "Handlers";
+    JDBCDatabaseUtilities.cleanTable(tableName);
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Handler(1, "User 1"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Handler(2, "User 2"));
 
-  private void insert(IncomingCall incomingCall) throws Exception {
-    String sql = "INSERT INTO IncomingCalls (Text, Module, Handler) VALUES (?, ?, ?)";
-    try (Connection con = new SQLiteJDBCTestConnector().getDBConnection()) {
-      PreparedStatement statement = con.prepareStatement(sql);
-      statement.setString(1, incomingCall.getText());
-      statement.setString(2, incomingCall.getModule().getValue());
-      statement.setString(3, incomingCall.getHandler().getValue());
-      statement.executeUpdate();
-    }
+    tableName = "Modules";
+    JDBCDatabaseUtilities.cleanTable(tableName);
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(1, "PM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(2, "MM"));
   }
 
   @Test
