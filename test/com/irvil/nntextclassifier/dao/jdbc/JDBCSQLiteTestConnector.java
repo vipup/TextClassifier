@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 class JDBCSQLiteTestConnector implements JDBCConnector {
-  public Connection getDBConnection() {
+  public Connection getConnection() {
     Connection dbConnection = null;
 
     try {

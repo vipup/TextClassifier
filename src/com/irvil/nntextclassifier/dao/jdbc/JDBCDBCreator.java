@@ -13,6 +13,10 @@ public class JDBCDBCreator implements StorageCreator {
   private JDBCConnector connector;
 
   public JDBCDBCreator(JDBCConnector connector) {
+    if (connector == null) {
+      throw new IllegalArgumentException();
+    }
+
     this.connector = connector;
   }
 
@@ -49,7 +53,7 @@ public class JDBCDBCreator implements StorageCreator {
   }
 
   private void executeQueries(List<String> sqlQueries) {
-    try (Connection con = connector.getDBConnection()) {
+    try (Connection con = connector.getConnection()) {
       Statement stmnt = con.createStatement();
 
       for (String sqlQuery : sqlQueries) {

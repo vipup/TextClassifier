@@ -13,6 +13,10 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
   private JDBCConnector connector;
 
   JDBCGenericDAO(JDBCConnector connector) {
+    if (connector == null) {
+      throw new IllegalArgumentException();
+    }
+
     this.connector = connector;
   }
 
@@ -21,7 +25,7 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
     int count = 0;
     String sql = "SELECT COUNT(*) FROM " + getTableName();
 
-    try (Connection con = connector.getDBConnection()) {
+    try (Connection con = connector.getConnection()) {
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       if (rs.next()) {
@@ -38,7 +42,7 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
   public T findByID(int id) {
     String sql = "SELECT Value FROM " + getTableName() + " WHERE Id = ?";
 
-    try (Connection con = connector.getDBConnection()) {
+    try (Connection con = connector.getConnection()) {
       PreparedStatement statement = con.prepareStatement(sql);
       statement.setInt(1, id);
       ResultSet rs = statement.executeQuery();
@@ -57,7 +61,7 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
   public T findByValue(String value) {
     String sql = "SELECT Id FROM " + getTableName() + " WHERE Value = ?";
 
-    try (Connection con = connector.getDBConnection()) {
+    try (Connection con = connector.getConnection()) {
       PreparedStatement statement = con.prepareStatement(sql);
       statement.setString(1, value);
       ResultSet rs = statement.executeQuery();
@@ -85,7 +89,7 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
   public void add(T object) {
     String sql = "INSERT INTO " + getTableName() + " (Value) VALUES (?)";
 
-    try (Connection con = connector.getDBConnection()) {
+    try (Connection con = connector.getConnection()) {
       PreparedStatement insertStatement = con.prepareStatement(sql);
       insertStatement.setString(1, object.getValue());
       insertStatement.executeUpdate();

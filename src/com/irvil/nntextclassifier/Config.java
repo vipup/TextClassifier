@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Config {
   private static Config instance;
-  private Properties properties = new Properties();
+  private final Properties properties = new Properties();
 
   private Config() {
     // read config file

@@ -1,8 +1,7 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.Config;
-import com.irvil.nntextclassifier.dao.DAOFactory;
 import com.irvil.nntextclassifier.dao.GenericDAO;
+import com.irvil.nntextclassifier.dao.factories.DAOFactory;
 import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
@@ -25,15 +24,15 @@ import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
 // todo: make Recognizer independent from DAOs
 public abstract class Recognizer {
-  private Config config = Config.getInstance();
-
+  private final DAOFactory daoFactory;
   private final int inputLayerSize;
   private final int outputLayerSize;
   private final BasicNetwork network;
   private final GenericDAO<Catalog> catalogDAO;
 
-  Recognizer(GenericDAO<Catalog> catalogDAO) {
-    this.inputLayerSize = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount();
+  Recognizer(GenericDAO<Catalog> catalogDAO, DAOFactory daoFactory) {
+    this.daoFactory = daoFactory;
+    this.inputLayerSize = daoFactory.vocabularyWordDAO().getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -53,8 +52,9 @@ public abstract class Recognizer {
     this.network.reset();
   }
 
-  Recognizer(File trainedNetwork, GenericDAO<Catalog> catalogDAO) {
-    this.inputLayerSize = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount();
+  Recognizer(File trainedNetwork, GenericDAO<Catalog> catalogDAO, DAOFactory daoFactory) {
+    this.daoFactory = daoFactory;
+    this.inputLayerSize = daoFactory.vocabularyWordDAO().getCount();
     this.outputLayerSize = catalogDAO.getCount();
     this.catalogDAO = catalogDAO;
 
@@ -74,7 +74,7 @@ public abstract class Recognizer {
   }
 
   public void train() {
-    List<IncomingCall> incomingCallsTrain = DAOFactory.incomingCallDAO(config.getDaoType(), config.getDBMSType()).getAll();
+    List<IncomingCall> incomingCallsTrain = daoFactory.incomingCallDAO().getAll();
 
     // prepare input and ideal vectors
     // input <- IncomingCall text vector
@@ -122,7 +122,7 @@ public abstract class Recognizer {
   }
 
   private double[] getTextAsWordVector(IncomingCall incomingCall, NGramStrategy nGram) {
-    GenericDAO<VocabularyWord> vocabularyWordDAO = DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType());
+    GenericDAO<VocabularyWord> vocabularyWordDAO = daoFactory.vocabularyWordDAO();
     double[] vector = new double[vocabularyWordDAO.getCount()];
 
     // convert text to nGram

@@ -1,6 +1,9 @@
 package com.irvil.nntextclassifier;
 
-import com.irvil.nntextclassifier.dao.DAOFactory;
+import com.irvil.nntextclassifier.dao.factories.DAOFactory;
+import com.irvil.nntextclassifier.dao.factories.JDBCDAOFactory;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
 import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
@@ -21,7 +24,6 @@ import javafx.stage.Stage;
 import java.io.File;
 
 public class MainWindow extends Application {
-  private Config config = Config.getInstance();
   private boolean error;
 
   private FlowPane root;
@@ -40,7 +42,33 @@ public class MainWindow extends Application {
   @Override
   public void init() throws Exception {
     super.init();
-    error = (!config.isLoaded() || !isDBFolderExists() || !isDBFilled() || !loadLearnedRecognizers());
+
+    Config config = Config.getInstance();
+    DAOFactory daoFactory = null;
+
+    // create DAO factory depends on config value
+    //
+
+    if (config.getDaoType().equals("jdbc")) {
+      // create connector depends on config value
+      //
+
+      JDBCConnector jdbcConnector = null;
+
+      if (config.getDBMSType().equals("sqlite")) {
+        jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/" + config.getSQLiteDbFileName());
+      }
+
+      // create factory
+      daoFactory = new JDBCDAOFactory(jdbcConnector);
+    }
+
+    //
+
+    error = (!config.isLoaded() ||
+        !isDBFolderExists(config.getDbPath()) ||
+        !isDBFilled(daoFactory) ||
+        !loadLearnedRecognizers(daoFactory, config.getDbPath()));
   }
 
   @Override
@@ -72,20 +100,20 @@ public class MainWindow extends Application {
     primaryStage.show();
   }
 
-  private boolean isDBFolderExists() {
-    return new File(config.getDbPath()).exists();
+  private boolean isDBFolderExists(String path) {
+    return new File(path).exists();
   }
 
-  private boolean isDBFilled() {
-    return (DAOFactory.vocabularyWordDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
-        DAOFactory.moduleDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0 &&
-        DAOFactory.handlerDAO(config.getDaoType(), config.getDBMSType()).getCount() != 0);
+  private boolean isDBFilled(DAOFactory daoFactory) {
+    return (daoFactory.vocabularyWordDAO().getCount() != 0 &&
+        daoFactory.moduleDAO().getCount() != 0 &&
+        daoFactory.handlerDAO().getCount() != 0);
   }
 
-  private boolean loadLearnedRecognizers() {
+  private boolean loadLearnedRecognizers(DAOFactory daoFactory, String path) {
     try {
-      moduleRecognizer = new ModuleRecognizer(new File(config.getDbPath() + "/ModuleRecognizerTrainedNetwork"));
-      handlerRecognizer = new HandlerRecognizer(new File(config.getDbPath() + "/HandlerRecognizerTrainedNetwork"));
+      moduleRecognizer = new ModuleRecognizer(new File(path + "/ModuleRecognizerTrainedNetwork"), daoFactory);
+      handlerRecognizer = new HandlerRecognizer(new File(path + "/HandlerRecognizerTrainedNetwork"), daoFactory);
     } catch (RuntimeException e) {
       return false;
     }

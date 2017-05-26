@@ -16,6 +16,10 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
   private JDBCConnector connector;
 
   public JDBCIncomingCallDAO(JDBCConnector connector) {
+    if (connector == null) {
+      throw new IllegalArgumentException();
+    }
+
     this.connector = connector;
   }
 
@@ -31,7 +35,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
             "LEFT JOIN Categories ON IncomingCalls.Category = Categories.Value " +
             "LEFT JOIN Handlers ON IncomingCalls.Handler = Handlers.Value";
 
-    try (Connection con = connector.getDBConnection()) {
+    try (Connection con = connector.getConnection()) {
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {
@@ -73,7 +77,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     List<String> catalog = new ArrayList<>();
     String sql = "SELECT DISTINCT " + fieldName + " FROM IncomingCalls";
 
-    try (Connection con = connector.getDBConnection()) {
+    try (Connection con = connector.getConnection()) {
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {

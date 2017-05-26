@@ -1,18 +1,17 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.Config;
-import com.irvil.nntextclassifier.dao.DAOFactory;
+import com.irvil.nntextclassifier.dao.factories.DAOFactory;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
 import java.io.File;
 
 public class HandlerRecognizer extends Recognizer {
-  public HandlerRecognizer() {
-    super(DAOFactory.handlerDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
+  public HandlerRecognizer(DAOFactory daoFactory) {
+    super(daoFactory.handlerDAO(), daoFactory);
   }
 
-  public HandlerRecognizer(File file) {
-    super(file, DAOFactory.handlerDAO(Config.getInstance().getDaoType(), Config.getInstance().getDBMSType()));
+  public HandlerRecognizer(File file, DAOFactory daoFactory) {
+    super(file, daoFactory.handlerDAO(), daoFactory);
   }
 
   @Override

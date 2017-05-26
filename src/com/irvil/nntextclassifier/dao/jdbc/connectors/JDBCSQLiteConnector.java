@@ -1,20 +1,22 @@
 package com.irvil.nntextclassifier.dao.jdbc.connectors;
 
-import com.irvil.nntextclassifier.Config;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-class JDBCSQLiteConnector implements JDBCConnector {
-  private Config config = Config.getInstance();
+public class JDBCSQLiteConnector implements JDBCConnector {
+  private final String dbName;
 
-  public Connection getDBConnection() {
+  public JDBCSQLiteConnector(String dbName) {
+    this.dbName = dbName;
+  }
+
+  public Connection getConnection() {
     Connection dbConnection = null;
 
     try {
       Class.forName("org.sqlite.JDBC");
-      dbConnection = DriverManager.getConnection("jdbc:sqlite:" + config.getDbPath() + "/" + config.getSQLiteDbFileName());
+      dbConnection = DriverManager.getConnection("jdbc:sqlite:" + dbName);
     } catch (ClassNotFoundException | SQLException e) {
       e.printStackTrace();
     }

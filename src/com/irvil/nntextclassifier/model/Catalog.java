@@ -5,7 +5,7 @@ public abstract class Catalog {
   private final int id;
   private final String value;
 
-  protected Catalog(int id, String value) {
+  Catalog(int id, String value) {
     this.id = id;
     this.value = value;
   }
