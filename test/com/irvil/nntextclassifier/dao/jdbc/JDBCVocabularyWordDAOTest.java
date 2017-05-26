@@ -12,7 +12,7 @@ public class JDBCVocabularyWordDAOTest {
 
   @Before
   public void initializeTable() throws Exception {
-    vocabularyWordDAO = new JDBCVocabularyWordDAO(new SQLiteJDBCTestConnector());
+    vocabularyWordDAO = new JDBCVocabularyWordDAO(new JDBCSQLiteTestConnector());
 
     String tableName = "Vocabulary";
     JDBCDatabaseUtilities.cleanTable(tableName);

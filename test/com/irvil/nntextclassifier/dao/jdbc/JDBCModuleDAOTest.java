@@ -13,7 +13,7 @@ public class JDBCModuleDAOTest {
 
   @Before
   public void initializeTable() throws Exception {
-    moduleDAO = new JDBCModuleDAO(new SQLiteJDBCTestConnector());
+    moduleDAO = new JDBCModuleDAO(new JDBCSQLiteTestConnector());
 
     String tableName = "Modules";
     JDBCDatabaseUtilities.cleanTable(tableName);

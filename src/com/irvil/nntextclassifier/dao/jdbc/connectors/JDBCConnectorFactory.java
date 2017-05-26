@@ -4,7 +4,7 @@ public class JDBCConnectorFactory {
   public static JDBCConnector getJDBCConnector(String dbmsType) {
     switch (dbmsType) {
       case "sqlite":
-        return new SQLiteJDBCConnector();
+        return new JDBCSQLiteConnector();
       default:
         throw new IllegalArgumentException();
     }

@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-class SQLiteJDBCConnector implements JDBCConnector {
+class JDBCSQLiteConnector implements JDBCConnector {
   private Config config = Config.getInstance();
 
   public Connection getDBConnection() {

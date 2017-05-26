@@ -16,7 +16,7 @@ public class JDBCIncomingCallDAOTest {
 
   @Before
   public void initializeTable() throws Exception {
-    incomingCallDAO = new JDBCIncomingCallDAO(new SQLiteJDBCTestConnector());
+    incomingCallDAO = new JDBCIncomingCallDAO(new JDBCSQLiteTestConnector());
 
     String tableName = "IncomingCalls";
     JDBCDatabaseUtilities.cleanTable(tableName);

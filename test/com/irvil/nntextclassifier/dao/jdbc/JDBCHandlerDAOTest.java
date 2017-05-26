@@ -13,7 +13,7 @@ public class JDBCHandlerDAOTest {
 
   @Before
   public void initializeTable() throws Exception {
-    handlerDAO = new JDBCHandlerDAO(new SQLiteJDBCTestConnector());
+    handlerDAO = new JDBCHandlerDAO(new JDBCSQLiteTestConnector());
 
     String tableName = "Handlers";
     JDBCDatabaseUtilities.cleanTable(tableName);
