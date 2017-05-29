@@ -3,7 +3,6 @@ package com.irvil.nntextclassifier.recognizer;
 import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
-import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
@@ -24,15 +23,17 @@ import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 public abstract class Recognizer {
   private final int inputLayerSize;
   private final int outputLayerSize;
-  private final BasicNetwork network;
+  private BasicNetwork network;
   private final List<Catalog> catalog;
   private final List<VocabularyWord> vocabulary;
+  private final NGramStrategy nGram;
 
-  Recognizer(List<Catalog> catalog, List<VocabularyWord> vocabulary) {
+  Recognizer(List<Catalog> catalog, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
     this.catalog = catalog;
     this.vocabulary = vocabulary;
     this.inputLayerSize = vocabulary.size();
     this.outputLayerSize = catalog.size();
+    this.nGram = nGram;
 
     // create neural network
     this.network = new BasicNetwork();
@@ -50,11 +51,8 @@ public abstract class Recognizer {
     this.network.reset();
   }
 
-  Recognizer(File trainedNetwork, List<Catalog> catalog, List<VocabularyWord> vocabulary) {
-    this.catalog = catalog;
-    this.vocabulary = vocabulary;
-    this.inputLayerSize = vocabulary.size();
-    this.outputLayerSize = catalog.size();
+  Recognizer(File trainedNetwork, List<Catalog> catalog, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+    this(catalog, vocabulary, nGram);
 
     // load neural network from file
     this.network = (BasicNetwork) loadObject(trainedNetwork);
@@ -64,7 +62,7 @@ public abstract class Recognizer {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
-    network.compute(getTextAsWordVector(incomingCall, new FilteredUnigram()), output);
+    network.compute(getTextAsWordVector(incomingCall), output);
     Encog.getInstance().shutdown();
 
     return convertVectorToCharacteristic(output);
@@ -108,7 +106,7 @@ public abstract class Recognizer {
     int i = 0;
 
     for (IncomingCall incomingCall : incomingCallsTrain) {
-      input[i] = getTextAsWordVector(incomingCall, new FilteredUnigram());
+      input[i] = getTextAsWordVector(incomingCall);
       ideal[i] = getCatalogValueAsVector(incomingCall);
       i++;
     }
@@ -142,7 +140,7 @@ public abstract class Recognizer {
     return vector;
   }
 
-  private double[] getTextAsWordVector(IncomingCall incomingCall, NGramStrategy nGram) {
+  private double[] getTextAsWordVector(IncomingCall incomingCall) {
     double[] vector = new double[inputLayerSize];
 
     // convert text to nGram
