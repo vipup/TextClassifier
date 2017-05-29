@@ -73,7 +73,7 @@ public class FirstStart {
   }
 
   public void trainRecognizer(String path, Recognizer recognizer) {
-    recognizer.train();
+    recognizer.train(daoFactory.incomingCallDAO().getAll());
     recognizer.saveTrainedRecognizer(new File(path + "/" + recognizer.toString() + "TrainedNetwork"));
   }
 

@@ -1,11 +1,13 @@
 package com.irvil.nntextclassifier.dao;
 
+import java.util.List;
+
 public interface GenericDAO<T> {
   int getCount();
 
-  T findByID(int id);
+  List<T> getAll();
 
-  T findByVector(double[] vector);
+  T findByID(int id);
 
   T findByValue(String value);
 

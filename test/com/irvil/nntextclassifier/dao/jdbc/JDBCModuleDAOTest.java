@@ -6,6 +6,8 @@ import com.irvil.nntextclassifier.model.Module;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public class JDBCModuleDAOTest {
@@ -27,41 +29,14 @@ public class JDBCModuleDAOTest {
   }
 
   @Test
-  public void findByVector() throws Exception {
-    double[] vector = new double[]{0.1, 0.3, 0.2};
+  public void getAll() throws Exception {
+    List<Catalog> characteristics = moduleDAO.getAll();
 
-    Catalog module = moduleDAO.findByVector(vector);
-    assertEquals(module.getValue(), "MM");
-  }
+    assertEquals(characteristics.get(0).getId(), 1);
+    assertEquals(characteristics.get(1).getId(), 2);
 
-  @Test
-  public void findByVectorNonexistent() throws Exception {
-    double[] vector = new double[]{0.1, 0.2, 0.3};
-
-    Catalog module = moduleDAO.findByVector(vector);
-    assertEquals(module, null);
-  }
-
-  @Test
-  public void findByVectorAllEqual() throws Exception {
-    double[] vector = new double[]{0.1, 0.1, 0.1};
-
-    Catalog module = moduleDAO.findByVector(vector);
-    assertEquals(module.getValue(), "PM");
-  }
-
-  @Test
-  public void findByVectorEmptyVector() throws Exception {
-    double[] vector = new double[0];
-
-    Catalog module = moduleDAO.findByVector(vector);
-    assertEquals(module, null);
-  }
-
-  @Test
-  public void findByVectorNullVector() throws Exception {
-    Catalog module = moduleDAO.findByVector(null);
-    assertEquals(module, null);
+    assertEquals(characteristics.get(0).getValue(), "PM");
+    assertEquals(characteristics.get(1).getValue(), "MM");
   }
 
   @Test

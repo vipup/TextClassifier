@@ -6,6 +6,8 @@ import com.irvil.nntextclassifier.model.Handler;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public class JDBCHandlerDAOTest {
@@ -27,41 +29,14 @@ public class JDBCHandlerDAOTest {
   }
 
   @Test
-  public void findByVector() throws Exception {
-    double[] vector = new double[]{0.1, 0.3, 0.2};
+  public void getAll() throws Exception {
+    List<Catalog> characteristics = handlerDAO.getAll();
 
-    Catalog handler = handlerDAO.findByVector(vector);
-    assertEquals(handler.getValue(), "User 2");
-  }
+    assertEquals(characteristics.get(0).getId(), 1);
+    assertEquals(characteristics.get(1).getId(), 2);
 
-  @Test
-  public void findByVectorNonexistent() throws Exception {
-    double[] vector = new double[]{0.1, 0.2, 0.3};
-
-    Catalog handler = handlerDAO.findByVector(vector);
-    assertEquals(handler, null);
-  }
-
-  @Test
-  public void findByVectorAllEqual() throws Exception {
-    double[] vector = new double[]{0.1, 0.1, 0.1};
-
-    Catalog handler = handlerDAO.findByVector(vector);
-    assertEquals(handler.getValue(), "User 1");
-  }
-
-  @Test
-  public void findByVectorEmptyVector() throws Exception {
-    double[] vector = new double[0];
-
-    Catalog handler = handlerDAO.findByVector(vector);
-    assertEquals(handler, null);
-  }
-
-  @Test
-  public void findByVectorNullVector() throws Exception {
-    Catalog handler = handlerDAO.findByVector(null);
-    assertEquals(handler, null);
+    assertEquals(characteristics.get(0).getValue(), "User 1");
+    assertEquals(characteristics.get(1).getValue(), "User 2");
   }
 
   @Test

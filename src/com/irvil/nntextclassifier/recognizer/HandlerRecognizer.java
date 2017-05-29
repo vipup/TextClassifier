@@ -7,11 +7,11 @@ import java.io.File;
 
 public class HandlerRecognizer extends Recognizer {
   public HandlerRecognizer(DAOFactory daoFactory) {
-    super(daoFactory.handlerDAO(), daoFactory);
+    super(daoFactory.handlerDAO().getAll(), daoFactory.vocabularyWordDAO().getAll());
   }
 
   public HandlerRecognizer(File file, DAOFactory daoFactory) {
-    super(file, daoFactory.handlerDAO(), daoFactory);
+    super(file, daoFactory.handlerDAO().getAll(), daoFactory.vocabularyWordDAO().getAll());
   }
 
   @Override

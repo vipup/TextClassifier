@@ -5,6 +5,8 @@ import com.irvil.nntextclassifier.model.VocabularyWord;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public class JDBCVocabularyWordDAOTest {
@@ -28,41 +30,18 @@ public class JDBCVocabularyWordDAOTest {
   }
 
   @Test
-  public void findByVector() throws Exception {
-    double[] vector = new double[]{0.1, 0.3, 0.2};
+  public void getAll() throws Exception {
+    List<VocabularyWord> characteristics = vocabularyWordDAO.getAll();
 
-    VocabularyWord vw = vocabularyWordDAO.findByVector(vector);
-    assertEquals(vw.getValue(), "test 2");
-  }
+    assertEquals(characteristics.get(0).getId(), 1);
+    assertEquals(characteristics.get(1).getId(), 2);
+    assertEquals(characteristics.get(2).getId(), 3);
+    assertEquals(characteristics.get(3).getId(), 4);
 
-  @Test
-  public void findByVectorNonexistent() throws Exception {
-    double[] vector = new double[]{0.1, 0.2, 0.3, 0.3, 0.3, 0.6};
-
-    VocabularyWord vw = vocabularyWordDAO.findByVector(vector);
-    assertEquals(vw, null);
-  }
-
-  @Test
-  public void findByVectorAllEqual() throws Exception {
-    double[] vector = new double[]{0.1, 0.1, 0.1};
-
-    VocabularyWord vw = vocabularyWordDAO.findByVector(vector);
-    assertEquals(vw.getValue(), "test 1");
-  }
-
-  @Test
-  public void findByVectorEmptyVector() throws Exception {
-    double[] vector = new double[0];
-
-    VocabularyWord vw = vocabularyWordDAO.findByVector(vector);
-    assertEquals(vw, null);
-  }
-
-  @Test
-  public void findByVectorNullVector() throws Exception {
-    VocabularyWord vw = vocabularyWordDAO.findByVector(null);
-    assertEquals(vw, null);
+    assertEquals(characteristics.get(0).getValue(), "test 1");
+    assertEquals(characteristics.get(1).getValue(), "test 2");
+    assertEquals(characteristics.get(2).getValue(), "test 3");
+    assertEquals(characteristics.get(3).getValue(), "test 4");
   }
 
   @Test

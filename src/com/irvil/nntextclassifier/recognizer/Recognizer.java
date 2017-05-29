@@ -1,7 +1,5 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.dao.GenericDAO;
-import com.irvil.nntextclassifier.dao.factories.DAOFactory;
 import com.irvil.nntextclassifier.model.Catalog;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
@@ -24,17 +22,17 @@ import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
 // todo: make Recognizer independent from DAOs
 public abstract class Recognizer {
-  private final DAOFactory daoFactory;
   private final int inputLayerSize;
   private final int outputLayerSize;
   private final BasicNetwork network;
-  private final GenericDAO<Catalog> catalogDAO;
+  private final List<Catalog> catalog;
+  private final List<VocabularyWord> vocabulary;
 
-  Recognizer(GenericDAO<Catalog> catalogDAO, DAOFactory daoFactory) {
-    this.daoFactory = daoFactory;
-    this.inputLayerSize = daoFactory.vocabularyWordDAO().getCount();
-    this.outputLayerSize = catalogDAO.getCount();
-    this.catalogDAO = catalogDAO;
+  Recognizer(List<Catalog> catalog, List<VocabularyWord> vocabulary) {
+    this.catalog = catalog;
+    this.vocabulary = vocabulary;
+    this.inputLayerSize = vocabulary.size();
+    this.outputLayerSize = catalog.size();
 
     // create neural network
     this.network = new BasicNetwork();
@@ -52,11 +50,11 @@ public abstract class Recognizer {
     this.network.reset();
   }
 
-  Recognizer(File trainedNetwork, GenericDAO<Catalog> catalogDAO, DAOFactory daoFactory) {
-    this.daoFactory = daoFactory;
-    this.inputLayerSize = daoFactory.vocabularyWordDAO().getCount();
-    this.outputLayerSize = catalogDAO.getCount();
-    this.catalogDAO = catalogDAO;
+  Recognizer(File trainedNetwork, List<Catalog> catalog, List<VocabularyWord> vocabulary) {
+    this.catalog = catalog;
+    this.vocabulary = vocabulary;
+    this.inputLayerSize = vocabulary.size();
+    this.outputLayerSize = catalog.size();
 
     // load neural network from file
     this.network = (BasicNetwork) loadObject(trainedNetwork);
@@ -69,13 +67,36 @@ public abstract class Recognizer {
     network.compute(getTextAsWordVector(incomingCall, new FilteredUnigram()), output);
     Encog.getInstance().shutdown();
 
-    // convert output vector to characteristic
-    return catalogDAO.findByVector(output);
+    return convertVectorToCharacteristic(output);
   }
 
-  public void train() {
-    List<IncomingCall> incomingCallsTrain = daoFactory.incomingCallDAO().getAll();
+  private Catalog convertVectorToCharacteristic(double[] output) {
+    int idOfMaxValue = getIdOfMaxValue(output);
 
+    for (Catalog el : catalog) {
+      if (el.getId() == idOfMaxValue) {
+        return el;
+      }
+    }
+
+    return null;
+  }
+
+  private int getIdOfMaxValue(double[] vector) {
+    int indexOfMaxValue = 0;
+    double maxValue = vector[0];
+
+    for (int i = 1; i < vector.length; i++) {
+      if (vector[i] > maxValue) {
+        maxValue = vector[i];
+        indexOfMaxValue = i;
+      }
+    }
+
+    return indexOfMaxValue + 1;
+  }
+
+  public void train(List<IncomingCall> incomingCallsTrain) {
     // prepare input and ideal vectors
     // input <- IncomingCall text vector
     // ideal <- characteristic vector
@@ -122,15 +143,14 @@ public abstract class Recognizer {
   }
 
   private double[] getTextAsWordVector(IncomingCall incomingCall, NGramStrategy nGram) {
-    GenericDAO<VocabularyWord> vocabularyWordDAO = daoFactory.vocabularyWordDAO();
-    double[] vector = new double[vocabularyWordDAO.getCount()];
+    double[] vector = new double[inputLayerSize];
 
     // convert text to nGram
     Set<String> uniqueValues = nGram.getNGram(incomingCall.getText());
 
     // create vector
     for (String word : uniqueValues) {
-      VocabularyWord vw = vocabularyWordDAO.findByValue(word);
+      VocabularyWord vw = findVocabularyWord(word);
 
       if (vw != null) {
         vector[vw.getId() - 1] = 1;
@@ -138,6 +158,16 @@ public abstract class Recognizer {
     }
 
     return vector;
+  }
+
+  private VocabularyWord findVocabularyWord(String word) {
+    for (VocabularyWord vw : vocabulary) {
+      if (vw.getValue().equals(word)) {
+        return vw;
+      }
+    }
+
+    return null;
   }
 
   protected abstract int getCatalogId(IncomingCall incomingCall);

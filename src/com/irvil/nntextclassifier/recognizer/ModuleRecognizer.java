@@ -7,11 +7,11 @@ import java.io.File;
 
 public class ModuleRecognizer extends Recognizer {
   public ModuleRecognizer(DAOFactory daoFactory) {
-    super(daoFactory.moduleDAO(), daoFactory);
+    super(daoFactory.moduleDAO().getAll(), daoFactory.vocabularyWordDAO().getAll());
   }
 
   public ModuleRecognizer(File file, DAOFactory daoFactory) {
-    super(file, daoFactory.moduleDAO(), daoFactory);
+    super(file, daoFactory.moduleDAO().getAll(), daoFactory.vocabularyWordDAO().getAll());
   }
 
   @Override
