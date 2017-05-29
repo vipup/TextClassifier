@@ -2,7 +2,7 @@ package com.irvil.nntextclassifier.dao;
 
 import java.util.List;
 
-public interface GenericDAO<T> {
+public interface CharacteristicDAO<T> {
   int getCount();
 
   List<T> getAll();

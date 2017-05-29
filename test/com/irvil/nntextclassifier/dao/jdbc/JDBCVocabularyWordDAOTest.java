@@ -1,6 +1,6 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
-import com.irvil.nntextclassifier.dao.GenericDAO;
+import com.irvil.nntextclassifier.dao.CharacteristicDAO;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class JDBCVocabularyWordDAOTest {
-  private GenericDAO<VocabularyWord> vocabularyWordDAO;
+  private CharacteristicDAO<VocabularyWord> vocabularyWordDAO;
 
   @Before
   public void initializeTable() throws Exception {
@@ -18,10 +18,10 @@ public class JDBCVocabularyWordDAOTest {
 
     String tableName = "Vocabulary";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new VocabularyWord(1, "test 1"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new VocabularyWord(2, "test 2"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new VocabularyWord(3, "test 3"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new VocabularyWord(4, "test 4"));
+    JDBCDatabaseUtilities.insertToVocabulary(new VocabularyWord(1, "test 1"));
+    JDBCDatabaseUtilities.insertToVocabulary(new VocabularyWord(2, "test 2"));
+    JDBCDatabaseUtilities.insertToVocabulary(new VocabularyWord(3, "test 3"));
+    JDBCDatabaseUtilities.insertToVocabulary(new VocabularyWord(4, "test 4"));
   }
 
   @Test

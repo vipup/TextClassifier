@@ -1,7 +1,8 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
-import com.irvil.nntextclassifier.model.Catalog;
+import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.VocabularyWord;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,11 +16,20 @@ class JDBCDatabaseUtilities {
     }
   }
 
-  static void insertToCatalog(String tableName, Catalog catalog) throws Exception {
+  static void insertToCatalog(String tableName, Characteristic characteristic) throws Exception {
     try (Connection con = new JDBCSQLiteTestConnector().getConnection()) {
       PreparedStatement statement = con.prepareStatement("INSERT INTO " + tableName + " (id, value) VALUES (?, ?)");
-      statement.setInt(1, catalog.getId());
-      statement.setString(2, catalog.getValue());
+      statement.setInt(1, characteristic.getId());
+      statement.setString(2, characteristic.getValue());
+      statement.executeUpdate();
+    }
+  }
+
+  static void insertToVocabulary(VocabularyWord vw) throws Exception {
+    try (Connection con = new JDBCSQLiteTestConnector().getConnection()) {
+      PreparedStatement statement = con.prepareStatement("INSERT INTO Vocabulary (id, value) VALUES (?, ?)");
+      statement.setInt(1, vw.getId());
+      statement.setString(2, vw.getValue());
       statement.executeUpdate();
     }
   }
@@ -29,8 +39,8 @@ class JDBCDatabaseUtilities {
     try (Connection con = new JDBCSQLiteTestConnector().getConnection()) {
       PreparedStatement statement = con.prepareStatement(sql);
       statement.setString(1, incomingCall.getText());
-      statement.setString(2, incomingCall.getModule().getValue());
-      statement.setString(3, incomingCall.getHandler().getValue());
+      statement.setString(2, incomingCall.getCharacteristic("Module").getValue());
+      statement.setString(3, incomingCall.getCharacteristic("Handler").getValue());
       statement.executeUpdate();
     }
   }

@@ -17,7 +17,7 @@ public class ModuleRecognizer extends Recognizer {
 
   @Override
   protected int getCatalogId(IncomingCall incomingCall) {
-    return incomingCall.getModule().getId();
+    return incomingCall.getCharacteristic("Module").getId();
   }
 
   @Override

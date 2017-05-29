@@ -1,10 +1,9 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.model.Catalog;
-import com.irvil.nntextclassifier.model.Module;
+import com.irvil.nntextclassifier.model.Characteristic;
 
-public class JDBCModuleDAO extends JDBCGenericDAO<Catalog> {
+public class JDBCModuleDAO extends JDBCCharacteristicDAO<Characteristic> {
   public JDBCModuleDAO(JDBCConnector connector) {
     super(connector);
   }
@@ -15,7 +14,7 @@ public class JDBCModuleDAO extends JDBCGenericDAO<Catalog> {
   }
 
   @Override
-  protected Module createObject(int id, String value) {
-    return new Module(id, value);
+  protected Characteristic createObject(int id, String value) {
+    return new Characteristic("Module", id, value);
   }
 }

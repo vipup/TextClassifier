@@ -1,8 +1,7 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
-import com.irvil.nntextclassifier.dao.GenericDAO;
+import com.irvil.nntextclassifier.dao.CharacteristicDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.model.Catalog;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,10 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
+abstract class JDBCCharacteristicDAO<T> implements CharacteristicDAO<T> {
   private JDBCConnector connector;
 
-  JDBCGenericDAO(JDBCConnector connector) {
+  JDBCCharacteristicDAO(JDBCConnector connector) {
     if (connector == null) {
       throw new IllegalArgumentException();
     }
@@ -102,7 +101,7 @@ abstract class JDBCGenericDAO<T extends Catalog> implements GenericDAO<T> {
 
     try (Connection con = connector.getConnection()) {
       PreparedStatement insertStatement = con.prepareStatement(sql);
-      insertStatement.setString(1, object.getValue());
+      insertStatement.setString(1, object.toString());
       insertStatement.executeUpdate();
     } catch (SQLException e) {
       e.printStackTrace();

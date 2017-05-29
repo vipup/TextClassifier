@@ -17,7 +17,7 @@ public class HandlerRecognizer extends Recognizer {
 
   @Override
   protected int getCatalogId(IncomingCall incomingCall) {
-    return incomingCall.getHandler().getId();
+    return incomingCall.getCharacteristic("Handler").getId();
   }
 
   @Override

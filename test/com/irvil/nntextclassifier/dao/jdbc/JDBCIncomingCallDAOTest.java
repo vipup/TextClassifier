@@ -1,12 +1,12 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
-import com.irvil.nntextclassifier.model.Handler;
+import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.IncomingCall;
-import com.irvil.nntextclassifier.model.Module;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -20,19 +20,28 @@ public class JDBCIncomingCallDAOTest {
 
     String tableName = "IncomingCalls";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text text", new Module(0, "PM"), new Handler(0, "User 1")));
-    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
-    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text1 text1", new Module(0, "MM"), new Handler(0, "User 2")));
+
+    List<Characteristic> characteristics = new ArrayList<>();
+    characteristics.add(new Characteristic("Module", 0, "PM"));
+    characteristics.add(new Characteristic("Handler", 0, "User 1"));
+    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text text", characteristics));
+
+    for (int i = 0; i < 2; i++) {
+      characteristics = new ArrayList<>();
+      characteristics.add(new Characteristic("Module", 0, "MM"));
+      characteristics.add(new Characteristic("Handler", 0, "User 2"));
+      JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text1 text1", characteristics));
+    }
 
     tableName = "Handlers";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Handler(1, "User 1"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Handler(2, "User 2"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Handler", 1, "User 1"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Handler", 2, "User 2"));
 
     tableName = "Modules";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(1, "PM"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(2, "MM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 1, "PM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 2, "MM"));
   }
 
   @Test
@@ -48,19 +57,19 @@ public class JDBCIncomingCallDAOTest {
     assertEquals(incomingCalls.get(2).getText(), "text1 text1");
 
     // check modules
-    assertEquals(incomingCalls.get(0).getModule().getValue(), "PM");
-    assertEquals(incomingCalls.get(1).getModule().getValue(), "MM");
-    assertEquals(incomingCalls.get(2).getModule().getValue(), "MM");
+    assertEquals(incomingCalls.get(0).getCharacteristic("Module").getValue(), "PM");
+    assertEquals(incomingCalls.get(1).getCharacteristic("Module").getValue(), "MM");
+    assertEquals(incomingCalls.get(2).getCharacteristic("Module").getValue(), "MM");
 
     // check handlers
-    assertEquals(incomingCalls.get(0).getHandler().getValue(), "User 1");
-    assertEquals(incomingCalls.get(1).getHandler().getValue(), "User 2");
-    assertEquals(incomingCalls.get(2).getHandler().getValue(), "User 2");
+    assertEquals(incomingCalls.get(0).getCharacteristic("Handler").getValue(), "User 1");
+    assertEquals(incomingCalls.get(1).getCharacteristic("Handler").getValue(), "User 2");
+    assertEquals(incomingCalls.get(2).getCharacteristic("Handler").getValue(), "User 2");
   }
 
   @Test
   public void getUniqueModules() throws Exception {
-    List<Module> modules = incomingCallDAO.getUniqueModules();
+    List<Characteristic> modules = incomingCallDAO.getUniqueModules();
 
     // check size
     assertEquals(modules.size(), 2);
@@ -72,7 +81,7 @@ public class JDBCIncomingCallDAOTest {
 
   @Test
   public void getUniqueHandlers() throws Exception {
-    List<Handler> handlers = incomingCallDAO.getUniqueHandlers();
+    List<Characteristic> handlers = incomingCallDAO.getUniqueHandlers();
 
     // check size
     assertEquals(handlers.size(), 2);

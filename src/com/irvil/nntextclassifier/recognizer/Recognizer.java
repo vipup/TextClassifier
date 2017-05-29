@@ -1,6 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.model.Catalog;
+import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
@@ -24,15 +24,15 @@ public abstract class Recognizer {
   private final int inputLayerSize;
   private final int outputLayerSize;
   private BasicNetwork network;
-  private final List<Catalog> catalog;
+  private final List<Characteristic> characteristic;
   private final List<VocabularyWord> vocabulary;
   private final NGramStrategy nGram;
 
-  Recognizer(List<Catalog> catalog, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
-    this.catalog = catalog;
+  Recognizer(List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+    this.characteristic = characteristic;
     this.vocabulary = vocabulary;
     this.inputLayerSize = vocabulary.size();
-    this.outputLayerSize = catalog.size();
+    this.outputLayerSize = characteristic.size();
     this.nGram = nGram;
 
     // create neural network
@@ -51,14 +51,14 @@ public abstract class Recognizer {
     this.network.reset();
   }
 
-  Recognizer(File trainedNetwork, List<Catalog> catalog, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
-    this(catalog, vocabulary, nGram);
+  Recognizer(File trainedNetwork, List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+    this(characteristic, vocabulary, nGram);
 
     // load neural network from file
     this.network = (BasicNetwork) loadObject(trainedNetwork);
   }
 
-  public Catalog recognize(IncomingCall incomingCall) {
+  public Characteristic recognize(IncomingCall incomingCall) {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
@@ -68,10 +68,10 @@ public abstract class Recognizer {
     return convertVectorToCharacteristic(output);
   }
 
-  private Catalog convertVectorToCharacteristic(double[] output) {
+  private Characteristic convertVectorToCharacteristic(double[] output) {
     int idOfMaxValue = getIdOfMaxValue(output);
 
-    for (Catalog el : catalog) {
+    for (Characteristic el : characteristic) {
       if (el.getId() == idOfMaxValue) {
         return el;
       }

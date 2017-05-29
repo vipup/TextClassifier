@@ -1,8 +1,7 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
-import com.irvil.nntextclassifier.dao.GenericDAO;
-import com.irvil.nntextclassifier.model.Catalog;
-import com.irvil.nntextclassifier.model.Module;
+import com.irvil.nntextclassifier.dao.CharacteristicDAO;
+import com.irvil.nntextclassifier.model.Characteristic;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,8 +9,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class JDBCModuleDAOTest {
-  private GenericDAO<Catalog> moduleDAO;
+public class JDBCCharacteristicDAOTest {
+  private CharacteristicDAO<Characteristic> moduleDAO;
 
   @Before
   public void initializeTable() throws Exception {
@@ -19,8 +18,8 @@ public class JDBCModuleDAOTest {
 
     String tableName = "Modules";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(1, "PM"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Module(2, "MM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 1, "PM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 2, "MM"));
   }
 
   @Test
@@ -30,7 +29,7 @@ public class JDBCModuleDAOTest {
 
   @Test
   public void getAll() throws Exception {
-    List<Catalog> characteristics = moduleDAO.getAll();
+    List<Characteristic> characteristics = moduleDAO.getAll();
 
     assertEquals(characteristics.get(0).getId(), 1);
     assertEquals(characteristics.get(1).getId(), 2);
@@ -41,31 +40,31 @@ public class JDBCModuleDAOTest {
 
   @Test
   public void findByID() throws Exception {
-    Catalog module = moduleDAO.findByID(1);
+    Characteristic module = moduleDAO.findByID(1);
     assertEquals(module.getValue(), "PM");
   }
 
   @Test
   public void findByIDNonexistent() throws Exception {
-    Catalog module = moduleDAO.findByID(10);
+    Characteristic module = moduleDAO.findByID(10);
     assertEquals(module, null);
   }
 
   @Test
   public void findByValue() throws Exception {
-    Catalog module = moduleDAO.findByValue("PM");
+    Characteristic module = moduleDAO.findByValue("PM");
     assertEquals(module.getId(), 1);
   }
 
   @Test
   public void findByValueNonexistent() throws Exception {
-    Catalog module = moduleDAO.findByValue("testtesttest");
+    Characteristic module = moduleDAO.findByValue("testtesttest");
     assertEquals(module, null);
   }
 
   @Test
   public void findByValueNull() throws Exception {
-    Catalog module = moduleDAO.findByValue(null);
+    Characteristic module = moduleDAO.findByValue(null);
     assertEquals(module, null);
   }
 
@@ -74,7 +73,7 @@ public class JDBCModuleDAOTest {
     int beforeCount = moduleDAO.getCount();
 
     String value = "Test add()";
-    moduleDAO.add(new Module(0, value));
+    moduleDAO.add(new Characteristic("Module", 0, value));
 
     assertEquals(moduleDAO.getCount(), beforeCount + 1);
     assertEquals(moduleDAO.findByValue(value).getValue(), value);

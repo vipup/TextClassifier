@@ -1,34 +1,32 @@
 package com.irvil.nntextclassifier.model;
 
+import java.util.List;
+
 public class IncomingCall {
   private final String text;
-  private final Module module;
-  private final Handler handler;
+  //todo: change to Set
+  private final List<Characteristic> characteristics;
 
-  public IncomingCall(String text, Module module, Handler handler) {
+  public IncomingCall(String text, List<Characteristic> characteristics) {
     this.text = text;
-    this.module = module;
-    this.handler = handler;
+    this.characteristics = characteristics;
   }
 
   public IncomingCall(String text) {
-    this(text, null, null);
+    this(text, null);
   }
 
   public String getText() {
     return text;
   }
 
-  public Module getModule() {
-    return module;
-  }
+  public Characteristic getCharacteristic(String name) {
+    for (Characteristic c : characteristics) {
+      if (c.getName().equals(name)) {
+        return c;
+      }
+    }
 
-  public Handler getHandler() {
-    return handler;
-  }
-
-  @Override
-  public String toString() {
-    return text + " (Module: " + module + ", Handler: " + handler + ")";
+    return null;
   }
 }

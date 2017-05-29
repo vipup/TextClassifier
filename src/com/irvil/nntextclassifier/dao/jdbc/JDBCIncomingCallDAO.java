@@ -2,9 +2,8 @@ package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.model.Handler;
+import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.IncomingCall;
-import com.irvil.nntextclassifier.model.Module;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -39,10 +38,12 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       ResultSet rs = con.createStatement().executeQuery(sql);
 
       while (rs.next()) {
-        Module module = new Module(rs.getInt("ModuleId"), rs.getString("ModuleValue"));
-        Handler handler = new Handler(rs.getInt("HandlerId"), rs.getString("HandlerValue"));
+        List<Characteristic> characteristics = new ArrayList<>();
 
-        list.add(new IncomingCall(rs.getString("Text"), module, handler));
+        characteristics.add(new Characteristic("Module", rs.getInt("ModuleId"), rs.getString("ModuleValue")));
+        characteristics.add(new Characteristic("Handler", rs.getInt("HandlerId"), rs.getString("HandlerValue")));
+
+        list.add(new IncomingCall(rs.getString("Text"), characteristics));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -52,22 +53,22 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
   }
 
   @Override
-  public List<Module> getUniqueModules() {
-    List<Module> modules = new ArrayList<>();
+  public List<Characteristic> getUniqueModules() {
+    List<Characteristic> modules = new ArrayList<>();
 
     for (String value : getUniqueCatalog("Module")) {
-      modules.add(new Module(0, value));
+      modules.add(new Characteristic("Module", 0, value));
     }
 
     return modules;
   }
 
   @Override
-  public List<Handler> getUniqueHandlers() {
-    List<Handler> handlers = new ArrayList<>();
+  public List<Characteristic> getUniqueHandlers() {
+    List<Characteristic> handlers = new ArrayList<>();
 
     for (String value : getUniqueCatalog("Handler")) {
-      handlers.add(new Handler(0, value));
+      handlers.add(new Characteristic("Handler", 0, value));
     }
 
     return handlers;
