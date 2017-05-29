@@ -62,7 +62,7 @@ public abstract class Recognizer {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
-    network.compute(getTextAsWordVector(incomingCall), output);
+    network.compute(getTextAsVectorOfWords(incomingCall), output);
     Encog.getInstance().shutdown();
 
     return convertVectorToCharacteristic(output);
@@ -98,18 +98,10 @@ public abstract class Recognizer {
     // prepare input and ideal vectors
     // input <- IncomingCall text vector
     // ideal <- characteristic vector
-    // todo: extract to other method
     //
 
-    double[][] input = new double[incomingCallsTrain.size()][inputLayerSize];
-    double[][] ideal = new double[incomingCallsTrain.size()][outputLayerSize];
-    int i = 0;
-
-    for (IncomingCall incomingCall : incomingCallsTrain) {
-      input[i] = getTextAsWordVector(incomingCall);
-      ideal[i] = getCatalogValueAsVector(incomingCall);
-      i++;
-    }
+    double[][] input = getInput(incomingCallsTrain);
+    double[][] ideal = getIdeal(incomingCallsTrain);
 
     // train
     //
@@ -126,6 +118,28 @@ public abstract class Recognizer {
     train.finishTraining();
   }
 
+  private double[][] getInput(List<IncomingCall> incomingCallsTrain) {
+    double[][] input = new double[incomingCallsTrain.size()][inputLayerSize];
+    int i = 0;
+
+    for (IncomingCall incomingCall : incomingCallsTrain) {
+      input[i] = getTextAsVectorOfWords(incomingCall);
+      i++;
+    }
+    return input;
+  }
+
+  private double[][] getIdeal(List<IncomingCall> incomingCallsTrain) {
+    double[][] ideal = new double[incomingCallsTrain.size()][outputLayerSize];
+    int i = 0;
+
+    for (IncomingCall incomingCall : incomingCallsTrain) {
+      ideal[i] = getCatalogValueAsVector(incomingCall);
+      i++;
+    }
+    return ideal;
+  }
+
   public void saveTrainedRecognizer(File trainedNetwork) {
     saveObject(trainedNetwork, network);
   }
@@ -140,7 +154,7 @@ public abstract class Recognizer {
     return vector;
   }
 
-  private double[] getTextAsWordVector(IncomingCall incomingCall) {
+  private double[] getTextAsVectorOfWords(IncomingCall incomingCall) {
     double[] vector = new double[inputLayerSize];
 
     // convert text to nGram
