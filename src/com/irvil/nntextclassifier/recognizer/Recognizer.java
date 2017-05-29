@@ -19,8 +19,8 @@ import java.util.Set;
 import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
-// todo: make Recognizer independent from DAOs
-public abstract class Recognizer {
+public class Recognizer {
+  private final String characteristicName;
   private final int inputLayerSize;
   private final int outputLayerSize;
   private BasicNetwork network;
@@ -28,7 +28,8 @@ public abstract class Recognizer {
   private final List<VocabularyWord> vocabulary;
   private final NGramStrategy nGram;
 
-  Recognizer(List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+  public Recognizer(String characteristicName, List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+    this.characteristicName = characteristicName;
     this.characteristic = characteristic;
     this.vocabulary = vocabulary;
     this.inputLayerSize = vocabulary.size();
@@ -51,8 +52,8 @@ public abstract class Recognizer {
     this.network.reset();
   }
 
-  Recognizer(File trainedNetwork, List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
-    this(characteristic, vocabulary, nGram);
+  public Recognizer(File trainedNetwork, String characteristicName, List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+    this(characteristicName, characteristic, vocabulary, nGram);
 
     // load neural network from file
     this.network = (BasicNetwork) loadObject(trainedNetwork);
@@ -68,12 +69,15 @@ public abstract class Recognizer {
     return convertVectorToCharacteristic(output);
   }
 
-  private Characteristic convertVectorToCharacteristic(double[] output) {
-    int idOfMaxValue = getIdOfMaxValue(output);
+  private Characteristic convertVectorToCharacteristic(double[] vector) {
+    int idOfMaxValue = getIdOfMaxValue(vector);
 
-    for (Characteristic el : characteristic) {
-      if (el.getId() == idOfMaxValue) {
-        return el;
+    // find Characteristic with found Id
+    //
+
+    for (Characteristic c : characteristic) {
+      if (c.getId() == idOfMaxValue) {
+        return c;
       }
     }
 
@@ -94,14 +98,18 @@ public abstract class Recognizer {
     return indexOfMaxValue + 1;
   }
 
-  public void train(List<IncomingCall> incomingCallsTrain) {
+  public void saveTrainedRecognizer(File trainedNetwork) {
+    saveObject(trainedNetwork, network);
+  }
+
+  public void train(List<IncomingCall> incomingCalls) {
     // prepare input and ideal vectors
     // input <- IncomingCall text vector
     // ideal <- characteristic vector
     //
 
-    double[][] input = getInput(incomingCallsTrain);
-    double[][] ideal = getIdeal(incomingCallsTrain);
+    double[][] input = getInput(incomingCalls);
+    double[][] ideal = getIdeal(incomingCalls);
 
     // train
     //
@@ -118,38 +126,38 @@ public abstract class Recognizer {
     train.finishTraining();
   }
 
-  private double[][] getInput(List<IncomingCall> incomingCallsTrain) {
-    double[][] input = new double[incomingCallsTrain.size()][inputLayerSize];
+  private double[][] getInput(List<IncomingCall> incomingCalls) {
+    double[][] input = new double[incomingCalls.size()][inputLayerSize];
     int i = 0;
 
-    for (IncomingCall incomingCall : incomingCallsTrain) {
-      input[i] = getTextAsVectorOfWords(incomingCall);
-      i++;
+    // convert all incoming call texts to vectors
+    //
+
+    for (IncomingCall incomingCall : incomingCalls) {
+      input[i++] = getTextAsVectorOfWords(incomingCall);
     }
     return input;
   }
 
-  private double[][] getIdeal(List<IncomingCall> incomingCallsTrain) {
-    double[][] ideal = new double[incomingCallsTrain.size()][outputLayerSize];
+  private double[][] getIdeal(List<IncomingCall> incomingCalls) {
+    double[][] ideal = new double[incomingCalls.size()][outputLayerSize];
     int i = 0;
 
-    for (IncomingCall incomingCall : incomingCallsTrain) {
-      ideal[i] = getCatalogValueAsVector(incomingCall);
-      i++;
+    // convert all incoming call characteristics to vectors
+    //
+
+    for (IncomingCall incomingCall : incomingCalls) {
+      ideal[i++] = getCharacteristicAsVector(incomingCall);
     }
     return ideal;
-  }
-
-  public void saveTrainedRecognizer(File trainedNetwork) {
-    saveObject(trainedNetwork, network);
   }
 
   // example:
   // count = 5; id = 4;
   // vector = {0, 0, 0, 1, 0}
-  private double[] getCatalogValueAsVector(IncomingCall incomingCall) {
+  private double[] getCharacteristicAsVector(IncomingCall incomingCall) {
     double[] vector = new double[outputLayerSize];
-    vector[getCatalogId(incomingCall) - 1] = 1;
+    vector[incomingCall.getCharacteristic(characteristicName).getId() - 1] = 1;
 
     return vector;
   }
@@ -161,8 +169,10 @@ public abstract class Recognizer {
     Set<String> uniqueValues = nGram.getNGram(incomingCall.getText());
 
     // create vector
+    //
+
     for (String word : uniqueValues) {
-      VocabularyWord vw = findVocabularyWord(word);
+      VocabularyWord vw = findWordInVocabulary(word);
 
       if (vw != null) {
         vector[vw.getId() - 1] = 1;
@@ -172,7 +182,7 @@ public abstract class Recognizer {
     return vector;
   }
 
-  private VocabularyWord findVocabularyWord(String word) {
+  private VocabularyWord findWordInVocabulary(String word) {
     for (VocabularyWord vw : vocabulary) {
       if (vw.getValue().equals(word)) {
         return vw;
@@ -182,5 +192,8 @@ public abstract class Recognizer {
     return null;
   }
 
-  protected abstract int getCatalogId(IncomingCall incomingCall);
+  @Override
+  public String toString() {
+    return characteristicName + "Recognizer";
+  }
 }

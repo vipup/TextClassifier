@@ -10,8 +10,6 @@ import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
-import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
-import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import org.encog.Encog;
 
@@ -74,7 +72,7 @@ public class FirstStart {
 
   public void trainRecognizer(String path, Recognizer recognizer) {
     recognizer.train(daoFactory.incomingCallDAO().getAll());
-    recognizer.saveTrainedRecognizer(new File(path + "/" + recognizer.toString() + "TrainedNetwork"));
+    recognizer.saveTrainedRecognizer(new File(path + "/" + recognizer.toString() + "Trained"));
   }
 
   public boolean createDbFolder(String path) {
@@ -134,8 +132,10 @@ public class FirstStart {
     // train recognizers
     //
 
-    fs.trainRecognizer(config.getDbPath(), new ModuleRecognizer(daoFactory));
-    fs.trainRecognizer(config.getDbPath(), new HandlerRecognizer(daoFactory));
+    List<VocabularyWord> vacabulary = daoFactory.vocabularyWordDAO().getAll();
+
+    fs.trainRecognizer(config.getDbPath(), new Recognizer("Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram()));
+    fs.trainRecognizer(config.getDbPath(), new Recognizer("Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram()));
     Encog.getInstance().shutdown();
   }
 }

@@ -5,8 +5,8 @@ import com.irvil.nntextclassifier.dao.factories.JDBCDAOFactory;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 import com.irvil.nntextclassifier.model.IncomingCall;
-import com.irvil.nntextclassifier.recognizer.HandlerRecognizer;
-import com.irvil.nntextclassifier.recognizer.ModuleRecognizer;
+import com.irvil.nntextclassifier.model.VocabularyWord;
+import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -22,6 +22,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.List;
 
 public class MainWindow extends Application {
   private boolean error;
@@ -112,8 +113,10 @@ public class MainWindow extends Application {
 
   private boolean loadLearnedRecognizers(DAOFactory daoFactory, String path) {
     try {
-      moduleRecognizer = new ModuleRecognizer(new File(path + "/ModuleRecognizerTrainedNetwork"), daoFactory);
-      handlerRecognizer = new HandlerRecognizer(new File(path + "/HandlerRecognizerTrainedNetwork"), daoFactory);
+      List<VocabularyWord> vacabulary = daoFactory.vocabularyWordDAO().getAll();
+
+      moduleRecognizer = new Recognizer(new File(path + "/ModuleRecognizerTrainedNetwork"), "Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram());
+      handlerRecognizer = new Recognizer(new File(path + "/HandlerRecognizerTrainedNetwork"), "Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram());
     } catch (RuntimeException e) {
       return false;
     }
