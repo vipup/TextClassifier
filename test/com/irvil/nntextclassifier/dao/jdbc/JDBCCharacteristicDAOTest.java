@@ -18,8 +18,8 @@ public class JDBCCharacteristicDAOTest {
 
     String tableName = "Modules";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 1, "PM"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 2, "MM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(1, "PM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(2, "MM"));
   }
 
   @Test
@@ -73,7 +73,7 @@ public class JDBCCharacteristicDAOTest {
     int beforeCount = moduleDAO.getCount();
 
     String value = "Test add()";
-    moduleDAO.add(new Characteristic("Module", 0, value));
+    moduleDAO.add(new Characteristic(0, value));
 
     assertEquals(moduleDAO.getCount(), beforeCount + 1);
     assertEquals(moduleDAO.findByValue(value).getValue(), value);

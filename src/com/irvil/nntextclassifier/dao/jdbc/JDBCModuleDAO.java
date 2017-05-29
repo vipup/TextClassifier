@@ -15,6 +15,6 @@ public class JDBCModuleDAO extends JDBCCharacteristicDAO<Characteristic> {
 
   @Override
   protected Characteristic createObject(int id, String value) {
-    return new Characteristic("Module", id, value);
+    return new Characteristic(id, value);
   }
 }

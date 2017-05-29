@@ -6,8 +6,9 @@ import com.irvil.nntextclassifier.model.IncomingCall;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,27 +22,27 @@ public class JDBCIncomingCallDAOTest {
     String tableName = "IncomingCalls";
     JDBCDatabaseUtilities.cleanTable(tableName);
 
-    List<Characteristic> characteristics = new ArrayList<>();
-    characteristics.add(new Characteristic("Module", 0, "PM"));
-    characteristics.add(new Characteristic("Handler", 0, "User 1"));
+    Map<String, Characteristic> characteristics = new HashMap<>();
+    characteristics.put("Module", new Characteristic(0, "PM"));
+    characteristics.put("Handler", new Characteristic(0, "User 1"));
     JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text text", characteristics));
 
     for (int i = 0; i < 2; i++) {
-      characteristics = new ArrayList<>();
-      characteristics.add(new Characteristic("Module", 0, "MM"));
-      characteristics.add(new Characteristic("Handler", 0, "User 2"));
+      characteristics = new HashMap<>();
+      characteristics.put("Module", new Characteristic(0, "MM"));
+      characteristics.put("Handler", new Characteristic(0, "User 2"));
       JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text1 text1", characteristics));
     }
 
     tableName = "Handlers";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Handler", 1, "User 1"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Handler", 2, "User 2"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(1, "User 1"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(2, "User 2"));
 
     tableName = "Modules";
     JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 1, "PM"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic("Module", 2, "MM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(1, "PM"));
+    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(2, "MM"));
   }
 
   @Test
@@ -69,7 +70,7 @@ public class JDBCIncomingCallDAOTest {
 
   @Test
   public void getUniqueModules() throws Exception {
-    List<Characteristic> modules = incomingCallDAO.getUniqueModules();
+    List<Characteristic> modules = incomingCallDAO.getUniqueValueOfCharacteristic("Module");
 
     // check size
     assertEquals(modules.size(), 2);
@@ -81,7 +82,7 @@ public class JDBCIncomingCallDAOTest {
 
   @Test
   public void getUniqueHandlers() throws Exception {
-    List<Characteristic> handlers = incomingCallDAO.getUniqueHandlers();
+    List<Characteristic> handlers = incomingCallDAO.getUniqueValueOfCharacteristic("Handler");
 
     // check size
     assertEquals(handlers.size(), 2);

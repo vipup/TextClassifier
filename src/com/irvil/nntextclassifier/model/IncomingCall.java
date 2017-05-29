@@ -1,13 +1,13 @@
 package com.irvil.nntextclassifier.model;
 
-import java.util.List;
+import java.util.Map;
 
 public class IncomingCall {
   private final String text;
   //todo: change to Set
-  private final List<Characteristic> characteristics;
+  private final Map<String, Characteristic> characteristics;
 
-  public IncomingCall(String text, List<Characteristic> characteristics) {
+  public IncomingCall(String text, Map<String, Characteristic> characteristics) {
     this.text = text;
     this.characteristics = characteristics;
   }
@@ -21,12 +21,6 @@ public class IncomingCall {
   }
 
   public Characteristic getCharacteristic(String name) {
-    for (Characteristic c : characteristics) {
-      if (c.getName().equals(name)) {
-        return c;
-      }
-    }
-
-    return null;
+    return characteristics.get(name);
   }
 }

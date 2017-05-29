@@ -15,6 +15,6 @@ public class JDBCHandlerDAO extends JDBCCharacteristicDAO<Characteristic> {
 
   @Override
   protected Characteristic createObject(int id, String value) {
-    return new Characteristic("Handler", id, value);
+    return new Characteristic(id, value);
   }
 }

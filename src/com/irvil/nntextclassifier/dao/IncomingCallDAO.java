@@ -8,7 +8,5 @@ import java.util.List;
 public interface IncomingCallDAO {
   List<IncomingCall> getAll();
 
-  List<Characteristic> getUniqueModules();
-
-  List<Characteristic> getUniqueHandlers();
+  List<Characteristic> getUniqueValueOfCharacteristic(String characteristicName);
 }
