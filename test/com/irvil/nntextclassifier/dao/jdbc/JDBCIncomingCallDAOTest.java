@@ -1,6 +1,10 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
+import com.irvil.nntextclassifier.Config;
+import com.irvil.nntextclassifier.dao.CharacteristicDAO;
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
+import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import org.junit.Before;
@@ -17,32 +21,65 @@ public class JDBCIncomingCallDAOTest {
 
   @Before
   public void initializeTable() throws Exception {
-    incomingCallDAO = new JDBCIncomingCallDAO(new JDBCSQLiteTestConnector());
+    Config config = Config.getInstance();
+    JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
+    incomingCallDAO = new JDBCIncomingCallDAO(jdbcConnector);
+    CharacteristicDAO moduleDAO = new JDBCCharacteristicDAO("Module", jdbcConnector);
+    CharacteristicDAO handlerDAO = new JDBCCharacteristicDAO("Handler", jdbcConnector);
 
-    String tableName = "IncomingCalls";
-    JDBCDatabaseUtilities.cleanTable(tableName);
+    // clear tables
+
+    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "CharacteristicsNames");
+    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "CharacteristicsValues");
+    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "IncomingCalls");
+    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "IncomingCallsCharacteristics");
+
+    // fill Module characteristics
+    //
+
+    moduleDAO.add(new Characteristic(0, "PM")); // ok
+    moduleDAO.add(new Characteristic(0, "MM")); // ok
+
+    // fill Handler characteristics
+    //
+
+    handlerDAO.add(new Characteristic(0, "User 1")); // ok
+    handlerDAO.add(new Characteristic(0, "User 2")); // ok
+
+    // fill incoming calls
 
     Map<String, Characteristic> characteristics = new HashMap<>();
     characteristics.put("Module", new Characteristic(0, "PM"));
     characteristics.put("Handler", new Characteristic(0, "User 1"));
-    JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text text", characteristics));
+    incomingCallDAO.add(new IncomingCall("text text", characteristics)); // ok
 
-    for (int i = 0; i < 2; i++) {
-      characteristics = new HashMap<>();
-      characteristics.put("Module", new Characteristic(0, "MM"));
-      characteristics.put("Handler", new Characteristic(0, "User 2"));
-      JDBCDatabaseUtilities.insertIncomingCall(new IncomingCall("text1 text1", characteristics));
-    }
+    characteristics = new HashMap<>();
+    characteristics.put("Module", new Characteristic(0, "MM"));
+    characteristics.put("Handler", new Characteristic(0, "User 2"));
+    incomingCallDAO.add(new IncomingCall("text1 text1", characteristics)); // ok
 
-    tableName = "Handlers";
-    JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(1, "User 1"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(2, "User 2"));
+    characteristics = new HashMap<>();
+    characteristics.put("Module", new Characteristic(0, "MM"));
+    characteristics.put("Handler", new Characteristic(0, "User 2"));
+    incomingCallDAO.add(new IncomingCall("text1 text1", characteristics)); //ok
 
-    tableName = "Modules";
-    JDBCDatabaseUtilities.cleanTable(tableName);
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(1, "PM"));
-    JDBCDatabaseUtilities.insertToCatalog(tableName, new Characteristic(2, "MM"));
+    characteristics = new HashMap<>();
+    characteristics.put("Module", new Characteristic(0, "BC"));
+    characteristics.put("Handler", new Characteristic(0, "User 3"));
+    incomingCallDAO.add(new IncomingCall("text2 text2", characteristics)); // error: "User 3" not exists
+
+    characteristics = new HashMap<>();
+    characteristics.put("Module", new Characteristic(0, "PM"));
+    characteristics.put("Handler", new Characteristic(0, "User 1"));
+    characteristics.put("Category", new Characteristic(0, "User 1"));
+    incomingCallDAO.add(new IncomingCall("text text", characteristics)); // error: "Category" not exists
+
+    characteristics = new HashMap<>();
+    incomingCallDAO.add(new IncomingCall("text text", characteristics)); // error: empty characteristics
+
+    incomingCallDAO.add(new IncomingCall("text3 text3", null)); // error: null characteristics
+
+    incomingCallDAO.add(null); // error: null IncomingCall
   }
 
   @Test
@@ -57,38 +94,13 @@ public class JDBCIncomingCallDAOTest {
     assertEquals(incomingCalls.get(1).getText(), "text1 text1");
     assertEquals(incomingCalls.get(2).getText(), "text1 text1");
 
-    // check modules
+    // check characteristics
     assertEquals(incomingCalls.get(0).getCharacteristic("Module").getValue(), "PM");
     assertEquals(incomingCalls.get(1).getCharacteristic("Module").getValue(), "MM");
     assertEquals(incomingCalls.get(2).getCharacteristic("Module").getValue(), "MM");
 
-    // check handlers
     assertEquals(incomingCalls.get(0).getCharacteristic("Handler").getValue(), "User 1");
     assertEquals(incomingCalls.get(1).getCharacteristic("Handler").getValue(), "User 2");
     assertEquals(incomingCalls.get(2).getCharacteristic("Handler").getValue(), "User 2");
-  }
-
-  @Test
-  public void getUniqueModules() throws Exception {
-    List<Characteristic> modules = incomingCallDAO.getUniqueValueOfCharacteristic("Module");
-
-    // check size
-    assertEquals(modules.size(), 2);
-
-    // check modules
-    assertEquals(modules.get(0).getValue(), "PM");
-    assertEquals(modules.get(1).getValue(), "MM");
-  }
-
-  @Test
-  public void getUniqueHandlers() throws Exception {
-    List<Characteristic> handlers = incomingCallDAO.getUniqueValueOfCharacteristic("Handler");
-
-    // check size
-    assertEquals(handlers.size(), 2);
-
-    // check modules
-    assertEquals(handlers.get(0).getValue(), "User 1");
-    assertEquals(handlers.get(1).getValue(), "User 2");
   }
 }

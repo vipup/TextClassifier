@@ -3,17 +3,16 @@ package com.irvil.nntextclassifier.dao.factories;
 import com.irvil.nntextclassifier.dao.CharacteristicDAO;
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.StorageCreator;
-import com.irvil.nntextclassifier.model.Characteristic;
-import com.irvil.nntextclassifier.model.VocabularyWord;
+import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
 
 public interface DAOFactory {
   IncomingCallDAO incomingCallDAO();
 
-  CharacteristicDAO<Characteristic> moduleDAO();
+  CharacteristicDAO moduleDAO();
 
-  CharacteristicDAO<Characteristic> handlerDAO();
+  CharacteristicDAO handlerDAO();
 
-  CharacteristicDAO<VocabularyWord> vocabularyWordDAO();
+  VocabularyWordDAO vocabularyWordDAO();
 
   StorageCreator storageCreator();
 }

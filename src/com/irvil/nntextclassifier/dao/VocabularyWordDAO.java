@@ -2,5 +2,10 @@ package com.irvil.nntextclassifier.dao;
 
 import com.irvil.nntextclassifier.model.VocabularyWord;
 
-public interface VocabularyWordDAO extends CharacteristicDAO<VocabularyWord> {
+import java.util.List;
+
+public interface VocabularyWordDAO {
+  List<VocabularyWord> getAll();
+
+  void add(VocabularyWord vocabularyWord);
 }

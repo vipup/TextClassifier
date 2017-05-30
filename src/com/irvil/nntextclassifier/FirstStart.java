@@ -64,8 +64,8 @@ public class FirstStart {
     IncomingCallDAO icDAO = daoFactory.incomingCallDAO();
 
     // save characteristics in Storage
-    icDAO.getUniqueValueOfCharacteristic("Module").forEach((module) -> daoFactory.moduleDAO().add(module));
-    icDAO.getUniqueValueOfCharacteristic("Handler").forEach((handler) -> daoFactory.handlerDAO().add(handler));
+//    icDAO.getUniqueValueOfCharacteristic("Module").forEach((module) -> daoFactory.moduleDAO().add(module));
+//    icDAO.getUniqueValueOfCharacteristic("Handler").forEach((handler) -> daoFactory.handlerDAO().add(handler));
 
     return true;
   }

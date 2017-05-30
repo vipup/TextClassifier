@@ -4,7 +4,6 @@ import java.util.Map;
 
 public class IncomingCall {
   private final String text;
-  //todo: change to Set
   private final Map<String, Characteristic> characteristics;
 
   public IncomingCall(String text, Map<String, Characteristic> characteristics) {
@@ -18,6 +17,10 @@ public class IncomingCall {
 
   public String getText() {
     return text;
+  }
+
+  public Map<String, Characteristic> getCharacteristics() {
+    return characteristics;
   }
 
   public Characteristic getCharacteristic(String name) {

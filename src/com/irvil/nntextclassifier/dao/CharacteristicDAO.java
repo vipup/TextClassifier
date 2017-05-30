@@ -1,15 +1,11 @@
 package com.irvil.nntextclassifier.dao;
 
+import com.irvil.nntextclassifier.model.Characteristic;
+
 import java.util.List;
 
-public interface CharacteristicDAO<T> {
-  int getCount();
+public interface CharacteristicDAO {
+  List<Characteristic> getAll();
 
-  List<T> getAll();
-
-  T findByID(int id);
-
-  T findByValue(String value);
-
-  void add(T object);
+  void add(Characteristic characteristic);
 }

@@ -3,10 +3,12 @@ package com.irvil.nntextclassifier.dao.factories;
 import com.irvil.nntextclassifier.dao.CharacteristicDAO;
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.StorageCreator;
-import com.irvil.nntextclassifier.dao.jdbc.*;
+import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
+import com.irvil.nntextclassifier.dao.jdbc.JDBCCharacteristicDAO;
+import com.irvil.nntextclassifier.dao.jdbc.JDBCDBCreator;
+import com.irvil.nntextclassifier.dao.jdbc.JDBCIncomingCallDAO;
+import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.model.Characteristic;
-import com.irvil.nntextclassifier.model.VocabularyWord;
 
 public class JDBCDAOFactory implements DAOFactory {
   private JDBCConnector connector;
@@ -25,17 +27,17 @@ public class JDBCDAOFactory implements DAOFactory {
   }
 
   @Override
-  public CharacteristicDAO<Characteristic> moduleDAO() {
-    return new JDBCModuleDAO(connector);
+  public CharacteristicDAO moduleDAO() {
+    return new JDBCCharacteristicDAO("Module", connector);
   }
 
   @Override
-  public CharacteristicDAO<Characteristic> handlerDAO() {
-    return new JDBCHandlerDAO(connector);
+  public CharacteristicDAO handlerDAO() {
+    return new JDBCCharacteristicDAO("Handler", connector);
   }
 
   @Override
-  public CharacteristicDAO<VocabularyWord> vocabularyWordDAO() {
+  public VocabularyWordDAO vocabularyWordDAO() {
     return new JDBCVocabularyWordDAO(connector);
   }
 

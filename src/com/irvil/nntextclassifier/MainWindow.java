@@ -68,7 +68,7 @@ public class MainWindow extends Application {
 
     error = (!config.isLoaded() ||
         !isDBFolderExists(config.getDbPath()) ||
-        !isDBFilled(daoFactory) ||
+        !isDBFilled() ||
         !loadLearnedRecognizers(daoFactory, config.getDbPath()));
   }
 
@@ -105,10 +105,8 @@ public class MainWindow extends Application {
     return new File(path).exists();
   }
 
-  private boolean isDBFilled(DAOFactory daoFactory) {
-    return (daoFactory.vocabularyWordDAO().getCount() != 0 &&
-        daoFactory.moduleDAO().getCount() != 0 &&
-        daoFactory.handlerDAO().getCount() != 0);
+  private boolean isDBFilled() {
+    return false;
   }
 
   private boolean loadLearnedRecognizers(DAOFactory daoFactory, String path) {
