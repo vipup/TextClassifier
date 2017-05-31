@@ -27,37 +27,44 @@ public class JDBCDBCreator implements StorageCreator {
     // create database structure
     //
 
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS CharacteristicsNames " +
+        "( `Id` INTEGER PRIMARY KEY AUTOINCREMENT, `Name` TEXT UNIQUE )");
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS CharacteristicsValues " +
+        "( `Id` INTEGER, `CharacteristicsNameId` INTEGER, `Value` TEXT, PRIMARY KEY(`Id`,`CharacteristicsNameId`,`Value`) )");
     sqlQueries.add("CREATE TABLE IF NOT EXISTS IncomingCalls " +
-        "( Text TEXT, Category TEXT, Module TEXT, Handler TEXT )");
+        "( `Id` INTEGER PRIMARY KEY AUTOINCREMENT, `Text` TEXT )");
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS IncomingCallsCharacteristics " +
+        "( `IncomingCallId` INTEGER, `CharacteristicsNameId` INTEGER, `CharacteristicsValueId` INTEGER, PRIMARY KEY(`IncomingCallId`,`CharacteristicsNameId`,`CharacteristicsValueId`) )");
     sqlQueries.add("CREATE TABLE IF NOT EXISTS Vocabulary " +
-        "( Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT UNIQUE )");
-    sqlQueries.add("CREATE TABLE IF NOT EXISTS Modules " +
-        "( Id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT )");
-    sqlQueries.add("CREATE TABLE IF NOT EXISTS Categories " +
-        "( Id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT )");
-    sqlQueries.add("CREATE TABLE IF NOT EXISTS Handlers " +
-        "( Id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, Value TEXT )");
+        "( `Id` INTEGER PRIMARY KEY AUTOINCREMENT, `Value` TEXT UNIQUE )");
 
-    // delete all records if tables already exists
-    //
+    executeQueries(sqlQueries);
+  }
 
-    sqlQueries.add("DELETE FROM Modules");
-    sqlQueries.add("DELETE FROM Categories");
-    sqlQueries.add("DELETE FROM Handlers");
+  @Override
+  public void clearStorage() {
+    List<String> sqlQueries = new ArrayList<>();
+
+    sqlQueries.add("DELETE FROM CharacteristicsNames");
+    sqlQueries.add("DELETE FROM CharacteristicsValues");
+    sqlQueries.add("DELETE FROM IncomingCalls");
+    sqlQueries.add("DELETE FROM IncomingCallsCharacteristics");
     sqlQueries.add("DELETE FROM Vocabulary");
 
     // reset autoincrement keys
-    sqlQueries.add("DELETE FROM sqlite_sequence WHERE name IN ('Modules', 'Categories', 'Handlers', 'Vocabulary')");
+    sqlQueries.add("DELETE FROM sqlite_sequence WHERE name IN " +
+        "('CharacteristicsNames', 'CharacteristicsValues', 'IncomingCalls', " +
+        "'IncomingCallsCharacteristics', 'Vocabulary')");
 
     executeQueries(sqlQueries);
   }
 
   private void executeQueries(List<String> sqlQueries) {
     try (Connection con = connector.getConnection()) {
-      Statement stmnt = con.createStatement();
+      Statement statement = con.createStatement();
 
       for (String sqlQuery : sqlQueries) {
-        stmnt.execute(sqlQuery);
+        statement.execute(sqlQuery);
       }
     } catch (SQLException e) {
       e.printStackTrace();
