@@ -43,7 +43,7 @@ public class FirstStart {
 
     // save vocabulary words in Storage
     for (String word : vocabulary) {
-      daoFactory.vocabularyWordDAO().add(new VocabularyWord(0, word));
+      //daoFactory.vocabularyWordDAO().add(new VocabularyWord(0, word));
     }
 
     return true;

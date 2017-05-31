@@ -157,7 +157,9 @@ public class Recognizer {
   // vector = {0, 0, 0, 1, 0}
   private double[] getCharacteristicAsVector(IncomingCall incomingCall) {
     double[] vector = new double[outputLayerSize];
-    vector[incomingCall.getCharacteristic(characteristicName).getId() - 1] = 1;
+
+    // todo: fix
+    //vector[incomingCall.getCharacteristic(characteristicName).getId() - 1] = 1;
 
     return vector;
   }
