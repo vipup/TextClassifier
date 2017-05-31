@@ -4,9 +4,9 @@ import java.util.Map;
 
 public class IncomingCall {
   private final String text;
-  private final Map<String, Characteristic> characteristics;
+  private final Map<String, CharacteristicValue> characteristics;
 
-  public IncomingCall(String text, Map<String, Characteristic> characteristics) {
+  public IncomingCall(String text, Map<String, CharacteristicValue> characteristics) {
     this.text = text;
     this.characteristics = characteristics;
   }
@@ -19,11 +19,11 @@ public class IncomingCall {
     return text;
   }
 
-  public Map<String, Characteristic> getCharacteristics() {
+  public Map<String, CharacteristicValue> getCharacteristics() {
     return characteristics;
   }
 
-  public Characteristic getCharacteristic(String name) {
+  public CharacteristicValue getCharacteristic(String name) {
     return characteristics.get(name);
   }
 }

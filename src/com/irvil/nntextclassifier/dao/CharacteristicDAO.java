@@ -5,7 +5,7 @@ import com.irvil.nntextclassifier.model.Characteristic;
 import java.util.List;
 
 public interface CharacteristicDAO {
-  List<Characteristic> getAll();
+  List<Characteristic> getAllCharacteristics();
 
-  void add(Characteristic characteristic);
+  Characteristic addCharacteristic(Characteristic characteristic) throws AlreadyExistsException, EmptyRecordException;
 }

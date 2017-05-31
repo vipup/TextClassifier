@@ -52,7 +52,7 @@ public class FirstStart {
   private Set<String> getVocabulary(NGramStrategy nGram, List<IncomingCall> incomingCalls) {
     Set<String> vocabulary = new LinkedHashSet<>();
 
-    // add words (converted to n-gram) from all IncomingCalls to vocabulary
+    // addPossibleValue words (converted to n-gram) from all IncomingCalls to vocabulary
     for (IncomingCall ic : incomingCalls) {
       vocabulary.addAll(nGram.getNGram(ic.getText()));
     }
@@ -64,8 +64,8 @@ public class FirstStart {
     IncomingCallDAO icDAO = daoFactory.incomingCallDAO();
 
     // save characteristics in Storage
-//    icDAO.getUniqueValueOfCharacteristic("Module").forEach((module) -> daoFactory.moduleDAO().add(module));
-//    icDAO.getUniqueValueOfCharacteristic("Handler").forEach((handler) -> daoFactory.handlerDAO().add(handler));
+//    icDAO.getUniqueValueOfCharacteristic("Module").forEach((module) -> daoFactory.moduleDAO().addPossibleValue(module));
+//    icDAO.getUniqueValueOfCharacteristic("Handler").forEach((handler) -> daoFactory.handlerDAO().addPossibleValue(handler));
 
     return true;
   }
@@ -134,8 +134,8 @@ public class FirstStart {
 
     List<VocabularyWord> vacabulary = daoFactory.vocabularyWordDAO().getAll();
 
-    fs.trainRecognizer(config.getDbPath(), new Recognizer("Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram()));
-    fs.trainRecognizer(config.getDbPath(), new Recognizer("Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram()));
+    //fs.trainRecognizer(config.getDbPath(), new Recognizer("Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram()));
+    //fs.trainRecognizer(config.getDbPath(), new Recognizer("Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram()));
     Encog.getInstance().shutdown();
   }
 }

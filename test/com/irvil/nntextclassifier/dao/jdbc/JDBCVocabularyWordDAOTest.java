@@ -21,7 +21,7 @@ public class JDBCVocabularyWordDAOTest {
     JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
     vocabularyWordDAO = new JDBCVocabularyWordDAO(jdbcConnector);
 
-    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "Vocabulary");
+    JDBCDatabaseUtilities.clearTable(jdbcConnector, "Vocabulary");
     vocabularyWordDAO.add(new VocabularyWord(0, "test 1")); //ok
     vocabularyWordDAO.add(new VocabularyWord(0, "test 2")); //ok
     vocabularyWordDAO.add(new VocabularyWord(0, "test 3")); //ok

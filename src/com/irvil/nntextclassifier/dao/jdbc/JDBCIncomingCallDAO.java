@@ -2,7 +2,7 @@ package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.model.Characteristic;
+import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 
 import java.sql.*;
@@ -40,8 +40,8 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     return incomingCalls;
   }
 
-  private Map<String, Characteristic> getCharacteristics(int incomingCallId) {
-    Map<String, Characteristic> characteristics = new HashMap<>();
+  private Map<String, CharacteristicValue> getCharacteristics(int incomingCallId) {
+    Map<String, CharacteristicValue> characteristics = new HashMap<>();
 
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT CharacteristicsNames.Name AS CharacteristicName, " +
@@ -59,7 +59,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       ResultSet rs = statement.executeQuery();
 
       while (rs.next()) {
-        characteristics.put(rs.getString("CharacteristicName"), new Characteristic(rs.getInt("CharacteristicId"), rs.getString("CharacteristicValue")));
+        characteristics.put(rs.getString("CharacteristicName"), new CharacteristicValue(rs.getInt("CharacteristicId"), rs.getString("CharacteristicValue")));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -80,7 +80,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       // save all characteristics to DB
       //
 
-      for (Map.Entry<String, Characteristic> entry : incomingCall.getCharacteristics().entrySet()) {
+      for (Map.Entry<String, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
         insertToIncomingCallsCharacteristicsTable(incomingCallId, entry.getKey(), entry.getValue().getValue());
       }
     }
@@ -94,7 +94,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
           "WHERE CharacteristicsNames.Name = ? AND CharacteristicsValues.Value = ?";
       PreparedStatement statement = con.prepareStatement(sqlSelect);
 
-      for (Map.Entry<String, Characteristic> entry : incomingCall.getCharacteristics().entrySet()) {
+      for (Map.Entry<String, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
         statement.setString(1, entry.getKey());
         statement.setString(2, entry.getValue().getValue());
         ResultSet rs = statement.executeQuery();
@@ -144,6 +144,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     }
   }
 
+  // todo: may be move to JDBCCharacteristicDAO
   private int getCharacteristicsValueId(String characteristicsName, String characteristicsValue) {
     int characteristicsValueId = 0;
 

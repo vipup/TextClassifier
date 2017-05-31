@@ -1,6 +1,6 @@
 package com.irvil.nntextclassifier.recognizer;
 
-import com.irvil.nntextclassifier.model.Characteristic;
+import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
@@ -24,16 +24,16 @@ public class Recognizer {
   private final int inputLayerSize;
   private final int outputLayerSize;
   private BasicNetwork network;
-  private final List<Characteristic> characteristic;
+  private final List<CharacteristicValue> characteristicValue;
   private final List<VocabularyWord> vocabulary;
   private final NGramStrategy nGram;
 
-  public Recognizer(String characteristicName, List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+  public Recognizer(String characteristicName, List<CharacteristicValue> characteristicValue, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
     this.characteristicName = characteristicName;
-    this.characteristic = characteristic;
+    this.characteristicValue = characteristicValue;
     this.vocabulary = vocabulary;
     this.inputLayerSize = vocabulary.size();
-    this.outputLayerSize = characteristic.size();
+    this.outputLayerSize = characteristicValue.size();
     this.nGram = nGram;
 
     // create neural network
@@ -52,14 +52,14 @@ public class Recognizer {
     this.network.reset();
   }
 
-  public Recognizer(File trainedNetwork, String characteristicName, List<Characteristic> characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
-    this(characteristicName, characteristic, vocabulary, nGram);
+  public Recognizer(File trainedNetwork, String characteristicName, List<CharacteristicValue> characteristicValue, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+    this(characteristicName, characteristicValue, vocabulary, nGram);
 
     // load neural network from file
     this.network = (BasicNetwork) loadObject(trainedNetwork);
   }
 
-  public Characteristic recognize(IncomingCall incomingCall) {
+  public CharacteristicValue recognize(IncomingCall incomingCall) {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
@@ -69,13 +69,13 @@ public class Recognizer {
     return convertVectorToCharacteristic(output);
   }
 
-  private Characteristic convertVectorToCharacteristic(double[] vector) {
+  private CharacteristicValue convertVectorToCharacteristic(double[] vector) {
     int idOfMaxValue = getIdOfMaxValue(vector);
 
-    // find Characteristic with found Id
+    // find CharacteristicValue with found Id
     //
 
-    for (Characteristic c : characteristic) {
+    for (CharacteristicValue c : characteristicValue) {
       if (c.getId() == idOfMaxValue) {
         return c;
       }
@@ -105,7 +105,7 @@ public class Recognizer {
   public void train(List<IncomingCall> incomingCalls) {
     // prepare input and ideal vectors
     // input <- IncomingCall text vector
-    // ideal <- characteristic vector
+    // ideal <- characteristicValue vector
     //
 
     double[][] input = getInput(incomingCalls);
@@ -119,7 +119,7 @@ public class Recognizer {
 
     do {
       train.iteration();
-      // todo: add observer
+      // todo: addPossibleValue observer
       //System.out.println("Error: " + train.getError());
     } while (train.getError() > 0.01);
 

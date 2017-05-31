@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 
 class JDBCDatabaseUtilities {
-  static void cleanTable(JDBCConnector jdbcConnector, String tableName) throws Exception {
+  static void clearTable(JDBCConnector jdbcConnector, String tableName) throws Exception {
     try (Connection con = jdbcConnector.getConnection()) {
       Statement statement = con.createStatement();
       statement.executeUpdate("DELETE FROM " + tableName);

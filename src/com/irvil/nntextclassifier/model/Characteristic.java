@@ -1,24 +1,43 @@
 package com.irvil.nntextclassifier.model;
 
-public class Characteristic {
-  private final int id;
-  private final String value;
+import java.util.List;
 
-  public Characteristic(int id, String value) {
+public class Characteristic {
+  int id;
+  private String name;
+  private List<CharacteristicValue> possibleValues;
+
+  public Characteristic(int id, String name, List<CharacteristicValue> possibleValues) {
     this.id = id;
-    this.value = value;
+    this.name = name;
+    this.possibleValues = possibleValues;
+  }
+
+  public Characteristic(int id, String name) {
+    this(id, name, null);
+  }
+
+  public Characteristic(String name, List<CharacteristicValue> possibleValues) {
+    this(0, name, possibleValues);
   }
 
   public int getId() {
     return id;
   }
 
-  public String getValue() {
-    return value;
+  public void setId(int id) {
+    this.id = id;
   }
 
-  @Override
-  public String toString() {
-    return value;
+  public String getName() {
+    return name;
+  }
+
+  public List<CharacteristicValue> getPossibleValues() {
+    return possibleValues;
+  }
+
+  public void setPossibleValues(List<CharacteristicValue> possibleValues) {
+    this.possibleValues = possibleValues;
   }
 }

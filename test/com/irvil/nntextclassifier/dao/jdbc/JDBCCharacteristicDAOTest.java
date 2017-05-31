@@ -1,83 +1,175 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.Config;
+import com.irvil.nntextclassifier.dao.AlreadyExistsException;
 import com.irvil.nntextclassifier.dao.CharacteristicDAO;
+import com.irvil.nntextclassifier.dao.EmptyRecordException;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 import com.irvil.nntextclassifier.model.Characteristic;
+import com.irvil.nntextclassifier.model.CharacteristicValue;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class JDBCCharacteristicDAOTest {
-  private CharacteristicDAO moduleDAO;
-  private CharacteristicDAO handlerDAO;
-  private CharacteristicDAO categoryDAO;
+  private Config config = Config.getInstance();
+  private JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
+  private CharacteristicDAO characteristicDAO = new JDBCCharacteristicDAO(jdbcConnector);
 
   @Before
   public void initializeTable() throws Exception {
-    Config config = Config.getInstance();
-    JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
-    moduleDAO = new JDBCCharacteristicDAO("Module", jdbcConnector);
-    handlerDAO = new JDBCCharacteristicDAO("Handler", jdbcConnector);
-    categoryDAO = new JDBCCharacteristicDAO("Category", jdbcConnector);
-
     // clear tables
     //
 
-    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "CharacteristicsNames");
-    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "CharacteristicsValues");
+    JDBCDatabaseUtilities.clearTable(jdbcConnector, "CharacteristicsNames");
+    JDBCDatabaseUtilities.clearTable(jdbcConnector, "CharacteristicsValues");
 
     // fill Module characteristic
     //
 
-    moduleDAO.add(new Characteristic(0, "PM")); // ok
-    moduleDAO.add(new Characteristic(0, "MM")); // ok
-    moduleDAO.add(new Characteristic(0, "MM")); // error: already exists
-    moduleDAO.add(new Characteristic(0, "")); // error: empty
-    moduleDAO.add(null); // error: null
+    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    possibleValues.add(new CharacteristicValue("PM"));
+    possibleValues.add(new CharacteristicValue("MM"));
+    characteristicDAO.addCharacteristic(new Characteristic("Module", possibleValues));
 
     // fill Handler characteristic
     //
 
-    handlerDAO.add(new Characteristic(0, "User 1")); // ok
-    handlerDAO.add(new Characteristic(0, "User 2")); // ok
-    handlerDAO.add(new Characteristic(0, "User 3")); // ok
+    possibleValues = new ArrayList<>();
+    possibleValues.add(new CharacteristicValue("User 1"));
+    possibleValues.add(new CharacteristicValue("User 2"));
+    possibleValues.add(new CharacteristicValue("User 3"));
+    characteristicDAO.addCharacteristic(new Characteristic("Handler", possibleValues));
   }
 
   @Test
-  public void getAllModules() throws Exception {
-    List<Characteristic> modules = moduleDAO.getAll();
+  public void getAllCharacteristics() throws Exception {
+    List<Characteristic> characteristics = characteristicDAO.getAllCharacteristics();
 
-    assertEquals(modules.size(), 2);
+    // check characteristics
+    //
 
-    assertEquals(modules.get(0).getId(), 1);
-    assertEquals(modules.get(1).getId(), 2);
-    assertEquals(modules.get(0).getValue(), "PM");
-    assertEquals(modules.get(1).getValue(), "MM");
+    assertEquals(characteristics.size(), 2);
+
+    assertEquals(characteristics.get(0).getId(), 1);
+    assertEquals(characteristics.get(0).getName(), "Module");
+
+    assertEquals(characteristics.get(1).getId(), 2);
+    assertEquals(characteristics.get(1).getName(), "Handler");
+
+    // check Module possible values
+    //
+
+    List<CharacteristicValue> modulePossibleValues = characteristics.get(0).getPossibleValues();
+
+    assertEquals(modulePossibleValues.size(), 2);
+
+    assertEquals(modulePossibleValues.get(0).getId(), 1);
+    assertEquals(modulePossibleValues.get(0).getValue(), "PM");
+
+    assertEquals(modulePossibleValues.get(1).getId(), 2);
+    assertEquals(modulePossibleValues.get(1).getValue(), "MM");
+
+    // check Handler possible values
+    //
+
+    List<CharacteristicValue> handlerPossibleValues = characteristics.get(1).getPossibleValues();
+
+    assertEquals(handlerPossibleValues.size(), 3);
+
+    assertEquals(handlerPossibleValues.get(0).getId(), 1);
+    assertEquals(handlerPossibleValues.get(0).getValue(), "User 1");
+
+    assertEquals(handlerPossibleValues.get(1).getId(), 2);
+    assertEquals(handlerPossibleValues.get(1).getValue(), "User 2");
+
+    assertEquals(handlerPossibleValues.get(2).getId(), 3);
+    assertEquals(handlerPossibleValues.get(2).getValue(), "User 3");
+  }
+
+  @Test(expected = EmptyRecordException.class)
+  public void addCharacteristicNull() throws Exception {
+    characteristicDAO.addCharacteristic(null);
+  }
+
+  @Test(expected = EmptyRecordException.class)
+  public void addCharacteristicEmpty() throws Exception {
+    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    possibleValues.add(new CharacteristicValue("Value 1"));
+    characteristicDAO.addCharacteristic(new Characteristic("", possibleValues));
+  }
+
+  @Test(expected = EmptyRecordException.class)
+  public void addCharacteristicNullPossibleValues() throws Exception {
+    characteristicDAO.addCharacteristic(new Characteristic("Test", null));
+  }
+
+  @Test(expected = EmptyRecordException.class)
+  public void addCharacteristicEmptyPossibleValues() throws Exception {
+    characteristicDAO.addCharacteristic(new Characteristic("Test", new ArrayList<>()));
+  }
+
+  @Test(expected = AlreadyExistsException.class)
+  public void addCharacteristicExisted() throws Exception {
+    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    possibleValues.add(new CharacteristicValue("BC"));
+    characteristicDAO.addCharacteristic(new Characteristic("Module", possibleValues));
   }
 
   @Test
-  public void getAllHandlers() throws Exception {
-    List<Characteristic> handlers = handlerDAO.getAll();
+  public void addCharacteristic() throws Exception {
+    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    possibleValues.add(new CharacteristicValue("Value 1"));
+    possibleValues.add(new CharacteristicValue(""));
+    possibleValues.add(null);
+    possibleValues.add(new CharacteristicValue("Value 2"));
+    possibleValues.add(new CharacteristicValue("Value 2"));
+    Characteristic characteristic = new Characteristic("Test", possibleValues);
 
-    assertEquals(handlers.size(), 3);
+    characteristic = characteristicDAO.addCharacteristic(characteristic);
 
-    assertEquals(handlers.get(0).getId(), 1);
-    assertEquals(handlers.get(1).getId(), 2);
-    assertEquals(handlers.get(2).getId(), 3);
-    assertEquals(handlers.get(0).getValue(), "User 1");
-    assertEquals(handlers.get(1).getValue(), "User 2");
-    assertEquals(handlers.get(2).getValue(), "User 3");
-  }
+    // check returned object
+    //
 
-  @Test
-  public void getAllCategories() throws Exception {
-    List<Characteristic> categories = categoryDAO.getAll();
+    assertEquals(characteristic.getId(), 3);
+    assertEquals(characteristic.getName(), "Test");
+    assertEquals(characteristic.getPossibleValues().size(), 5);
+    assertEquals(characteristic.getPossibleValues().get(0).getId(), 1);
+    assertEquals(characteristic.getPossibleValues().get(0).getValue(), "Value 1");
+    assertEquals(characteristic.getPossibleValues().get(1).getId(), 0);
+    assertEquals(characteristic.getPossibleValues().get(1).getValue(), "");
+    assertEquals(characteristic.getPossibleValues().get(2), null);
+    assertEquals(characteristic.getPossibleValues().get(3).getId(), 2);
+    assertEquals(characteristic.getPossibleValues().get(3).getValue(), "Value 2");
+    assertEquals(characteristic.getPossibleValues().get(4).getId(), 2);
+    assertEquals(characteristic.getPossibleValues().get(4).getValue(), "Value 2");
 
-    assertEquals(categories.size(), 0);
+    // check record from DB
+    //
+
+    List<Characteristic> characteristicsFromDb = characteristicDAO.getAllCharacteristics();
+
+    assertEquals(characteristicsFromDb.size(), 3);
+
+    assertEquals(characteristicsFromDb.get(2).getId(), 3);
+    assertEquals(characteristicsFromDb.get(2).getName(), "Test");
+
+    // check Test possible values
+    //
+
+    List<CharacteristicValue> testPossibleValues = characteristicsFromDb.get(2).getPossibleValues();
+
+    assertEquals(testPossibleValues.size(), 2);
+
+    assertEquals(testPossibleValues.get(0).getId(), 1);
+    assertEquals(testPossibleValues.get(0).getValue(), "Value 1");
+
+    assertEquals(testPossibleValues.get(1).getId(), 2);
+    assertEquals(testPossibleValues.get(1).getValue(), "Value 2");
   }
 }

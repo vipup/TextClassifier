@@ -5,7 +5,7 @@ import com.irvil.nntextclassifier.dao.CharacteristicDAO;
 import com.irvil.nntextclassifier.dao.IncomingCallDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
-import com.irvil.nntextclassifier.model.Characteristic;
+import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,54 +24,54 @@ public class JDBCIncomingCallDAOTest {
     Config config = Config.getInstance();
     JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
     incomingCallDAO = new JDBCIncomingCallDAO(jdbcConnector);
-    CharacteristicDAO moduleDAO = new JDBCCharacteristicDAO("Module", jdbcConnector);
-    CharacteristicDAO handlerDAO = new JDBCCharacteristicDAO("Handler", jdbcConnector);
+    CharacteristicDAO moduleDAO = new JDBCCharacteristicDAO(jdbcConnector);
+    CharacteristicDAO handlerDAO = new JDBCCharacteristicDAO(jdbcConnector);
 
     // clear tables
 
-    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "CharacteristicsNames");
-    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "CharacteristicsValues");
-    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "IncomingCalls");
-    JDBCDatabaseUtilities.cleanTable(jdbcConnector, "IncomingCallsCharacteristics");
+    JDBCDatabaseUtilities.clearTable(jdbcConnector, "CharacteristicsNames");
+    JDBCDatabaseUtilities.clearTable(jdbcConnector, "CharacteristicsValues");
+    JDBCDatabaseUtilities.clearTable(jdbcConnector, "IncomingCalls");
+    JDBCDatabaseUtilities.clearTable(jdbcConnector, "IncomingCallsCharacteristics");
 
     // fill Module characteristics
     //
 
-    moduleDAO.add(new Characteristic(0, "PM")); // ok
-    moduleDAO.add(new Characteristic(0, "MM")); // ok
-
-    // fill Handler characteristics
-    //
-
-    handlerDAO.add(new Characteristic(0, "User 1")); // ok
-    handlerDAO.add(new Characteristic(0, "User 2")); // ok
+//    moduleDAO.addPossibleValue(, new CharacteristicValue(0, "PM")); // ok
+//    moduleDAO.addPossibleValue(, new CharacteristicValue(0, "MM")); // ok
+//
+//    // fill Handler characteristics
+//    //
+//
+//    handlerDAO.addPossibleValue(, new CharacteristicValue(0, "User 1")); // ok
+//    handlerDAO.addPossibleValue(, new CharacteristicValue(0, "User 2")); // ok
 
     // fill incoming calls
 
-    Map<String, Characteristic> characteristics = new HashMap<>();
-    characteristics.put("Module", new Characteristic(0, "PM"));
-    characteristics.put("Handler", new Characteristic(0, "User 1"));
+    Map<String, CharacteristicValue> characteristics = new HashMap<>();
+    characteristics.put("Module", new CharacteristicValue(0, "PM"));
+    characteristics.put("Handler", new CharacteristicValue(0, "User 1"));
     incomingCallDAO.add(new IncomingCall("text text", characteristics)); // ok
 
     characteristics = new HashMap<>();
-    characteristics.put("Module", new Characteristic(0, "MM"));
-    characteristics.put("Handler", new Characteristic(0, "User 2"));
+    characteristics.put("Module", new CharacteristicValue(0, "MM"));
+    characteristics.put("Handler", new CharacteristicValue(0, "User 2"));
     incomingCallDAO.add(new IncomingCall("text1 text1", characteristics)); // ok
 
     characteristics = new HashMap<>();
-    characteristics.put("Module", new Characteristic(0, "MM"));
-    characteristics.put("Handler", new Characteristic(0, "User 2"));
+    characteristics.put("Module", new CharacteristicValue(0, "MM"));
+    characteristics.put("Handler", new CharacteristicValue(0, "User 2"));
     incomingCallDAO.add(new IncomingCall("text1 text1", characteristics)); //ok
 
     characteristics = new HashMap<>();
-    characteristics.put("Module", new Characteristic(0, "BC"));
-    characteristics.put("Handler", new Characteristic(0, "User 3"));
+    characteristics.put("Module", new CharacteristicValue(0, "BC"));
+    characteristics.put("Handler", new CharacteristicValue(0, "User 3"));
     incomingCallDAO.add(new IncomingCall("text2 text2", characteristics)); // error: "User 3" not exists
 
     characteristics = new HashMap<>();
-    characteristics.put("Module", new Characteristic(0, "PM"));
-    characteristics.put("Handler", new Characteristic(0, "User 1"));
-    characteristics.put("Category", new Characteristic(0, "User 1"));
+    characteristics.put("Module", new CharacteristicValue(0, "PM"));
+    characteristics.put("Handler", new CharacteristicValue(0, "User 1"));
+    characteristics.put("Category", new CharacteristicValue(0, "User 1"));
     incomingCallDAO.add(new IncomingCall("text text", characteristics)); // error: "Category" not exists
 
     characteristics = new HashMap<>();

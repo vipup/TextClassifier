@@ -113,8 +113,8 @@ public class MainWindow extends Application {
     try {
       List<VocabularyWord> vacabulary = daoFactory.vocabularyWordDAO().getAll();
 
-      moduleRecognizer = new Recognizer(new File(path + "/ModuleRecognizerTrainedNetwork"), "Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram());
-      handlerRecognizer = new Recognizer(new File(path + "/HandlerRecognizerTrainedNetwork"), "Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram());
+      //moduleRecognizer = new Recognizer(new File(path + "/ModuleRecognizerTrainedNetwork"), "Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram());
+      //handlerRecognizer = new Recognizer(new File(path + "/HandlerRecognizerTrainedNetwork"), "Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram());
     } catch (RuntimeException e) {
       return false;
     }
