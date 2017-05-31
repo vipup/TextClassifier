@@ -7,5 +7,5 @@ import java.util.List;
 public interface VocabularyWordDAO {
   List<VocabularyWord> getAll();
 
-  void add(VocabularyWord vocabularyWord);
+  void add(VocabularyWord vocabularyWord) throws EmptyRecordException, AlreadyExistsException;
 }

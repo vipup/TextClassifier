@@ -9,6 +9,10 @@ public class VocabularyWord {
     this.value = value;
   }
 
+  public VocabularyWord(String value) {
+    this(0, value);
+  }
+
   public int getId() {
     return id;
   }

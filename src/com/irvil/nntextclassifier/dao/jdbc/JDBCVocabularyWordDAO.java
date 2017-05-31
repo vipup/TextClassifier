@@ -1,5 +1,7 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
+import com.irvil.nntextclassifier.dao.AlreadyExistsException;
+import com.irvil.nntextclassifier.dao.EmptyRecordException;
 import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.model.VocabularyWord;
@@ -41,25 +43,29 @@ public class JDBCVocabularyWordDAO implements VocabularyWordDAO {
   }
 
   @Override
-  public void add(VocabularyWord vocabularyWord) {
-    if (vocabularyWord != null &&
-        !vocabularyWord.getValue().equals("") &&
-        !isVocabularyWordExistsInDB(vocabularyWord)) {
-      try (Connection con = connector.getConnection()) {
-        String sqlInsert = "INSERT INTO Vocabulary (Value) VALUES (?)";
-        PreparedStatement statement = con.prepareStatement(sqlInsert);
-        statement.setString(1, vocabularyWord.getValue());
-        statement.executeUpdate();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+  public void add(VocabularyWord vocabularyWord) throws EmptyRecordException, AlreadyExistsException {
+    if (vocabularyWord == null ||
+        vocabularyWord.getValue().equals("")) {
+      throw new EmptyRecordException("Vocabulary word is null or empty");
+    }
+
+    if (isVocabularyWordExistsInDB(vocabularyWord)) {
+      throw new AlreadyExistsException("Vocabulary word already exists");
+    }
+
+    try (Connection con = connector.getConnection()) {
+      String sqlInsert = "INSERT INTO Vocabulary (Value) VALUES (?)";
+      PreparedStatement statement = con.prepareStatement(sqlInsert);
+      statement.setString(1, vocabularyWord.getValue());
+      statement.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
     }
   }
 
   private boolean isVocabularyWordExistsInDB(VocabularyWord vocabularyWord) {
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT Id FROM Vocabulary WHERE Value = ?";
-
       PreparedStatement statement = con.prepareStatement(sqlSelect);
       statement.setString(1, vocabularyWord.getValue());
       ResultSet rs = statement.executeQuery();
