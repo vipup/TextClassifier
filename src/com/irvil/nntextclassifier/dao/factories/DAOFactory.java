@@ -8,9 +8,7 @@ import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
 public interface DAOFactory {
   IncomingCallDAO incomingCallDAO();
 
-  CharacteristicDAO moduleDAO();
-
-  CharacteristicDAO handlerDAO();
+  CharacteristicDAO characteristicDAO();
 
   VocabularyWordDAO vocabularyWordDAO();
 

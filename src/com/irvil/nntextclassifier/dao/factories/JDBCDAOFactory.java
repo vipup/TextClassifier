@@ -27,12 +27,7 @@ public class JDBCDAOFactory implements DAOFactory {
   }
 
   @Override
-  public CharacteristicDAO moduleDAO() {
-    return new JDBCCharacteristicDAO(connector);
-  }
-
-  @Override
-  public CharacteristicDAO handlerDAO() {
+  public CharacteristicDAO characteristicDAO() {
     return new JDBCCharacteristicDAO(connector);
   }
 
