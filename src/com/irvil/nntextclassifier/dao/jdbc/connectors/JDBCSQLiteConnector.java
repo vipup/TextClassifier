@@ -17,8 +17,7 @@ public class JDBCSQLiteConnector implements JDBCConnector {
     try {
       Class.forName("org.sqlite.JDBC");
       dbConnection = DriverManager.getConnection("jdbc:sqlite:" + dbName);
-    } catch (ClassNotFoundException | SQLException e) {
-      e.printStackTrace();
+    } catch (ClassNotFoundException | SQLException ignored) {
     }
 
     return dbConnection;
