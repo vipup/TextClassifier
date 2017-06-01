@@ -12,5 +12,6 @@ public class JDBCIncomingCallDAOTest extends IncomingCallDAOTest {
     storageCreator = new JDBCDBCreator(jdbcConnector);
     characteristicDAO = new JDBCCharacteristicDAO(jdbcConnector);
     incomingCallDAO = new JDBCIncomingCallDAO(jdbcConnector);
+    vocabularyWordDAO = new JDBCVocabularyWordDAO(jdbcConnector);
   }
 }

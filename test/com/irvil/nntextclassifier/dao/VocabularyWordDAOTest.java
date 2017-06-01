@@ -10,16 +10,14 @@ import static org.junit.Assert.assertEquals;
 
 public abstract class VocabularyWordDAOTest {
   protected StorageCreator storageCreator;
+  protected CharacteristicDAO characteristicDAO;
+  protected IncomingCallDAO incomingCallDAO;
   protected VocabularyWordDAO vocabularyWordDAO;
 
   @Before
-  public void fillStorage() throws Exception {
+  public void setUp() throws Exception {
     initializeDAO();
-
-    storageCreator.clearStorage();
-
-    vocabularyWordDAO.add(new VocabularyWord("Test 1"));
-    vocabularyWordDAO.add(new VocabularyWord("Test 2"));
+    Helper.fillStorageWithTestData(storageCreator, characteristicDAO, incomingCallDAO, vocabularyWordDAO);
   }
 
   public abstract void initializeDAO();

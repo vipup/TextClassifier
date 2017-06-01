@@ -6,7 +6,6 @@ import com.irvil.nntextclassifier.model.IncomingCall;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,46 +16,12 @@ public abstract class IncomingCallDAOTest {
   protected StorageCreator storageCreator;
   protected CharacteristicDAO characteristicDAO;
   protected IncomingCallDAO incomingCallDAO;
+  protected VocabularyWordDAO vocabularyWordDAO;
 
   @Before
-  public void fillStorage() throws Exception {
+  public void setUp() throws Exception {
     initializeDAO();
-
-    storageCreator.clearStorage();
-
-    // fill Module characteristic
-    //
-
-    List<CharacteristicValue> possibleValues = new ArrayList<>();
-    possibleValues.add(new CharacteristicValue("PM"));
-    possibleValues.add(new CharacteristicValue("MM"));
-    characteristicDAO.addCharacteristic(new Characteristic("Module", possibleValues));
-
-    // fill Handler characteristic
-    //
-
-    possibleValues = new ArrayList<>();
-    possibleValues.add(new CharacteristicValue("User 1"));
-    possibleValues.add(new CharacteristicValue("User 2"));
-    characteristicDAO.addCharacteristic(new Characteristic("Handler", possibleValues));
-
-    // fill incoming calls
-    //
-
-    Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
-    characteristics.put(new Characteristic("Module"), new CharacteristicValue("PM"));
-    characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 1"));
-    incomingCallDAO.add(new IncomingCall("text text", characteristics));
-
-    characteristics = new HashMap<>();
-    characteristics.put(new Characteristic("Module"), new CharacteristicValue("MM"));
-    characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 2"));
-    incomingCallDAO.add(new IncomingCall("text1 text1", characteristics));
-
-    characteristics = new HashMap<>();
-    characteristics.put(new Characteristic("Module"), new CharacteristicValue("MM"));
-    characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 2"));
-    incomingCallDAO.add(new IncomingCall("text1 text1", characteristics));
+    Helper.fillStorageWithTestData(storageCreator, characteristicDAO, incomingCallDAO, vocabularyWordDAO);
   }
 
   public abstract void initializeDAO();
@@ -131,7 +96,7 @@ public abstract class IncomingCallDAOTest {
   public void addCharacteristicValueNotExists() throws Exception {
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
     characteristics.put(new Characteristic("Module"), new CharacteristicValue("PM"));
-    characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 3"));
+    characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 4"));
     incomingCallDAO.add(new IncomingCall("text text", characteristics));
   }
 

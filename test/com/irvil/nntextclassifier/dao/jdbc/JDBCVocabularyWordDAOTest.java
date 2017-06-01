@@ -10,6 +10,8 @@ public class JDBCVocabularyWordDAOTest extends VocabularyWordDAOTest {
   public void initializeDAO() {
     JDBCConnector jdbcConnector = new JDBCSQLiteConnector(Config.getInstance().getDbPath() + "/test.db");
     storageCreator = new JDBCDBCreator(jdbcConnector);
+    characteristicDAO = new JDBCCharacteristicDAO(jdbcConnector);
+    incomingCallDAO = new JDBCIncomingCallDAO(jdbcConnector);
     vocabularyWordDAO = new JDBCVocabularyWordDAO(jdbcConnector);
   }
 }

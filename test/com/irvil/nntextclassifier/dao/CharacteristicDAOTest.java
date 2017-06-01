@@ -13,29 +13,13 @@ import static org.junit.Assert.assertEquals;
 public abstract class CharacteristicDAOTest {
   protected StorageCreator storageCreator;
   protected CharacteristicDAO characteristicDAO;
+  protected IncomingCallDAO incomingCallDAO;
+  protected VocabularyWordDAO vocabularyWordDAO;
 
   @Before
-  public void fillStorage() throws Exception {
+  public void setUp() throws Exception {
     initializeDAO();
-
-    storageCreator.clearStorage();
-
-    // fill Module characteristic
-    //
-
-    List<CharacteristicValue> possibleValues = new ArrayList<>();
-    possibleValues.add(new CharacteristicValue("PM"));
-    possibleValues.add(new CharacteristicValue("MM"));
-    characteristicDAO.addCharacteristic(new Characteristic("Module", possibleValues));
-
-    // fill Handler characteristic
-    //
-
-    possibleValues = new ArrayList<>();
-    possibleValues.add(new CharacteristicValue("User 1"));
-    possibleValues.add(new CharacteristicValue("User 2"));
-    possibleValues.add(new CharacteristicValue("User 3"));
-    characteristicDAO.addCharacteristic(new Characteristic("Handler", possibleValues));
+    Helper.fillStorageWithTestData(storageCreator, characteristicDAO, incomingCallDAO, vocabularyWordDAO);
   }
 
   public abstract void initializeDAO();
