@@ -4,6 +4,7 @@ import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.AlreadyExistsException;
 import com.irvil.nntextclassifier.dao.CharacteristicDAO;
 import com.irvil.nntextclassifier.dao.EmptyRecordException;
+import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 import com.irvil.nntextclassifier.model.Characteristic;
@@ -18,17 +19,13 @@ import static org.junit.Assert.assertEquals;
 
 // todo: make DAOs tests general for all DAO implementations
 public class JDBCCharacteristicDAOTest {
-  private Config config = Config.getInstance();
-  private JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
+  private JDBCConnector jdbcConnector = new JDBCSQLiteConnector(Config.getInstance().getDbPath() + "/test.db");
+  private StorageCreator storageCreator = new JDBCDBCreator(jdbcConnector);
   private CharacteristicDAO characteristicDAO = new JDBCCharacteristicDAO(jdbcConnector);
 
   @Before
   public void initializeTable() throws Exception {
-    // clear tables
-    //
-
-    JDBCDatabaseUtilities.clearTable(jdbcConnector, "CharacteristicsNames");
-    JDBCDatabaseUtilities.clearTable(jdbcConnector, "CharacteristicsValues");
+    storageCreator.clearStorage();
 
     // fill Module characteristic
     //

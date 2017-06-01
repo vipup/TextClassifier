@@ -3,6 +3,7 @@ package com.irvil.nntextclassifier.dao.jdbc;
 import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.AlreadyExistsException;
 import com.irvil.nntextclassifier.dao.EmptyRecordException;
+import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
@@ -15,13 +16,13 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class JDBCVocabularyWordDAOTest {
-  private Config config = Config.getInstance();
-  private JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
+  private JDBCConnector jdbcConnector = new JDBCSQLiteConnector(Config.getInstance().getDbPath() + "/test.db");
+  private StorageCreator storageCreator = new JDBCDBCreator(jdbcConnector);
   private VocabularyWordDAO vocabularyWordDAO = new JDBCVocabularyWordDAO(jdbcConnector);
 
   @Before
   public void initializeTable() throws Exception {
-    JDBCDatabaseUtilities.clearTable(jdbcConnector, "Vocabulary");
+    storageCreator.clearStorage();
 
     vocabularyWordDAO.add(new VocabularyWord("Test 1"));
     vocabularyWordDAO.add(new VocabularyWord("Test 2"));
