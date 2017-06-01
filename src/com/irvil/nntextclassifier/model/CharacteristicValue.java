@@ -24,4 +24,14 @@ public class CharacteristicValue {
   public String getValue() {
     return value;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return ((o instanceof CharacteristicValue) && (this.value.equals(((CharacteristicValue) o).getValue())));
+  }
+
+  @Override
+  public int hashCode() {
+    return this.value.hashCode();
+  }
 }
