@@ -35,8 +35,7 @@ public class JDBCVocabularyWordDAO implements VocabularyWordDAO {
       while (rs.next()) {
         vocabularyWords.add(new VocabularyWord(rs.getInt("Id"), rs.getString("Value")));
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (SQLException ignored) {
     }
 
     return vocabularyWords;
@@ -49,34 +48,27 @@ public class JDBCVocabularyWordDAO implements VocabularyWordDAO {
       throw new EmptyRecordException("Vocabulary word is null or empty");
     }
 
-    if (isVocabularyWordExistsInDB(vocabularyWord)) {
-      throw new AlreadyExistsException("Vocabulary word already exists");
-    }
-
     try (Connection con = connector.getConnection()) {
+      if (isVocabularyWordExistsInDB(vocabularyWord)) {
+        throw new AlreadyExistsException("Vocabulary word already exists");
+      }
+
       String sqlInsert = "INSERT INTO Vocabulary (Value) VALUES (?)";
       PreparedStatement statement = con.prepareStatement(sqlInsert);
       statement.setString(1, vocabularyWord.getValue());
       statement.executeUpdate();
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (SQLException ignored) {
     }
   }
 
-  private boolean isVocabularyWordExistsInDB(VocabularyWord vocabularyWord) {
+  private boolean isVocabularyWordExistsInDB(VocabularyWord vocabularyWord) throws SQLException {
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT Id FROM Vocabulary WHERE Value = ?";
       PreparedStatement statement = con.prepareStatement(sqlSelect);
       statement.setString(1, vocabularyWord.getValue());
       ResultSet rs = statement.executeQuery();
 
-      if (rs.next()) {
-        return true;
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
+      return rs.next();
     }
-
-    return false;
   }
 }

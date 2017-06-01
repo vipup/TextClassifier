@@ -66,8 +66,7 @@ public class JDBCDBCreator implements StorageCreator {
       for (String sqlQuery : sqlQueries) {
         statement.execute(sqlQuery);
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (SQLException ignored) {
     }
   }
 }

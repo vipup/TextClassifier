@@ -28,6 +28,7 @@ public class Recognizer {
   private final List<VocabularyWord> vocabulary;
   private final NGramStrategy nGram;
 
+  // todo: change parameters to Characteristic
   public Recognizer(String characteristicName, List<CharacteristicValue> characteristicValue, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
     this.characteristicName = characteristicName;
     this.characteristicValue = characteristicValue;

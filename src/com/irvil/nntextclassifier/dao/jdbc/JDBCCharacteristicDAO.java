@@ -39,8 +39,7 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
 
         characteristics.add(characteristic);
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (SQLException ignored) {
     }
 
     return characteristics;
@@ -55,11 +54,11 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
       throw new EmptyRecordException("Characteristic and/or Possible values are null or empty");
     }
 
-    if (isCharacteristicExistsInDB(characteristic)) {
-      throw new AlreadyExistsException("Characteristic already exists");
-    }
-
     try (Connection con = connector.getConnection()) {
+      if (isCharacteristicExistsInDB(characteristic)) {
+        throw new AlreadyExistsException("Characteristic already exists");
+      }
+
       String sqlInsert = "INSERT INTO CharacteristicsNames (Name) VALUES (?)";
       PreparedStatement statement = con.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
       statement.setString(1, characteristic.getName());
@@ -79,14 +78,13 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
           insertPossibleValue(characteristic, possibleValue);
         }
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (SQLException ignored) {
     }
 
     return characteristic;
   }
 
-  private List<CharacteristicValue> getAllPossibleValues(Characteristic characteristic) {
+  private List<CharacteristicValue> getAllPossibleValues(Characteristic characteristic) throws SQLException {
     List<CharacteristicValue> possibleValues = new ArrayList<>();
 
     try (Connection con = connector.getConnection()) {
@@ -98,31 +96,23 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
       while (rs.next()) {
         possibleValues.add(new CharacteristicValue(rs.getInt("Id"), rs.getString("Value")));
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
 
     return possibleValues;
   }
 
-  private boolean isCharacteristicExistsInDB(Characteristic characteristic) {
+  private boolean isCharacteristicExistsInDB(Characteristic characteristic) throws SQLException {
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT Id FROM CharacteristicsNames WHERE Name = ?";
       PreparedStatement statement = con.prepareStatement(sqlSelect);
       statement.setString(1, characteristic.getName());
       ResultSet rs = statement.executeQuery();
 
-      if (rs.next()) {
-        return true;
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
+      return rs.next();
     }
-
-    return false;
   }
 
-  private void insertPossibleValue(Characteristic characteristic, CharacteristicValue characteristicValue) {
+  private void insertPossibleValue(Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
     if (characteristicValue != null &&
         !characteristicValue.getValue().equals("")) {
 
@@ -139,8 +129,6 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
           statement.setInt(2, characteristic.getId());
           statement.setString(3, characteristicValue.getValue());
           statement.executeUpdate();
-        } catch (SQLException e) {
-          e.printStackTrace();
         }
       }
 
@@ -149,7 +137,7 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
     }
   }
 
-  private int searchCharacteristicPossibleValue(Characteristic characteristic, CharacteristicValue characteristicValue) {
+  private int searchCharacteristicPossibleValue(Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT Id FROM CharacteristicsValues WHERE CharacteristicsNameId = ? AND Value = ?";
 
@@ -161,14 +149,12 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
       if (rs.next()) {
         return rs.getInt("Id");
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
 
     return -1; // not found in Db
   }
 
-  private int getLastCharacteristicPossibleValueId(Characteristic characteristic) {
+  private int getLastCharacteristicPossibleValueId(Characteristic characteristic) throws SQLException {
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT MAX(Id) AS MaxID FROM CharacteristicsValues WHERE CharacteristicsNameId = ?";
       PreparedStatement statement = con.prepareStatement(sqlSelect);
@@ -178,8 +164,6 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
       if (rs.next()) {
         return rs.getInt("MaxID"); // last possible values id
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
 
     return 0; // possible values not found in DB

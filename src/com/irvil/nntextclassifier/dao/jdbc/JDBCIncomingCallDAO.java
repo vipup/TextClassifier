@@ -36,8 +36,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       while (rs.next()) {
         incomingCalls.add(new IncomingCall(rs.getString("Text"), getCharacteristicsValues(rs.getInt("Id"))));
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (SQLException ignored) {
     }
 
     return incomingCalls;
@@ -52,11 +51,11 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       throw new EmptyRecordException("Incoming call is null or empty");
     }
 
-    if (!fillCharacteristicNamesAndValuesIDs(incomingCall)) {
-      throw new NotExistsException("Characteristic value not exists");
-    }
-
     try (Connection con = connector.getConnection()) {
+      if (!fillCharacteristicNamesAndValuesIDs(incomingCall)) {
+        throw new NotExistsException("Characteristic value not exists");
+      }
+
       String sqlInsert = "INSERT INTO IncomingCalls (Text) VALUES (?)";
       PreparedStatement statement = con.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
       statement.setString(1, incomingCall.getText());
@@ -72,12 +71,11 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
           insertToIncomingCallsCharacteristicsTable(generatedKeys.getInt(1), entry.getKey(), entry.getValue());
         }
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (SQLException ignored) {
     }
   }
 
-  private Map<Characteristic, CharacteristicValue> getCharacteristicsValues(int incomingCallId) {
+  private Map<Characteristic, CharacteristicValue> getCharacteristicsValues(int incomingCallId) throws SQLException {
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
 
     try (Connection con = connector.getConnection()) {
@@ -101,14 +99,12 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
         CharacteristicValue characteristicValue = new CharacteristicValue(rs.getInt("CharacteristicValueId"), rs.getString("CharacteristicValue"));
         characteristics.put(characteristic, characteristicValue);
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
 
     return characteristics;
   }
 
-  private boolean fillCharacteristicNamesAndValuesIDs(IncomingCall incomingCall) {
+  private boolean fillCharacteristicNamesAndValuesIDs(IncomingCall incomingCall) throws SQLException {
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT CharacteristicsNames.Id AS CharacteristicId, " +
           "CharacteristicsValues.Id AS CharacteristicValueId " +
@@ -129,14 +125,12 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
           return false;
         }
       }
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
 
     return true;
   }
 
-  private void insertToIncomingCallsCharacteristicsTable(int incomingCallId, Characteristic characteristic, CharacteristicValue characteristicValue) {
+  private void insertToIncomingCallsCharacteristicsTable(int incomingCallId, Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
     try (Connection con = connector.getConnection()) {
       String sqlInsert = "INSERT INTO IncomingCallsCharacteristics (IncomingCallId, CharacteristicsNameId, CharacteristicsValueId) VALUES (?, ?, ?)";
       PreparedStatement statement = con.prepareStatement(sqlInsert);
@@ -144,8 +138,6 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       statement.setInt(2, characteristic.getId());
       statement.setInt(3, characteristicValue.getId());
       statement.executeUpdate();
-    } catch (SQLException e) {
-      e.printStackTrace();
     }
   }
 }

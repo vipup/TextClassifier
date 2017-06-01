@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+// todo: make DAOs tests general for all DAO implementations
 public class JDBCCharacteristicDAOTest {
   private Config config = Config.getInstance();
   private JDBCConnector jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/test.db");
