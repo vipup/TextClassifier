@@ -119,6 +119,10 @@ public class Recognizer {
     saveObject(trainedNetwork, network);
   }
 
+  public String getCharacteristicName() {
+    return characteristic.getName();
+  }
+
   public void train(List<IncomingCall> incomingCalls) {
     // prepare input and ideal vectors
     // input <- IncomingCall text vector

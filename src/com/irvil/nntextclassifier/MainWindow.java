@@ -4,6 +4,8 @@ import com.irvil.nntextclassifier.dao.factories.DAOFactory;
 import com.irvil.nntextclassifier.dao.factories.JDBCDAOFactory;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
+import com.irvil.nntextclassifier.model.Characteristic;
+import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
@@ -22,65 +24,108 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainWindow extends Application {
-  private boolean error;
+  private Config config = Config.getInstance();
 
   private FlowPane root;
   private TextArea textAreaIncomingCall;
   private Button btnRecognize;
-  private Label lblModule;
-  private Label lblHandler;
+  private Label lblCharacteristics;
 
-  private Recognizer moduleRecognizer;
-  private Recognizer handlerRecognizer;
+  private List<Recognizer> recognizers = new ArrayList<>();
 
   public static void main(String[] args) {
     launch(args);
   }
 
   @Override
-  public void init() throws Exception {
-    super.init();
+  public void start(Stage primaryStage) {
+    if (!config.isLoaded()) {
+      alertMsg("Config file is not found or it is empty");
+      return;
+    }
 
-    Config config = Config.getInstance();
+    DAOFactory daoFactory = getDaoFactory();
+
+    if (daoFactory == null) {
+      alertMsg("Oops, it seems there is an error in config file");
+      return;
+    }
+
+    // todo: start FirstStart automatically
+    if (!isDBFilled(daoFactory)) {
+      alertMsg("Database is empty. Please start FirstStart class.");
+      return;
+    }
+
+    if (!loadLearnedRecognizers(daoFactory, config.getDbPath())) {
+      alertMsg("Learned recognizers is not found. Please start FirstStart class.");
+      return;
+    }
+
+    buildForm(primaryStage);
+  }
+
+  public DAOFactory getDaoFactory() {
     DAOFactory daoFactory = null;
 
     // create DAO factory depends on config value
     //
 
-    if (config.getDaoType().equals("jdbc")) {
-      // create connector depends on config value
-      //
+    try {
+      if (config.getDaoType().equals("jdbc")) {
+        // create connector depends on config value
+        //
 
-      JDBCConnector jdbcConnector = null;
+        JDBCConnector jdbcConnector = null;
 
-      if (config.getDBMSType().equals("sqlite")) {
-        jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/" + config.getSQLiteDbFileName());
+        if (config.getDBMSType().equals("sqlite")) {
+          jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/" + config.getSQLiteDbFileName());
+        }
+
+        // create factory
+        daoFactory = new JDBCDAOFactory(jdbcConnector);
       }
-
-      // create factory
-      daoFactory = new JDBCDAOFactory(jdbcConnector);
+    } catch (IllegalArgumentException e) {
+      return null;
     }
 
-    //
-
-    error = (!config.isLoaded() ||
-        !isDBFolderExists(config.getDbPath()) ||
-        !isDBFilled() ||
-        !loadLearnedRecognizers(daoFactory, config.getDbPath()));
+    return daoFactory;
   }
 
-  @Override
-  public void start(Stage primaryStage) {
-    if (error) {
-      Alert alert = new Alert(Alert.AlertType.ERROR);
-      alert.setContentText("Database or learned recognizers not found. Please start FirstStart module.");
-      alert.showAndWait();
-    } else {
-      buildForm(primaryStage);
+  private void alertMsg(String text) {
+    Alert alert = new Alert(Alert.AlertType.ERROR);
+    alert.setContentText(text);
+    alert.showAndWait();
+  }
+
+  private boolean isDBFilled(DAOFactory daoFactory) {
+    List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
+    List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
+
+    return (characteristics.size() != 0 && vocabulary.size() != 0);
+  }
+
+  private boolean loadLearnedRecognizers(DAOFactory daoFactory, String path) {
+    try {
+      List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
+      List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
+
+      // load trained recognizers for each Characteristic from DB
+      //
+
+      for (Characteristic characteristic : characteristics) {
+        File trainedRecognizer = new File(path + "/" + characteristic.getName() + "RecognizerNeuralNetwork");
+        recognizers.add(new Recognizer(trainedRecognizer, characteristic, vocabulary, new FilteredUnigram()));
+      }
+    } catch (Exception e) {
+      return false;
     }
+
+    return true;
   }
 
   private void buildForm(Stage primaryStage) {
@@ -90,36 +135,14 @@ public class MainWindow extends Application {
     btnRecognize = new Button("Recognize");
     btnRecognize.setOnAction(new RecognizeBtnPressEvent());
 
-    lblModule = new Label("");
-    lblHandler = new Label("");
+    lblCharacteristics = new Label("");
 
     root = new FlowPane(Orientation.VERTICAL, 10, 10);
     root.setAlignment(Pos.BASELINE_CENTER);
-    root.getChildren().addAll(textAreaIncomingCall, btnRecognize, lblModule, lblHandler);
+    root.getChildren().addAll(textAreaIncomingCall, btnRecognize, lblCharacteristics);
 
     primaryStage.setScene(new Scene(root, 500, 300));
     primaryStage.show();
-  }
-
-  private boolean isDBFolderExists(String path) {
-    return new File(path).exists();
-  }
-
-  private boolean isDBFilled() {
-    return false;
-  }
-
-  private boolean loadLearnedRecognizers(DAOFactory daoFactory, String path) {
-    try {
-      List<VocabularyWord> vacabulary = daoFactory.vocabularyWordDAO().getAll();
-
-      //moduleRecognizer = new Recognizer(new File(path + "/ModuleRecognizerTrainedNetwork"), "Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram());
-      //handlerRecognizer = new Recognizer(new File(path + "/HandlerRecognizerTrainedNetwork"), "Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram());
-    } catch (RuntimeException e) {
-      return false;
-    }
-
-    return true;
   }
 
   // Event handlers
@@ -128,11 +151,23 @@ public class MainWindow extends Application {
   private class RecognizeBtnPressEvent implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
-      IncomingCall ic = new IncomingCall(textAreaIncomingCall.getText());
+      IncomingCall incomingCall = new IncomingCall(textAreaIncomingCall.getText());
+      StringBuilder recognizedCharacteristics = new StringBuilder();
 
-      // recognize characteristics
-      lblModule.setText(moduleRecognizer.recognize(ic).getValue());
-      lblHandler.setText(handlerRecognizer.recognize(ic).getValue());
+      // start Recognizer for each Characteristic from DB
+      //
+
+      try {
+        for (Recognizer recognizer : recognizers) {
+          CharacteristicValue recognizedValue = recognizer.recognize(incomingCall);
+          recognizedCharacteristics.append(recognizer.getCharacteristicName()).append(": ").append(recognizedValue.getValue()).append("\n");
+        }
+      } catch (Exception e) {
+        alertMsg("It seems that learned recognizer does not match Characteristics and Vocabulary. " +
+            "You need to relearn recognizer.");
+      }
+
+      lblCharacteristics.setText(recognizedCharacteristics.toString());
     }
   }
 }
