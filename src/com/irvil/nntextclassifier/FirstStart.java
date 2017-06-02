@@ -45,7 +45,7 @@ public class FirstStart {
     //
 
     FirstStart fs = new FirstStart(daoFactory, new FilteredUnigram());
-    List<IncomingCall> incomingCalls = fs.convertXLSXtoIncomingCalls("./etc/1.xlsx");
+    List<IncomingCall> incomingCalls = fs.readXlsxFile("./etc/1.xlsx");
 
     fs.createDbFolder(config.getDbPath());
     fs.createStorage(daoFactory);
@@ -76,7 +76,7 @@ public class FirstStart {
     storageCreator.clearStorage();
   }
 
-  private List<IncomingCall> convertXLSXtoIncomingCalls(String xlsxFile) throws IOException {
+  private List<IncomingCall> readXlsxFile(String xlsxFile) throws IOException {
     List<Characteristic> characteristics = new ArrayList<>();
     List<IncomingCall> incomingCalls = new ArrayList<>();
 
