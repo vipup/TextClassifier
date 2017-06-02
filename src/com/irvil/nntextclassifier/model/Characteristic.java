@@ -1,10 +1,13 @@
 package com.irvil.nntextclassifier.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Characteristic {
   private int id;
   private String name;
+
+  // todo: replace List to Set
   private List<CharacteristicValue> possibleValues;
 
   private Characteristic(int id, String name, List<CharacteristicValue> possibleValues) {
@@ -14,7 +17,7 @@ public class Characteristic {
   }
 
   public Characteristic(int id, String name) {
-    this(id, name, null);
+    this(id, name, new ArrayList<>());
   }
 
   public Characteristic(String name, List<CharacteristicValue> possibleValues) {
@@ -22,7 +25,7 @@ public class Characteristic {
   }
 
   public Characteristic(String name) {
-    this(0, name, null);
+    this(0, name, new ArrayList<>());
   }
 
   public int getId() {
@@ -43,6 +46,12 @@ public class Characteristic {
 
   public void setPossibleValues(List<CharacteristicValue> possibleValues) {
     this.possibleValues = possibleValues;
+  }
+
+  public void addPossibleValue(CharacteristicValue value) {
+    if (possibleValues.indexOf(value) == -1) {
+      possibleValues.add(value);
+    }
   }
 
   @Override
