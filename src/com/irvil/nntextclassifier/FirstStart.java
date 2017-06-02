@@ -83,7 +83,7 @@ public class FirstStart {
     XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile));
     XSSFSheet sheet = excelFile.getSheetAt(1);
 
-    // create Characteristics
+    // create Characteristics catalog
     // first row contains Characteristics names from second to last columns
     //
 
@@ -120,6 +120,9 @@ public class FirstStart {
   }
 
   private void fillIncomingCalls(List<IncomingCall> incomingCalls) {
+    // save incoming calls to Storage
+    //
+
     for (IncomingCall incomingCall : incomingCalls) {
       try {
         daoFactory.incomingCallDAO().add(incomingCall);
@@ -131,7 +134,7 @@ public class FirstStart {
   private void fillCharacteristics(List<IncomingCall> incomingCalls) {
     Set<Characteristic> characteristics = getCharacteristicsCatalog(incomingCalls);
 
-    // save characteristics in Storage
+    // save characteristics to Storage
     //
 
     for (Characteristic characteristic : characteristics) {
@@ -146,11 +149,11 @@ public class FirstStart {
     Map<Characteristic, Characteristic> characteristics = new HashMap<>();
 
     for (IncomingCall incomingCall : incomingCalls) {
-      // for all incoming calls characteristics
+      // for all incoming calls characteristic values
       //
 
       for (Map.Entry<Characteristic, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
-        // add characteristic to Map
+        // add characteristic to catalog
         characteristics.put(entry.getKey(), entry.getKey());
 
         // add characteristic value to possible values
@@ -162,10 +165,10 @@ public class FirstStart {
   }
 
   private void fillVocabulary(List<IncomingCall> incomingCalls) {
-    // create vocabulary from all IncomingCalls
-    Set<String> vocabulary = getVocabularyFromIncommingCallsTexts(incomingCalls);
+    // create vocabulary from all Incoming Calls Texts
+    Set<String> vocabulary = getVocabularyFromIncomingCallsTexts(incomingCalls);
 
-    // save vocabulary words in Storage
+    // save vocabulary words to Storage
     //
 
     for (String word : vocabulary) {
@@ -176,10 +179,10 @@ public class FirstStart {
     }
   }
 
-  private Set<String> getVocabularyFromIncommingCallsTexts(List<IncomingCall> incomingCalls) {
+  private Set<String> getVocabularyFromIncomingCallsTexts(List<IncomingCall> incomingCalls) {
     Set<String> vocabulary = new LinkedHashSet<>();
 
-    // add words (converted to n-gram) from all IncomingCalls to vocabulary
+    // add words (converted to n-gram) from all Incoming Calls Texts to vocabulary
     //
 
     for (IncomingCall incomingCall : incomingCalls) {
