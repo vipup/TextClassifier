@@ -5,10 +5,10 @@ import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 class Helper {
   static void fillStorageWithTestData(StorageCreator storageCreator, CharacteristicDAO characteristicDAO, IncomingCallDAO incomingCallDAO, VocabularyWordDAO vocabularyWordDAO) throws Exception {
@@ -17,7 +17,7 @@ class Helper {
     // fill Module characteristic
     //
 
-    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    Set<CharacteristicValue> possibleValues = new LinkedHashSet<>();
     possibleValues.add(new CharacteristicValue("PM"));
     possibleValues.add(new CharacteristicValue("MM"));
     characteristicDAO.addCharacteristic(new Characteristic("Module", possibleValues));
@@ -25,7 +25,7 @@ class Helper {
     // fill Handler characteristic
     //
 
-    possibleValues = new ArrayList<>();
+    possibleValues = new LinkedHashSet<>();
     possibleValues.add(new CharacteristicValue("User 1"));
     possibleValues.add(new CharacteristicValue("User 2"));
     possibleValues.add(new CharacteristicValue("User 3"));

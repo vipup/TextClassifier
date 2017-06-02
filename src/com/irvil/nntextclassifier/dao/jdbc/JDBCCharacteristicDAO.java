@@ -9,7 +9,9 @@ import com.irvil.nntextclassifier.model.CharacteristicValue;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class JDBCCharacteristicDAO implements CharacteristicDAO {
   private JDBCConnector connector;
@@ -84,8 +86,8 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
     return characteristic;
   }
 
-  private List<CharacteristicValue> getAllPossibleValues(Characteristic characteristic) throws SQLException {
-    List<CharacteristicValue> possibleValues = new ArrayList<>();
+  private Set<CharacteristicValue> getAllPossibleValues(Characteristic characteristic) throws SQLException {
+    Set<CharacteristicValue> possibleValues = new LinkedHashSet<>();
 
     try (Connection con = connector.getConnection()) {
       String sqlSelect = "SELECT Id, Value FROM CharacteristicsValues WHERE CharacteristicsNameId = ?";

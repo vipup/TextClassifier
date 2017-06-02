@@ -1,31 +1,29 @@
 package com.irvil.nntextclassifier.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class Characteristic {
   private int id;
   private String name;
+  private Set<CharacteristicValue> possibleValues;
 
-  // todo: replace List to Set
-  private List<CharacteristicValue> possibleValues;
-
-  private Characteristic(int id, String name, List<CharacteristicValue> possibleValues) {
+  private Characteristic(int id, String name, Set<CharacteristicValue> possibleValues) {
     this.id = id;
     this.name = name;
     this.possibleValues = possibleValues;
   }
 
   public Characteristic(int id, String name) {
-    this(id, name, new ArrayList<>());
+    this(id, name, new LinkedHashSet<>());
   }
 
-  public Characteristic(String name, List<CharacteristicValue> possibleValues) {
+  public Characteristic(String name, Set<CharacteristicValue> possibleValues) {
     this(0, name, possibleValues);
   }
 
   public Characteristic(String name) {
-    this(0, name, new ArrayList<>());
+    this(0, name, new LinkedHashSet<>());
   }
 
   public int getId() {
@@ -40,18 +38,16 @@ public class Characteristic {
     return name;
   }
 
-  public List<CharacteristicValue> getPossibleValues() {
+  public Set<CharacteristicValue> getPossibleValues() {
     return possibleValues;
   }
 
-  public void setPossibleValues(List<CharacteristicValue> possibleValues) {
+  public void setPossibleValues(Set<CharacteristicValue> possibleValues) {
     this.possibleValues = possibleValues;
   }
 
   public void addPossibleValue(CharacteristicValue value) {
-    if (possibleValues.indexOf(value) == -1) {
-      possibleValues.add(value);
-    }
+    possibleValues.add(value);
   }
 
   @Override

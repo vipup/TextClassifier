@@ -5,8 +5,10 @@ import com.irvil.nntextclassifier.model.CharacteristicValue;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -42,31 +44,38 @@ public abstract class CharacteristicDAOTest {
     // check Module possible values
     //
 
-    List<CharacteristicValue> modulePossibleValues = characteristics.get(0).getPossibleValues();
+    Set<CharacteristicValue> modulePossibleValues = characteristics.get(0).getPossibleValues();
+    Iterator<CharacteristicValue> moduleIterator = modulePossibleValues.iterator();
+    CharacteristicValue valPM = moduleIterator.next();
+    CharacteristicValue valMM = moduleIterator.next();
 
     assertEquals(modulePossibleValues.size(), 2);
 
-    assertEquals(modulePossibleValues.get(0).getId(), 1);
-    assertEquals(modulePossibleValues.get(0).getValue(), "PM");
+    assertEquals(valPM.getId(), 1);
+    assertEquals(valPM.getValue(), "PM");
 
-    assertEquals(modulePossibleValues.get(1).getId(), 2);
-    assertEquals(modulePossibleValues.get(1).getValue(), "MM");
+    assertEquals(valMM.getId(), 2);
+    assertEquals(valMM.getValue(), "MM");
 
     // check Handler possible values
     //
 
-    List<CharacteristicValue> handlerPossibleValues = characteristics.get(1).getPossibleValues();
+    Set<CharacteristicValue> handlerPossibleValues = characteristics.get(1).getPossibleValues();
+    Iterator<CharacteristicValue> handlerIterator = handlerPossibleValues.iterator();
+    CharacteristicValue valUser1 = handlerIterator.next();
+    CharacteristicValue valUser2 = handlerIterator.next();
+    CharacteristicValue valUser3 = handlerIterator.next();
 
     assertEquals(handlerPossibleValues.size(), 3);
 
-    assertEquals(handlerPossibleValues.get(0).getId(), 1);
-    assertEquals(handlerPossibleValues.get(0).getValue(), "User 1");
+    assertEquals(valUser1.getId(), 1);
+    assertEquals(valUser1.getValue(), "User 1");
 
-    assertEquals(handlerPossibleValues.get(1).getId(), 2);
-    assertEquals(handlerPossibleValues.get(1).getValue(), "User 2");
+    assertEquals(valUser2.getId(), 2);
+    assertEquals(valUser2.getValue(), "User 2");
 
-    assertEquals(handlerPossibleValues.get(2).getId(), 3);
-    assertEquals(handlerPossibleValues.get(2).getValue(), "User 3");
+    assertEquals(valUser3.getId(), 3);
+    assertEquals(valUser3.getValue(), "User 3");
   }
 
   @Test(expected = EmptyRecordException.class)
@@ -76,7 +85,7 @@ public abstract class CharacteristicDAOTest {
 
   @Test(expected = EmptyRecordException.class)
   public void addCharacteristicEmpty() throws Exception {
-    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    Set<CharacteristicValue> possibleValues = new LinkedHashSet<>();
     possibleValues.add(new CharacteristicValue("Value 1"));
     characteristicDAO.addCharacteristic(new Characteristic("", possibleValues));
   }
@@ -88,19 +97,19 @@ public abstract class CharacteristicDAOTest {
 
   @Test(expected = EmptyRecordException.class)
   public void addCharacteristicEmptyPossibleValues() throws Exception {
-    characteristicDAO.addCharacteristic(new Characteristic("Test", new ArrayList<>()));
+    characteristicDAO.addCharacteristic(new Characteristic("Test", new LinkedHashSet<>()));
   }
 
   @Test(expected = AlreadyExistsException.class)
   public void addCharacteristicExisted() throws Exception {
-    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    Set<CharacteristicValue> possibleValues = new LinkedHashSet<>();
     possibleValues.add(new CharacteristicValue("BC"));
     characteristicDAO.addCharacteristic(new Characteristic("Module", possibleValues));
   }
 
   @Test
   public void addCharacteristic() throws Exception {
-    List<CharacteristicValue> possibleValues = new ArrayList<>();
+    Set<CharacteristicValue> possibleValues = new LinkedHashSet<>();
     possibleValues.add(new CharacteristicValue("Value 1"));
     possibleValues.add(new CharacteristicValue(""));
     possibleValues.add(null);
@@ -113,18 +122,24 @@ public abstract class CharacteristicDAOTest {
     // check returned object
     //
 
+    Iterator<CharacteristicValue> iterator = characteristic.getPossibleValues().iterator();
+    CharacteristicValue valValue1 = iterator.next();
+    CharacteristicValue valEmpty = iterator.next();
+    CharacteristicValue valNull = iterator.next();
+    CharacteristicValue valValue2 = iterator.next();
+
     assertEquals(characteristic.getId(), 3);
     assertEquals(characteristic.getName(), "Test");
-    assertEquals(characteristic.getPossibleValues().size(), 5);
-    assertEquals(characteristic.getPossibleValues().get(0).getId(), 1);
-    assertEquals(characteristic.getPossibleValues().get(0).getValue(), "Value 1");
-    assertEquals(characteristic.getPossibleValues().get(1).getId(), 0);
-    assertEquals(characteristic.getPossibleValues().get(1).getValue(), "");
-    assertEquals(characteristic.getPossibleValues().get(2), null);
-    assertEquals(characteristic.getPossibleValues().get(3).getId(), 2);
-    assertEquals(characteristic.getPossibleValues().get(3).getValue(), "Value 2");
-    assertEquals(characteristic.getPossibleValues().get(4).getId(), 2);
-    assertEquals(characteristic.getPossibleValues().get(4).getValue(), "Value 2");
+
+    assertEquals(characteristic.getPossibleValues().size(), 4);
+
+    assertEquals(valValue1.getId(), 1);
+    assertEquals(valValue1.getValue(), "Value 1");
+    assertEquals(valEmpty.getId(), 0);
+    assertEquals(valEmpty.getValue(), "");
+    assertEquals(valNull, null);
+    assertEquals(valValue2.getId(), 2);
+    assertEquals(valValue2.getValue(), "Value 2");
 
     // check record from DB
     //
@@ -139,14 +154,17 @@ public abstract class CharacteristicDAOTest {
     // check Test possible values
     //
 
-    List<CharacteristicValue> testPossibleValues = characteristicsFromDb.get(2).getPossibleValues();
+    Set<CharacteristicValue> testPossibleValues = characteristicsFromDb.get(2).getPossibleValues();
+    Iterator<CharacteristicValue> iteratorTest = testPossibleValues.iterator();
+    CharacteristicValue valTestValue1 = iteratorTest.next();
+    CharacteristicValue valTestValue2 = iteratorTest.next();
 
     assertEquals(testPossibleValues.size(), 2);
 
-    assertEquals(testPossibleValues.get(0).getId(), 1);
-    assertEquals(testPossibleValues.get(0).getValue(), "Value 1");
+    assertEquals(valTestValue1.getId(), 1);
+    assertEquals(valTestValue1.getValue(), "Value 1");
 
-    assertEquals(testPossibleValues.get(1).getId(), 2);
-    assertEquals(testPossibleValues.get(1).getValue(), "Value 2");
+    assertEquals(valTestValue2.getId(), 2);
+    assertEquals(valTestValue2.getValue(), "Value 2");
   }
 }
