@@ -22,13 +22,15 @@ import java.util.*;
 
 public class FirstStart {
   private DAOFactory daoFactory;
+  private NGramStrategy nGram;
 
-  public FirstStart(DAOFactory daoFactory) {
+  public FirstStart(DAOFactory daoFactory, NGramStrategy nGram) {
     if (daoFactory == null) {
       throw new IllegalArgumentException();
     }
 
     this.daoFactory = daoFactory;
+    this.nGram = nGram;
   }
 
   public static void main(String[] args) throws Exception {
@@ -42,7 +44,7 @@ public class FirstStart {
 
     //
 
-    FirstStart fs = new FirstStart(daoFactory);
+    FirstStart fs = new FirstStart(daoFactory, new FilteredUnigram());
     List<IncomingCall> incomingCalls = fs.convertXLSXtoIncomingCalls("./etc/1.xlsx");
 
     fs.createDbFolder(config.getDbPath());
@@ -56,11 +58,11 @@ public class FirstStart {
     List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
     List<IncomingCall> incomingCallsForTrain = daoFactory.incomingCallDAO().getAll();
 
-    // train Recognizer for each Characteristic in DB
+    // train Recognizer for each Characteristic from DB
     //
 
     for (Characteristic characteristic : characteristics) {
-      Recognizer recognizer = new Recognizer(characteristic, vocabulary, new FilteredUnigram());
+      Recognizer recognizer = new Recognizer(characteristic, vocabulary, nGram);
       recognizer.train(incomingCallsForTrain);
       recognizer.saveTrainedRecognizer(new File(pathToSave + "/" + recognizer.toString()));
     }
@@ -160,9 +162,8 @@ public class FirstStart {
   }
 
   private void fillVocabulary(List<IncomingCall> incomingCalls) {
-    // todo: FilteredUnigram move to constructor
     // create vocabulary from all IncomingCalls
-    Set<String> vocabulary = getVocabularyFromIncommingCallsTexts(new FilteredUnigram(), incomingCalls);
+    Set<String> vocabulary = getVocabularyFromIncommingCallsTexts(incomingCalls);
 
     // save vocabulary words in Storage
     //
@@ -175,7 +176,7 @@ public class FirstStart {
     }
   }
 
-  private Set<String> getVocabularyFromIncommingCallsTexts(NGramStrategy nGram, List<IncomingCall> incomingCalls) {
+  private Set<String> getVocabularyFromIncommingCallsTexts(List<IncomingCall> incomingCalls) {
     Set<String> vocabulary = new LinkedHashSet<>();
 
     // add words (converted to n-gram) from all IncomingCalls to vocabulary
