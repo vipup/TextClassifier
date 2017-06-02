@@ -141,7 +141,7 @@ public class Recognizer {
     do {
       train.iteration();
       // todo: add observer
-      //System.out.println("Error: " + train.getError());
+      System.out.println("Error: " + train.getError());
     } while (train.getError() > 0.01);
 
     train.finishTraining();
@@ -219,5 +219,9 @@ public class Recognizer {
   @Override
   public String toString() {
     return characteristic.getName() + "RecognizerNeuralNetwork";
+  }
+
+  public static void shutdown() {
+    Encog.getInstance().shutdown();
   }
 }

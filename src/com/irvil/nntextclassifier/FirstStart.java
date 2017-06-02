@@ -1,23 +1,24 @@
 package com.irvil.nntextclassifier;
 
-import com.irvil.nntextclassifier.dao.IncomingCallDAO;
+import com.irvil.nntextclassifier.dao.AlreadyExistsException;
+import com.irvil.nntextclassifier.dao.EmptyRecordException;
+import com.irvil.nntextclassifier.dao.NotExistsException;
 import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.dao.factories.DAOFactory;
-import com.irvil.nntextclassifier.dao.factories.JDBCDAOFactory;
-import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
+import com.irvil.nntextclassifier.model.Characteristic;
+import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
-import org.encog.Encog;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class FirstStart {
   private DAOFactory daoFactory;
@@ -30,112 +31,160 @@ public class FirstStart {
     this.daoFactory = daoFactory;
   }
 
-  public boolean createStorage() {
-    StorageCreator sc = daoFactory.storageCreator();
-    sc.createStorage();
-
-    return true;
-  }
-
-  public boolean fillVocabulary(NGramStrategy nGram) {
-    // build vocabulary from all IncomingCalls
-    Set<String> vocabulary = getVocabulary(nGram, daoFactory.incomingCallDAO().getAll());
-
-    // save vocabulary words in Storage
-    for (String word : vocabulary) {
-      //daoFactory.vocabularyWordDAO().add(new VocabularyWord(0, word));
-    }
-
-    return true;
-  }
-
-  private Set<String> getVocabulary(NGramStrategy nGram, List<IncomingCall> incomingCalls) {
-    Set<String> vocabulary = new LinkedHashSet<>();
-
-    // addPossibleValue words (converted to n-gram) from all IncomingCalls to vocabulary
-    for (IncomingCall ic : incomingCalls) {
-      vocabulary.addAll(nGram.getNGram(ic.getText()));
-    }
-
-    return vocabulary;
-  }
-
-  public boolean fillReferenceData() {
-    IncomingCallDAO icDAO = daoFactory.incomingCallDAO();
-
-    // save characteristics in Storage
-//    icDAO.getUniqueValueOfCharacteristic("Module").forEach((module) -> daoFactory.moduleDAO().addPossibleValue(module));
-//    icDAO.getUniqueValueOfCharacteristic("Handler").forEach((handler) -> daoFactory.handlerDAO().addPossibleValue(handler));
-
-    return true;
-  }
-
-  public void trainRecognizer(String path, Recognizer recognizer) {
-    recognizer.train(daoFactory.incomingCallDAO().getAll());
-    recognizer.saveTrainedRecognizer(new File(path + "/" + recognizer.toString() + "Trained"));
-  }
-
-  public boolean createDbFolder(String path) {
-    return new File(path).mkdir();
-  }
-
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
+    DAOFactory daoFactory = new MainWindow().getDaoFactory();
     Config config = Config.getInstance();
-    DAOFactory daoFactory = null;
 
-    // create DAO factory depends on config value
-    //
-
-    if (config.getDaoType().equals("jdbc")) {
-      // create connector depends on config value
-      //
-
-      JDBCConnector jdbcConnector = null;
-
-      if (config.getDBMSType().equals("sqlite")) {
-        jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/" + config.getSQLiteDbFileName());
-      }
-
-      // create factory
-      daoFactory = new JDBCDAOFactory(jdbcConnector);
+    if (daoFactory == null) {
+      System.out.println("Oops, it seems there is an error in config file");
+      return;
     }
 
     //
 
     FirstStart fs = new FirstStart(daoFactory);
+    List<IncomingCall> incomingCalls = fs.convertXLSXtoIncomingCalls("./etc/1.xlsx");
 
-    // create Storage
+    fs.createDbFolder(config.getDbPath());
+    fs.createStorage(daoFactory);
+    fs.fillStorage(incomingCalls);
+    fs.trainRecognizers(daoFactory, config.getDbPath());
+  }
+
+  private void trainRecognizers(DAOFactory daoFactory, String pathToSave) {
+    List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
+    List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
+    List<IncomingCall> incomingCallsForTrain = daoFactory.incomingCallDAO().getAll();
+
+    // train Recognizer for each Characteristic in DB
     //
 
-    if (fs.createDbFolder(config.getDbPath())) {
-      System.out.println("Folder created");
+    for (Characteristic characteristic : characteristics) {
+      Recognizer recognizer = new Recognizer(characteristic, vocabulary, new FilteredUnigram());
+      recognizer.train(incomingCallsForTrain);
+      recognizer.saveTrainedRecognizer(new File(pathToSave + "/" + recognizer.toString()));
     }
 
-    if (fs.createStorage()) {
-      System.out.println("Storage created");
-    }
+    Recognizer.shutdown();
+  }
 
-    // fill data
+  private void createStorage(DAOFactory daoFactory) {
+    StorageCreator storageCreator = daoFactory.storageCreator();
+    storageCreator.createStorage();
+    storageCreator.clearStorage();
+  }
+
+  private List<IncomingCall> convertXLSXtoIncomingCalls(String xlsxFile) throws IOException {
+    List<Characteristic> characteristics = new ArrayList<>();
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+
+    XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile));
+    XSSFSheet sheet = excelFile.getSheetAt(1);
+
+    // create Characteristics
+    // first row contains Characteristics names from second to last columns
     //
 
-    System.out.println("Fill IncomingCalls and press Enter");
-    System.in.read();
-
-    if (fs.fillVocabulary(new FilteredUnigram())) {
-      System.out.println("Vocabulary filled");
+    for (int i = 1; i < sheet.getRow(0).getLastCellNum(); i++) {
+      characteristics.add(new Characteristic(sheet.getRow(0).getCell(i).getStringCellValue()));
     }
 
-    if (fs.fillReferenceData()) {
-      System.out.println("Modules, Categories, Handlers filled");
-    }
-
-    // train recognizers
+    // fill IncomingCalls
+    // start from second row
     //
 
-    List<VocabularyWord> vacabulary = daoFactory.vocabularyWordDAO().getAll();
+    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+      Map<Characteristic, CharacteristicValue> characteristicsValues = new HashMap<>();
 
-    //fs.trainRecognizer(config.getDbPath(), new Recognizer("Module", daoFactory.moduleDAO().getAll(), vacabulary, new FilteredUnigram()));
-    //fs.trainRecognizer(config.getDbPath(), new Recognizer("Handler", daoFactory.handlerDAO().getAll(), vacabulary, new FilteredUnigram()));
-    Encog.getInstance().shutdown();
+      for (int j = 1; j < sheet.getRow(i).getLastCellNum(); j++) {
+        characteristicsValues.put(characteristics.get(j - 1), new CharacteristicValue(sheet.getRow(i).getCell(j).getStringCellValue()));
+      }
+
+      incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
+    }
+
+    excelFile.close();
+    return incomingCalls;
+  }
+
+  private void createDbFolder(String path) {
+    new File(path).mkdir();
+  }
+
+  private void fillStorage(List<IncomingCall> incomingCalls) {
+    fillVocabulary(incomingCalls);
+    fillCharacteristics(incomingCalls);
+    fillIncomingCalls(incomingCalls);
+  }
+
+  private void fillIncomingCalls(List<IncomingCall> incomingCalls) {
+    for (IncomingCall incomingCall : incomingCalls) {
+      try {
+        daoFactory.incomingCallDAO().add(incomingCall);
+      } catch (EmptyRecordException | NotExistsException ignored) {
+      }
+    }
+  }
+
+  private void fillCharacteristics(List<IncomingCall> incomingCalls) {
+    Set<Characteristic> characteristics = getCharacteristicsCatalog(incomingCalls);
+
+    // save characteristics in Storage
+    //
+
+    for (Characteristic characteristic : characteristics) {
+      try {
+        daoFactory.characteristicDAO().addCharacteristic(characteristic);
+      } catch (EmptyRecordException | AlreadyExistsException ignored) {
+      }
+    }
+  }
+
+  private Set<Characteristic> getCharacteristicsCatalog(List<IncomingCall> incomingCalls) {
+    Map<Characteristic, Characteristic> characteristics = new HashMap<>();
+
+    for (IncomingCall incomingCall : incomingCalls) {
+      // for all incoming calls characteristics
+      //
+
+      for (Map.Entry<Characteristic, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
+        // add characteristic to Map
+        characteristics.put(entry.getKey(), entry.getKey());
+
+        // add characteristic value to possible values
+        characteristics.get(entry.getKey()).addPossibleValue(entry.getValue());
+      }
+    }
+
+    return characteristics.keySet();
+  }
+
+  private void fillVocabulary(List<IncomingCall> incomingCalls) {
+    // todo: FilteredUnigram move to constructor
+    // create vocabulary from all IncomingCalls
+    Set<String> vocabulary = getVocabularyFromIncommingCallsTexts(new FilteredUnigram(), incomingCalls);
+
+    // save vocabulary words in Storage
+    //
+
+    for (String word : vocabulary) {
+      try {
+        daoFactory.vocabularyWordDAO().add(new VocabularyWord(word));
+      } catch (EmptyRecordException | AlreadyExistsException ignored) {
+      }
+    }
+  }
+
+  private Set<String> getVocabularyFromIncommingCallsTexts(NGramStrategy nGram, List<IncomingCall> incomingCalls) {
+    Set<String> vocabulary = new LinkedHashSet<>();
+
+    // add words (converted to n-gram) from all IncomingCalls to vocabulary
+    //
+
+    for (IncomingCall incomingCall : incomingCalls) {
+      vocabulary.addAll(nGram.getNGram(incomingCall.getText()));
+    }
+
+    return vocabulary;
   }
 }
