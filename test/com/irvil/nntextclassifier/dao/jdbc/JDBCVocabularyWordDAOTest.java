@@ -8,7 +8,7 @@ import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 public class JDBCVocabularyWordDAOTest extends VocabularyWordDAOTest {
   @Override
   public void initializeDAO() {
-    JDBCConnector jdbcConnector = new JDBCSQLiteConnector(Config.getInstance().getDbPath() + "/test.db");
+    JDBCConnector jdbcConnector = new JDBCSQLiteConnector(".db/test.db");
     storageCreator = new JDBCDBCreator(jdbcConnector);
     characteristicDAO = new JDBCCharacteristicDAO(jdbcConnector);
     incomingCallDAO = new JDBCIncomingCallDAO(jdbcConnector);
