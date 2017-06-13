@@ -19,7 +19,7 @@ public class Config {
     }
   }
 
-  public static Config getInstance() {
+  static Config getInstance() {
     // create only one object - Singleton pattern
     if (instance == null) {
       instance = new Config();
@@ -28,23 +28,27 @@ public class Config {
     return instance;
   }
 
-  public boolean isLoaded() {
+  boolean isLoaded() {
     return properties.size() > 0;
   }
 
-  public String getDbPath() {
-    return properties.getProperty("db_path");
+  String getDbPath() {
+    return getProperty("db_path");
   }
 
-  public String getDaoType() {
-    return properties.getProperty("dao_type");
+  String getDaoType() {
+    return getProperty("dao_type");
   }
 
-  public String getDBMSType() {
-    return properties.getProperty("dbms_type");
+  String getDBMSType() {
+    return getProperty("dbms_type");
   }
 
-  public String getSQLiteDbFileName() {
-    return properties.getProperty("sqlite_db_filename");
+  String getSQLiteDbFileName() {
+    return getProperty("sqlite_db_filename");
+  }
+
+  private String getProperty(String property) {
+    return properties.getProperty(property) != null ? properties.getProperty(property) : "";
   }
 }
