@@ -9,7 +9,6 @@ import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
-import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -20,12 +19,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
-public class FirstStart {
+// todo: create tests
+class FirstStart {
   private DAOFactory daoFactory;
   private NGramStrategy nGram;
 
-  public FirstStart(DAOFactory daoFactory, NGramStrategy nGram) {
-    if (daoFactory == null) {
+  FirstStart(DAOFactory daoFactory, NGramStrategy nGram) {
+    if (daoFactory == null || nGram == null) {
       throw new IllegalArgumentException();
     }
 
@@ -33,27 +33,11 @@ public class FirstStart {
     this.nGram = nGram;
   }
 
-  public static void main(String[] args) throws Exception {
-    DAOFactory daoFactory = new MainWindow().getDaoFactory();
-    Config config = Config.getInstance();
-
-    if (daoFactory == null) {
-      System.out.println("Oops, it seems there is an error in config file");
-      return;
-    }
-
-    //
-
-    FirstStart fs = new FirstStart(daoFactory, new FilteredUnigram());
-    List<IncomingCall> incomingCalls = fs.readXlsxFile("./etc/1.xlsx");
-
-    fs.createDbFolder(config.getDbPath());
-    fs.createStorage(daoFactory);
-    fs.fillStorage(incomingCalls);
-    fs.trainRecognizers(daoFactory, config.getDbPath());
+  static boolean createDbFolder(String path) {
+    return new File(path).mkdir();
   }
 
-  private void trainRecognizers(DAOFactory daoFactory, String pathToSave) {
+  void trainAndSaveRecognizers(String pathToSave) {
     List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
     List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
     List<IncomingCall> incomingCallsForTrain = daoFactory.incomingCallDAO().getAll();
@@ -70,50 +54,49 @@ public class FirstStart {
     Recognizer.shutdown();
   }
 
-  private void createStorage(DAOFactory daoFactory) {
+  void createStorage() {
     StorageCreator storageCreator = daoFactory.storageCreator();
     storageCreator.createStorage();
     storageCreator.clearStorage();
   }
 
-  private List<IncomingCall> readXlsxFile(String xlsxFile) throws IOException {
-    List<Characteristic> characteristics = new ArrayList<>();
+  List<IncomingCall> readXlsxFile(File xlsxFile) {
     List<IncomingCall> incomingCalls = new ArrayList<>();
 
-    XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile));
-    XSSFSheet sheet = excelFile.getSheetAt(1);
+    try (XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile))) {
+      XSSFSheet sheet = excelFile.getSheetAt(1);
 
-    // create Characteristics catalog
-    // first row contains Characteristics names from second to last columns
-    //
+      // create Characteristics catalog
+      // first row contains Characteristics names from second to last columns
+      //
 
-    for (int i = 1; i < sheet.getRow(0).getLastCellNum(); i++) {
-      characteristics.add(new Characteristic(sheet.getRow(0).getCell(i).getStringCellValue()));
-    }
+      List<Characteristic> characteristics = new ArrayList<>();
 
-    // fill IncomingCalls
-    // start from second row
-    //
-
-    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-      Map<Characteristic, CharacteristicValue> characteristicsValues = new HashMap<>();
-
-      for (int j = 1; j < sheet.getRow(i).getLastCellNum(); j++) {
-        characteristicsValues.put(characteristics.get(j - 1), new CharacteristicValue(sheet.getRow(i).getCell(j).getStringCellValue()));
+      for (int i = 1; i < sheet.getRow(0).getLastCellNum(); i++) {
+        characteristics.add(new Characteristic(sheet.getRow(0).getCell(i).getStringCellValue()));
       }
 
-      incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
+      // fill IncomingCalls
+      // start from second row
+      //
+
+      for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+        Map<Characteristic, CharacteristicValue> characteristicsValues = new HashMap<>();
+
+        for (int j = 1; j < sheet.getRow(i).getLastCellNum(); j++) {
+          characteristicsValues.put(characteristics.get(j - 1), new CharacteristicValue(sheet.getRow(i).getCell(j).getStringCellValue()));
+        }
+
+        incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
+      }
+    } catch (IOException ignored) {
+
     }
 
-    excelFile.close();
     return incomingCalls;
   }
 
-  private void createDbFolder(String path) {
-    new File(path).mkdir();
-  }
-
-  private void fillStorage(List<IncomingCall> incomingCalls) {
+  void fillStorage(List<IncomingCall> incomingCalls) {
     fillVocabulary(incomingCalls);
     fillCharacteristics(incomingCalls);
     fillIncomingCalls(incomingCalls);

@@ -11,6 +11,7 @@ import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -21,6 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -43,36 +45,73 @@ public class MainWindow extends Application {
 
   @Override
   public void start(Stage primaryStage) {
+    // check config file
+    //
+
     if (!config.isLoaded()) {
-      alertMsg("Config file is not found or it is empty");
+      errorMsg("Config file is not found or it is empty.");
       return;
     }
+
+    // create Storage folder
+    //
+
+    if (!isDBFolderExists()) {
+      if (!FirstStart.createDbFolder(config.getDbPath())) {
+        errorMsg("Can't create folder.");
+        return;
+      }
+    }
+
+    // create DAO factory using settings from config file
+    //
 
     DAOFactory daoFactory = getDaoFactory();
 
     if (daoFactory == null) {
-      alertMsg("Oops, it seems there is an error in config file");
+      errorMsg("Oops, it seems there is an error in config file.");
       return;
     }
 
-    // todo: start FirstStart automatically
-    if (!isDBFilled(daoFactory)) {
-      alertMsg("Database is empty. Please start FirstStart class.");
+    // check if it is first start
+    //
+
+    if (!isDBFilled(daoFactory) || !loadLearnedRecognizers(daoFactory)) {
+      infoMsg("You start program first time. Please, choose XLSX file with data for recognizer learning.");
+
+      File file = openFileDialogBox();
+
+      if (file != null) {
+        FirstStart firstStart = new FirstStart(daoFactory, new FilteredUnigram());
+        firstStart.createStorage();
+        firstStart.fillStorage(firstStart.readXlsxFile(file));
+        firstStart.trainAndSaveRecognizers(config.getDbPath());
+
+        // todo: add log window
+      }
+
+      Platform.exit();
       return;
     }
 
-    if (!loadLearnedRecognizers(daoFactory, config.getDbPath())) {
-      alertMsg("Learned recognizers is not found. Please start FirstStart class.");
-      return;
-    }
-
+    // start program
     buildForm(primaryStage);
   }
 
-  public DAOFactory getDaoFactory() {
+  private File openFileDialogBox() {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("*.xlsx", "*.xlsx"));
+    return fileChooser.showOpenDialog(null);
+  }
+
+  private boolean isDBFolderExists() {
+    return new File(config.getDbPath()).exists();
+  }
+
+  private DAOFactory getDaoFactory() {
     DAOFactory daoFactory = null;
 
-    // create DAO factory depends on config value
+    // create DAO factory depends on config values
     //
 
     try {
@@ -96,8 +135,18 @@ public class MainWindow extends Application {
     return daoFactory;
   }
 
-  private void alertMsg(String text) {
-    Alert alert = new Alert(Alert.AlertType.ERROR);
+  private void errorMsg(String text) {
+    msg(text, Alert.AlertType.ERROR);
+    Platform.exit();
+  }
+
+  private void infoMsg(String text) {
+    msg(text, Alert.AlertType.INFORMATION);
+  }
+
+  private void msg(String text, Alert.AlertType alertType) {
+    Alert alert = new Alert(alertType);
+    alert.setHeaderText("");
     alert.setContentText(text);
     alert.showAndWait();
   }
@@ -109,7 +158,7 @@ public class MainWindow extends Application {
     return (characteristics.size() != 0 && vocabulary.size() != 0);
   }
 
-  private boolean loadLearnedRecognizers(DAOFactory daoFactory, String path) {
+  private boolean loadLearnedRecognizers(DAOFactory daoFactory) {
     try {
       List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
       List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
@@ -118,7 +167,7 @@ public class MainWindow extends Application {
       //
 
       for (Characteristic characteristic : characteristics) {
-        File trainedRecognizer = new File(path + "/" + characteristic.getName() + "RecognizerNeuralNetwork");
+        File trainedRecognizer = new File(config.getDbPath() + "/" + characteristic.getName() + "RecognizerNeuralNetwork");
         recognizers.add(new Recognizer(trainedRecognizer, characteristic, vocabulary, new FilteredUnigram()));
       }
     } catch (Exception e) {
@@ -163,7 +212,8 @@ public class MainWindow extends Application {
           recognizedCharacteristics.append(recognizer.getCharacteristicName()).append(": ").append(recognizedValue.getValue()).append("\n");
         }
       } catch (Exception e) {
-        alertMsg("It seems that learned recognizer does not match Characteristics and Vocabulary. " +
+        // it is possible if DB was edited manually
+        errorMsg("It seems that learned recognizer does not match Characteristics and Vocabulary. " +
             "You need to relearn recognizer.");
       }
 
