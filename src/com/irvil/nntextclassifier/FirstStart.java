@@ -103,7 +103,10 @@ class FirstStart implements Observable {
           characteristicsValues.put(characteristics.get(j - 1), new CharacteristicValue(sheet.getRow(i).getCell(j).getStringCellValue()));
         }
 
-        incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
+        // exclude empty rows
+        if (!sheet.getRow(i).getCell(0).getStringCellValue().equals("")) {
+          incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
+        }
       }
     } catch (IOException ignored) {
 
