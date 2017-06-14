@@ -48,6 +48,10 @@ public class Config {
     return getProperty("sqlite_db_filename");
   }
 
+  String getNGramStrategy() {
+    return getProperty("ngram_strategy");
+  }
+
   private String getProperty(String property) {
     return properties.getProperty(property) != null ? properties.getProperty(property) : "";
   }

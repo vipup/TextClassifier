@@ -8,7 +8,7 @@ import java.util.Set;
 class FilteredBigram implements NGramStrategy {
   @Override
   public Set<String> getNGram(String text) {
-    List<String> unigram = new ArrayList<>(new FilteredUnigram().getNGram(text));
+    List<String> unigram = new ArrayList<>(NGramStrategySimpleFactory.getStrategy("filtered_unigram").getNGram(text));
 
     // concatenate words to bigrams
     // example: "How are you doing?" => {"how are", "are you", "you doing"}

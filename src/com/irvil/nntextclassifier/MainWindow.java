@@ -8,7 +8,8 @@ import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
-import com.irvil.nntextclassifier.ngram.FilteredUnigram;
+import com.irvil.nntextclassifier.ngram.NGramStrategy;
+import com.irvil.nntextclassifier.ngram.NGramStrategySimpleFactory;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -64,12 +65,13 @@ public class MainWindow extends Application {
       }
     }
 
-    // create DAO factory using settings from config file
+    // create DAO factory and NGramStrategy using settings from config file
     //
 
     DAOFactory daoFactory = getDaoFactory();
+    NGramStrategy nGramStrategy = NGramStrategySimpleFactory.getStrategy(config.getNGramStrategy());
 
-    if (daoFactory == null) {
+    if (daoFactory == null || nGramStrategy == null) {
       errorMsg("Oops, it seems there is an error in config file.");
       return;
     }
@@ -77,7 +79,7 @@ public class MainWindow extends Application {
     // check if it is first start
     //
 
-    if (!isDBFilled(daoFactory) || !loadLearnedRecognizers(daoFactory)) {
+    if (!isDBFilled(daoFactory) || !loadLearnedRecognizers(daoFactory, nGramStrategy)) {
       infoMsg("You start program first time. Please, choose XLSX file with data to recognizer training.");
 
       File file = openFileDialogBox();
@@ -93,7 +95,7 @@ public class MainWindow extends Application {
         Task<Void> task = new Task<Void>() {
           @Override
           protected Void call() throws Exception {
-            FirstStart firstStart = new FirstStart(daoFactory, new FilteredUnigram());
+            FirstStart firstStart = new FirstStart(daoFactory, nGramStrategy);
             firstStart.addObserver(logWindow);
 
             firstStart.createStorage();
@@ -172,7 +174,7 @@ public class MainWindow extends Application {
     return (characteristics.size() != 0 && vocabulary.size() != 0);
   }
 
-  private boolean loadLearnedRecognizers(DAOFactory daoFactory) {
+  private boolean loadLearnedRecognizers(DAOFactory daoFactory, NGramStrategy nGramStrategy) {
     try {
       List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
       List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
@@ -182,7 +184,7 @@ public class MainWindow extends Application {
 
       for (Characteristic characteristic : characteristics) {
         File trainedRecognizer = new File(config.getDbPath() + "/" + characteristic.getName() + "RecognizerNeuralNetwork");
-        recognizers.add(new Recognizer(trainedRecognizer, characteristic, vocabulary, new FilteredUnigram()));
+        recognizers.add(new Recognizer(trainedRecognizer, characteristic, vocabulary, nGramStrategy));
       }
     } catch (Exception e) {
       return false;
