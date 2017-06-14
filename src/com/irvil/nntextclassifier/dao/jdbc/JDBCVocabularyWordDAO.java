@@ -42,33 +42,55 @@ public class JDBCVocabularyWordDAO implements VocabularyWordDAO {
   }
 
   @Override
-  public void add(VocabularyWord vocabularyWord) throws EmptyRecordException, AlreadyExistsException {
-    if (vocabularyWord == null ||
-        vocabularyWord.getValue().equals("")) {
-      throw new EmptyRecordException("Vocabulary word is null or empty");
+  public void addAll(List<VocabularyWord> vocabulary) throws EmptyRecordException, AlreadyExistsException {
+    if (vocabulary == null ||
+        vocabulary.size() == 0) {
+      throw new EmptyRecordException("Vocabulary is null or empty");
     }
 
     try (Connection con = connector.getConnection()) {
-      if (isVocabularyWordExistsInDB(vocabularyWord)) {
-        throw new AlreadyExistsException("Vocabulary word already exists");
-      }
+      con.setAutoCommit(false);
+
+      // prepare sql query
+      //
 
       String sqlInsert = "INSERT INTO Vocabulary (Value) VALUES (?)";
       PreparedStatement statement = con.prepareStatement(sqlInsert);
-      statement.setString(1, vocabularyWord.getValue());
-      statement.executeUpdate();
+
+      //
+
+      for (VocabularyWord vocabularyWord : vocabulary) {
+        // check
+        //
+
+        if (vocabularyWord == null ||
+            vocabularyWord.getValue().equals("")) {
+          throw new EmptyRecordException("Vocabulary word is null or empty");
+        }
+
+        if (isVocabularyWordExistsInDB(con, vocabularyWord)) {
+          throw new AlreadyExistsException("Vocabulary word already exists");
+        }
+
+        // insert
+        //
+
+        statement.setString(1, vocabularyWord.getValue());
+        statement.executeUpdate();
+      }
+
+      con.commit();
+      con.setAutoCommit(true);
     } catch (SQLException ignored) {
     }
   }
 
-  private boolean isVocabularyWordExistsInDB(VocabularyWord vocabularyWord) throws SQLException {
-    try (Connection con = connector.getConnection()) {
-      String sqlSelect = "SELECT Id FROM Vocabulary WHERE Value = ?";
-      PreparedStatement statement = con.prepareStatement(sqlSelect);
-      statement.setString(1, vocabularyWord.getValue());
-      ResultSet rs = statement.executeQuery();
+  private boolean isVocabularyWordExistsInDB(Connection con, VocabularyWord vocabularyWord) throws SQLException {
+    String sqlSelect = "SELECT Id FROM Vocabulary WHERE Value = ?";
+    PreparedStatement statement = con.prepareStatement(sqlSelect);
+    statement.setString(1, vocabularyWord.getValue());
+    ResultSet rs = statement.executeQuery();
 
-      return rs.next();
-    }
+    return rs.next();
   }
 }

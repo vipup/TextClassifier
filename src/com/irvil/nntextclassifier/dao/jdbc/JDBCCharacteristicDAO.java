@@ -37,7 +37,7 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
         Characteristic characteristic = new Characteristic(rs.getInt("Id"), rs.getString("Name"));
 
         // get all possible values
-        characteristic.setPossibleValues(getAllPossibleValues(characteristic));
+        characteristic.setPossibleValues(getAllPossibleValues(con, characteristic));
 
         characteristics.add(characteristic);
       }
@@ -57,7 +57,7 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
     }
 
     try (Connection con = connector.getConnection()) {
-      if (isCharacteristicExistsInDB(characteristic)) {
+      if (isCharacteristicExistsInDB(con, characteristic)) {
         throw new AlreadyExistsException("Characteristic already exists");
       }
 
@@ -77,7 +77,7 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
         //
 
         for (CharacteristicValue possibleValue : characteristic.getPossibleValues()) {
-          insertPossibleValue(characteristic, possibleValue);
+          insertPossibleValue(con, characteristic, possibleValue);
         }
       }
     } catch (SQLException ignored) {
@@ -86,52 +86,46 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
     return characteristic;
   }
 
-  private Set<CharacteristicValue> getAllPossibleValues(Characteristic characteristic) throws SQLException {
+  private Set<CharacteristicValue> getAllPossibleValues(Connection con, Characteristic characteristic) throws SQLException {
     Set<CharacteristicValue> possibleValues = new LinkedHashSet<>();
 
-    try (Connection con = connector.getConnection()) {
-      String sqlSelect = "SELECT Id, Value FROM CharacteristicsValues WHERE CharacteristicsNameId = ?";
-      PreparedStatement statement = con.prepareStatement(sqlSelect);
-      statement.setInt(1, characteristic.getId());
-      ResultSet rs = statement.executeQuery();
+    String sqlSelect = "SELECT Id, Value FROM CharacteristicsValues WHERE CharacteristicsNameId = ?";
+    PreparedStatement statement = con.prepareStatement(sqlSelect);
+    statement.setInt(1, characteristic.getId());
+    ResultSet rs = statement.executeQuery();
 
-      while (rs.next()) {
-        possibleValues.add(new CharacteristicValue(rs.getInt("Id"), rs.getString("Value")));
-      }
+    while (rs.next()) {
+      possibleValues.add(new CharacteristicValue(rs.getInt("Id"), rs.getString("Value")));
     }
 
     return possibleValues;
   }
 
-  private boolean isCharacteristicExistsInDB(Characteristic characteristic) throws SQLException {
-    try (Connection con = connector.getConnection()) {
-      String sqlSelect = "SELECT Id FROM CharacteristicsNames WHERE Name = ?";
-      PreparedStatement statement = con.prepareStatement(sqlSelect);
-      statement.setString(1, characteristic.getName());
-      ResultSet rs = statement.executeQuery();
+  private boolean isCharacteristicExistsInDB(Connection con, Characteristic characteristic) throws SQLException {
+    String sqlSelect = "SELECT Id FROM CharacteristicsNames WHERE Name = ?";
+    PreparedStatement statement = con.prepareStatement(sqlSelect);
+    statement.setString(1, characteristic.getName());
+    ResultSet rs = statement.executeQuery();
 
-      return rs.next();
-    }
+    return rs.next();
   }
 
-  private void insertPossibleValue(Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
+  private void insertPossibleValue(Connection con, Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
     if (characteristicValue != null &&
         !characteristicValue.getValue().equals("")) {
 
       // try to find Value in DB
-      int newCharacteristicValueId = searchCharacteristicPossibleValue(characteristic, characteristicValue);
+      int newCharacteristicValueId = searchCharacteristicPossibleValue(con, characteristic, characteristicValue);
 
       if (newCharacteristicValueId == -1) { // not found -> insert it
-        newCharacteristicValueId = getLastCharacteristicPossibleValueId(characteristic) + 1;
+        newCharacteristicValueId = getLastCharacteristicPossibleValueId(con, characteristic) + 1;
 
-        try (Connection con = connector.getConnection()) {
-          String sqlInsert = "INSERT INTO CharacteristicsValues (Id, CharacteristicsNameId, Value) VALUES (?, ?, ?)";
-          PreparedStatement statement = con.prepareStatement(sqlInsert);
-          statement.setInt(1, newCharacteristicValueId);
-          statement.setInt(2, characteristic.getId());
-          statement.setString(3, characteristicValue.getValue());
-          statement.executeUpdate();
-        }
+        String sqlInsert = "INSERT INTO CharacteristicsValues (Id, CharacteristicsNameId, Value) VALUES (?, ?, ?)";
+        PreparedStatement statement = con.prepareStatement(sqlInsert);
+        statement.setInt(1, newCharacteristicValueId);
+        statement.setInt(2, characteristic.getId());
+        statement.setString(3, characteristicValue.getValue());
+        statement.executeUpdate();
       }
 
       // set inserted row Id to CharacteristicValue
@@ -139,33 +133,29 @@ public class JDBCCharacteristicDAO implements CharacteristicDAO {
     }
   }
 
-  private int searchCharacteristicPossibleValue(Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
-    try (Connection con = connector.getConnection()) {
-      String sqlSelect = "SELECT Id FROM CharacteristicsValues WHERE CharacteristicsNameId = ? AND Value = ?";
+  private int searchCharacteristicPossibleValue(Connection con, Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
+    String sqlSelect = "SELECT Id FROM CharacteristicsValues WHERE CharacteristicsNameId = ? AND Value = ?";
 
-      PreparedStatement statement = con.prepareStatement(sqlSelect);
-      statement.setInt(1, characteristic.getId());
-      statement.setString(2, characteristicValue.getValue());
-      ResultSet rs = statement.executeQuery();
+    PreparedStatement statement = con.prepareStatement(sqlSelect);
+    statement.setInt(1, characteristic.getId());
+    statement.setString(2, characteristicValue.getValue());
+    ResultSet rs = statement.executeQuery();
 
-      if (rs.next()) {
-        return rs.getInt("Id");
-      }
+    if (rs.next()) {
+      return rs.getInt("Id");
     }
 
     return -1; // not found in Db
   }
 
-  private int getLastCharacteristicPossibleValueId(Characteristic characteristic) throws SQLException {
-    try (Connection con = connector.getConnection()) {
-      String sqlSelect = "SELECT MAX(Id) AS MaxID FROM CharacteristicsValues WHERE CharacteristicsNameId = ?";
-      PreparedStatement statement = con.prepareStatement(sqlSelect);
-      statement.setInt(1, characteristic.getId());
-      ResultSet rs = statement.executeQuery();
+  private int getLastCharacteristicPossibleValueId(Connection con, Characteristic characteristic) throws SQLException {
+    String sqlSelect = "SELECT MAX(Id) AS MaxID FROM CharacteristicsValues WHERE CharacteristicsNameId = ?";
+    PreparedStatement statement = con.prepareStatement(sqlSelect);
+    statement.setInt(1, characteristic.getId());
+    ResultSet rs = statement.executeQuery();
 
-      if (rs.next()) {
-        return rs.getInt("MaxID"); // last possible values id
-      }
+    if (rs.next()) {
+      return rs.getInt("MaxID"); // last possible values id
     }
 
     return 0; // possible values not found in DB

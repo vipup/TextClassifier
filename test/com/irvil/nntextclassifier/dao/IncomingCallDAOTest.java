@@ -6,6 +6,7 @@ import com.irvil.nntextclassifier.model.IncomingCall;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,25 +64,44 @@ public abstract class IncomingCallDAOTest {
   }
 
   @Test(expected = EmptyRecordException.class)
+  public void addNullList() throws Exception {
+    incomingCallDAO.addAll(null);
+  }
+
+  @Test(expected = EmptyRecordException.class)
+  public void addEmptyList() throws Exception {
+    incomingCallDAO.addAll(new ArrayList<>());
+  }
+
+  @Test(expected = EmptyRecordException.class)
   public void addNull() throws Exception {
-    incomingCallDAO.add(null);
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+    incomingCalls.add(null);
+    incomingCallDAO.addAll(incomingCalls);
   }
 
   @Test(expected = EmptyRecordException.class)
   public void addEmpty() throws Exception {
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
     characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 1"));
-    incomingCallDAO.add(new IncomingCall("", characteristics));
+
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+    incomingCalls.add(new IncomingCall("", characteristics));
+    incomingCallDAO.addAll(incomingCalls);
   }
 
   @Test(expected = EmptyRecordException.class)
   public void addCharacteristicsNull() throws Exception {
-    incomingCallDAO.add(new IncomingCall("text text", null));
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+    incomingCalls.add(new IncomingCall("text text", null));
+    incomingCallDAO.addAll(incomingCalls);
   }
 
   @Test(expected = EmptyRecordException.class)
   public void addCharacteristicsEmpty() throws Exception {
-    incomingCallDAO.add(new IncomingCall("text text", new HashMap<>()));
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+    incomingCalls.add(new IncomingCall("text text", new HashMap<>()));
+    incomingCallDAO.addAll(incomingCalls);
   }
 
   @Test(expected = NotExistsException.class)
@@ -89,7 +109,10 @@ public abstract class IncomingCallDAOTest {
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
     characteristics.put(new Characteristic("Module"), new CharacteristicValue("PM"));
     characteristics.put(new Characteristic("Test"), new CharacteristicValue("User 1"));
-    incomingCallDAO.add(new IncomingCall("text text", characteristics));
+
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+    incomingCalls.add(new IncomingCall("text text", characteristics));
+    incomingCallDAO.addAll(incomingCalls);
   }
 
   @Test(expected = NotExistsException.class)
@@ -97,7 +120,10 @@ public abstract class IncomingCallDAOTest {
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
     characteristics.put(new Characteristic("Module"), new CharacteristicValue("PM"));
     characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 4"));
-    incomingCallDAO.add(new IncomingCall("text text", characteristics));
+
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+    incomingCalls.add(new IncomingCall("text text", characteristics));
+    incomingCallDAO.addAll(incomingCalls);
   }
 
   @Test
@@ -105,28 +131,31 @@ public abstract class IncomingCallDAOTest {
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
     characteristics.put(new Characteristic("Module"), new CharacteristicValue("MM"));
     characteristics.put(new Characteristic("Handler"), new CharacteristicValue("User 1"));
-    incomingCallDAO.add(new IncomingCall("text2 text2", characteristics));
+
+    List<IncomingCall> incomingCalls = new ArrayList<>();
+    incomingCalls.add(new IncomingCall("text2 text2", characteristics));
+    incomingCallDAO.addAll(incomingCalls);
 
     // check record from DB
     //
 
-    List<IncomingCall> incomingCalls = incomingCallDAO.getAll();
+    List<IncomingCall> incomingCallsFromDB = incomingCallDAO.getAll();
 
     // check size
-    assertEquals(incomingCalls.size(), 4);
+    assertEquals(incomingCallsFromDB.size(), 4);
 
     // check text
     //
 
-    assertEquals(incomingCalls.get(3).getText(), "text2 text2");
+    assertEquals(incomingCallsFromDB.get(3).getText(), "text2 text2");
 
     // check characteristics
     //
 
-    assertEquals(incomingCalls.get(3).getCharacteristics().size(), 2);
-    assertEquals(incomingCalls.get(3).getCharacteristicValue(new Characteristic("Module")).getId(), 2);
-    assertEquals(incomingCalls.get(3).getCharacteristicValue(new Characteristic("Module")).getValue(), "MM");
-    assertEquals(incomingCalls.get(3).getCharacteristicValue(new Characteristic("Handler")).getId(), 1);
-    assertEquals(incomingCalls.get(3).getCharacteristicValue(new Characteristic("Handler")).getValue(), "User 1");
+    assertEquals(incomingCallsFromDB.get(3).getCharacteristics().size(), 2);
+    assertEquals(incomingCallsFromDB.get(3).getCharacteristicValue(new Characteristic("Module")).getId(), 2);
+    assertEquals(incomingCallsFromDB.get(3).getCharacteristicValue(new Characteristic("Module")).getValue(), "MM");
+    assertEquals(incomingCallsFromDB.get(3).getCharacteristicValue(new Characteristic("Handler")).getId(), 1);
+    assertEquals(incomingCallsFromDB.get(3).getCharacteristicValue(new Characteristic("Handler")).getValue(), "User 1");
   }
 }

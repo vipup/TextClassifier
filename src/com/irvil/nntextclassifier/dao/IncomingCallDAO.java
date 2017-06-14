@@ -7,5 +7,5 @@ import java.util.List;
 public interface IncomingCallDAO {
   List<IncomingCall> getAll();
 
-  void add(IncomingCall incomingCall) throws EmptyRecordException, NotExistsException;
+  void addAll(List<IncomingCall> incomingCalls) throws EmptyRecordException, NotExistsException;
 }

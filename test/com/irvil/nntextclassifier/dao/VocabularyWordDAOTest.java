@@ -4,6 +4,7 @@ import com.irvil.nntextclassifier.model.VocabularyWord;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -36,23 +37,44 @@ public abstract class VocabularyWordDAOTest {
   }
 
   @Test(expected = EmptyRecordException.class)
-  public void addNull() throws Exception {
-    vocabularyWordDAO.add(null);
+  public void addNullVocabulary() throws Exception {
+    vocabularyWordDAO.addAll(null);
   }
 
   @Test(expected = EmptyRecordException.class)
-  public void addEmpty() throws Exception {
-    vocabularyWordDAO.add(new VocabularyWord(""));
+  public void addEmptyVocabulary() throws Exception {
+    vocabularyWordDAO.addAll(new ArrayList<>());
+  }
+
+  @Test(expected = EmptyRecordException.class)
+  public void addNullWord() throws Exception {
+    List<VocabularyWord> vocabulary = new ArrayList<>();
+    vocabulary.add(new VocabularyWord("Test"));
+    vocabulary.add(null);
+    vocabularyWordDAO.addAll(vocabulary);
+  }
+
+  @Test(expected = EmptyRecordException.class)
+  public void addEmptyWord() throws Exception {
+    List<VocabularyWord> vocabulary = new ArrayList<>();
+    vocabulary.add(new VocabularyWord("Test"));
+    vocabulary.add(new VocabularyWord(""));
+    vocabularyWordDAO.addAll(vocabulary);
   }
 
   @Test(expected = AlreadyExistsException.class)
   public void addExisted() throws Exception {
-    vocabularyWordDAO.add(new VocabularyWord("Test 1"));
+    List<VocabularyWord> vocabulary = new ArrayList<>();
+    vocabulary.add(new VocabularyWord("Test"));
+    vocabulary.add(new VocabularyWord("Test 1")); // existed
+    vocabularyWordDAO.addAll(vocabulary);
   }
 
   @Test
   public void add() throws Exception {
-    vocabularyWordDAO.add(new VocabularyWord("Test 3"));
+    List<VocabularyWord> vocabulary = new ArrayList<>();
+    vocabulary.add(new VocabularyWord("Test 3"));
+    vocabularyWordDAO.addAll(vocabulary);
 
     // check record from DB
     //

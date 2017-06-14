@@ -114,22 +114,19 @@ class FirstStart implements Observable {
 
   void fillStorage(List<IncomingCall> incomingCalls) {
     fillVocabulary(incomingCalls);
-    notifyObservers("Vocabulary filled. Wait for Characteristics filling...");
     fillCharacteristics(incomingCalls);
-    notifyObservers("Characteristics filled. Wait for Incoming calls filling...");
     fillIncomingCalls(incomingCalls);
-    notifyObservers("Incoming calls filled. Wait for recognizer training...");
   }
 
   private void fillIncomingCalls(List<IncomingCall> incomingCalls) {
     // save incoming calls to Storage
     //
 
-    for (IncomingCall incomingCall : incomingCalls) {
-      try {
-        daoFactory.incomingCallDAO().add(incomingCall);
-      } catch (EmptyRecordException | NotExistsException ignored) {
-      }
+    try {
+      daoFactory.incomingCallDAO().addAll(incomingCalls);
+      notifyObservers("Incoming calls filled. Wait for recognizer training...");
+    } catch (EmptyRecordException | NotExistsException e) {
+      notifyObservers(e.getMessage());
     }
   }
 
@@ -142,9 +139,12 @@ class FirstStart implements Observable {
     for (Characteristic characteristic : characteristics) {
       try {
         daoFactory.characteristicDAO().addCharacteristic(characteristic);
-      } catch (EmptyRecordException | AlreadyExistsException ignored) {
+      } catch (EmptyRecordException | AlreadyExistsException e) {
+        notifyObservers(e.getMessage());
       }
     }
+
+    notifyObservers("Characteristics filled. Wait for Incoming calls filling...");
   }
 
   private Set<Characteristic> getCharacteristicsCatalog(List<IncomingCall> incomingCalls) {
@@ -167,28 +167,33 @@ class FirstStart implements Observable {
   }
 
   private void fillVocabulary(List<IncomingCall> incomingCalls) {
-    // create vocabulary from all Incoming Calls Texts
-    Set<String> vocabulary = getVocabularyFromIncomingCallsTexts(incomingCalls);
-
-    // save vocabulary words to Storage
+    // save vocabulary to Storage
     //
 
-    for (String word : vocabulary) {
-      try {
-        daoFactory.vocabularyWordDAO().add(new VocabularyWord(word));
-      } catch (EmptyRecordException | AlreadyExistsException ignored) {
-      }
+    try {
+      daoFactory.vocabularyWordDAO().addAll(getVocabularyFromIncomingCallsTexts(incomingCalls));
+      notifyObservers("Vocabulary filled. Wait for Characteristics filling...");
+    } catch (EmptyRecordException | AlreadyExistsException e) {
+      notifyObservers(e.getMessage());
     }
   }
 
-  private Set<String> getVocabularyFromIncomingCallsTexts(List<IncomingCall> incomingCalls) {
-    Set<String> vocabulary = new LinkedHashSet<>();
+  private List<VocabularyWord> getVocabularyFromIncomingCallsTexts(List<IncomingCall> incomingCalls) {
+    Set<String> uniqueValues = new LinkedHashSet<>();
+    List<VocabularyWord> vocabulary = new ArrayList<>();
 
     // add words (converted to n-gram) from all Incoming Calls Texts to vocabulary
     //
 
     for (IncomingCall incomingCall : incomingCalls) {
-      vocabulary.addAll(nGram.getNGram(incomingCall.getText()));
+      uniqueValues.addAll(nGram.getNGram(incomingCall.getText()));
+    }
+
+    // convert uniqueValues to Vocabulary
+    //
+
+    for (String uniqueValue : uniqueValues) {
+      vocabulary.add(new VocabularyWord(uniqueValue));
     }
 
     return vocabulary;
