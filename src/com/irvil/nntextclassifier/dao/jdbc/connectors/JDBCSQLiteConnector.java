@@ -15,15 +15,12 @@ public class JDBCSQLiteConnector implements JDBCConnector {
     this.dbName = dbName;
   }
 
-  public Connection getConnection() {
-    Connection dbConnection = null;
-
+  public Connection getConnection() throws SQLException {
     try {
       Class.forName("org.sqlite.JDBC");
-      dbConnection = DriverManager.getConnection("jdbc:sqlite:" + dbName);
-    } catch (ClassNotFoundException | SQLException ignored) {
+    } catch (ClassNotFoundException ignored) {
     }
 
-    return dbConnection;
+    return DriverManager.getConnection("jdbc:sqlite:" + dbName);
   }
 }
