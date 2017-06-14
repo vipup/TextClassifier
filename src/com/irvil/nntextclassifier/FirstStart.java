@@ -145,12 +145,11 @@ class FirstStart implements Observable {
     for (Characteristic characteristic : characteristics) {
       try {
         daoFactory.characteristicDAO().addCharacteristic(characteristic);
+        notifyObservers("Characteristics '" + characteristic.getName() + "' filled. Wait for Incoming calls filling...");
       } catch (EmptyRecordException | AlreadyExistsException e) {
         notifyObservers(e.getMessage());
       }
     }
-
-    notifyObservers("Characteristics filled. Wait for Incoming calls filling...");
   }
 
   private Set<Characteristic> getCharacteristicsCatalog(List<IncomingCall> incomingCalls) {
