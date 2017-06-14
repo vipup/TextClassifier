@@ -10,6 +10,8 @@ import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
+import com.irvil.nntextclassifier.observer.Observable;
+import com.irvil.nntextclassifier.observer.Observer;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -20,9 +22,10 @@ import java.io.IOException;
 import java.util.*;
 
 // todo: create tests
-class FirstStart {
+class FirstStart implements Observable {
   private DAOFactory daoFactory;
   private NGramStrategy nGram;
+  private List<Observer> observers = new ArrayList<>();
 
   FirstStart(DAOFactory daoFactory, NGramStrategy nGram) {
     if (daoFactory == null || nGram == null) {
@@ -47,10 +50,22 @@ class FirstStart {
 
     for (Characteristic characteristic : characteristics) {
       Recognizer recognizer = new Recognizer(characteristic, vocabulary, nGram);
+
+      // add all FirstStart observers to Recognizer observers
+      //
+
+      for (Observer o : observers) {
+        recognizer.addObserver(o);
+      }
+
+      // train and save recognizer
+      //
+
       recognizer.train(incomingCallsForTrain);
       recognizer.saveTrainedRecognizer(new File(pathToSave + "/" + recognizer.toString()));
     }
 
+    notifyObservers("\nPlease restart the program.");
     Recognizer.shutdown();
   }
 
@@ -58,6 +73,7 @@ class FirstStart {
     StorageCreator storageCreator = daoFactory.storageCreator();
     storageCreator.createStorage();
     storageCreator.clearStorage();
+    notifyObservers("Storage created. Wait for storage filling...");
   }
 
   List<IncomingCall> readXlsxFile(File xlsxFile) {
@@ -98,8 +114,11 @@ class FirstStart {
 
   void fillStorage(List<IncomingCall> incomingCalls) {
     fillVocabulary(incomingCalls);
+    notifyObservers("Vocabulary filled. Wait for Characteristics filling...");
     fillCharacteristics(incomingCalls);
+    notifyObservers("Characteristics filled. Wait for Incoming calls filling...");
     fillIncomingCalls(incomingCalls);
+    notifyObservers("Incoming calls filled. Wait for recognizer training...");
   }
 
   private void fillIncomingCalls(List<IncomingCall> incomingCalls) {
@@ -173,5 +192,22 @@ class FirstStart {
     }
 
     return vocabulary;
+  }
+
+  @Override
+  public void addObserver(Observer o) {
+    observers.add(o);
+  }
+
+  @Override
+  public void removeObserver(Observer o) {
+    observers.remove(o);
+  }
+
+  @Override
+  public void notifyObservers(String text) {
+    for (Observer o : observers) {
+      o.update(text);
+    }
   }
 }

@@ -5,6 +5,8 @@ import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
+import com.irvil.nntextclassifier.observer.Observable;
+import com.irvil.nntextclassifier.observer.Observer;
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.basic.BasicMLDataSet;
@@ -14,6 +16,7 @@ import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,13 +24,14 @@ import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
 // todo: create Test class
-public class Recognizer {
+public class Recognizer implements Observable {
   private final Characteristic characteristic;
   private final int inputLayerSize;
   private final int outputLayerSize;
   private final BasicNetwork network;
   private final List<VocabularyWord> vocabulary;
   private final NGramStrategy nGram;
+  private List<Observer> observers = new ArrayList<>();
 
   public Recognizer(File trainedNetwork, Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
     if (characteristic == null ||
@@ -56,6 +60,10 @@ public class Recognizer {
 
   public Recognizer(Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
     this(null, characteristic, vocabulary, nGram);
+  }
+
+  public static void shutdown() {
+    Encog.getInstance().shutdown();
   }
 
   private BasicNetwork createNeuralNetwork() {
@@ -117,6 +125,7 @@ public class Recognizer {
 
   public void saveTrainedRecognizer(File trainedNetwork) {
     saveObject(trainedNetwork, network);
+    notifyObservers("Trained Recognizer for Characteristics '" + characteristic.getName() + "' saved...");
   }
 
   public String getCharacteristicName() {
@@ -140,11 +149,11 @@ public class Recognizer {
 
     do {
       train.iteration();
-      // todo: add observer
-      System.out.println("Error: " + train.getError());
+      notifyObservers("Errors: " + String.format("%.2f", train.getError() * 100) + "%");
     } while (train.getError() > 0.01);
 
     train.finishTraining();
+    notifyObservers("Recognizer for Characteristics '" + characteristic.getName() + "' trained...");
   }
 
   private double[][] getInput(List<IncomingCall> incomingCalls) {
@@ -221,7 +230,20 @@ public class Recognizer {
     return characteristic.getName() + "RecognizerNeuralNetwork";
   }
 
-  public static void shutdown() {
-    Encog.getInstance().shutdown();
+  @Override
+  public void addObserver(Observer o) {
+    observers.add(o);
+  }
+
+  @Override
+  public void removeObserver(Observer o) {
+    observers.remove(o);
+  }
+
+  @Override
+  public void notifyObservers(String text) {
+    for (Observer o : observers) {
+      o.update(text);
+    }
   }
 }

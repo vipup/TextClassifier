@@ -78,7 +78,7 @@ public class MainWindow extends Application {
     //
 
     if (!isDBFilled(daoFactory) || !loadLearnedRecognizers(daoFactory)) {
-      infoMsg("You start program first time. Please, choose XLSX file with data for recognizer learning.");
+      infoMsg("You start program first time. Please, choose XLSX file with data to recognizer training.");
 
       File file = openFileDialogBox();
 
@@ -87,23 +87,18 @@ public class MainWindow extends Application {
         logWindow.show();
 
         // handle file and update log window in separate thread
+        // log window do not update if we run this code in main thread
         //
 
         Task<Void> task = new Task<Void>() {
           @Override
           protected Void call() throws Exception {
             FirstStart firstStart = new FirstStart(daoFactory, new FilteredUnigram());
+            firstStart.addObserver(logWindow);
 
             firstStart.createStorage();
-            logWindow.addText("Storage created. Wait for storage filling...");
-
             firstStart.fillStorage(firstStart.readXlsxFile(file));
-            logWindow.addText("Storage filled. Wait for recognizer training...");
-
             firstStart.trainAndSaveRecognizers(config.getDbPath());
-            logWindow.addText("Recognizer trained. All tasks finished.");
-            logWindow.addText("\nPlease restart the program.");
-
             return null;
           }
         };
@@ -112,7 +107,7 @@ public class MainWindow extends Application {
 
       return;
     }
-    // todo: change learn to train
+
     // everything is ok (Storage is filled, recognizer is trained) -> start program
     buildForm(primaryStage);
   }
@@ -232,8 +227,8 @@ public class MainWindow extends Application {
         }
       } catch (Exception e) {
         // it is possible if DB was edited manually
-        errorMsg("It seems that learned recognizer does not match Characteristics and Vocabulary. " +
-            "You need to relearn recognizer.");
+        errorMsg("It seems that trained recognizer does not match Characteristics and Vocabulary. " +
+            "You need to retrain recognizer.");
       }
 
       lblCharacteristics.setText(recognizedCharacteristics.toString());
