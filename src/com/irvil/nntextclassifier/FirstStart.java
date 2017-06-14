@@ -66,6 +66,7 @@ class FirstStart implements Observable {
     }
 
     notifyObservers("\nPlease restart the program.");
+    //todo: fix exceptions
     Recognizer.shutdown();
   }
 
@@ -108,11 +109,13 @@ class FirstStart implements Observable {
           incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
         }
       }
-    } catch (IOException ignored) {
 
+      return incomingCalls;
+    } catch (IOException e) {
+      notifyObservers(e.getMessage());
     }
 
-    return incomingCalls;
+    return null;
   }
 
   void fillStorage(List<IncomingCall> incomingCalls) {
