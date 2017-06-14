@@ -12,6 +12,7 @@ import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -82,19 +83,37 @@ public class MainWindow extends Application {
       File file = openFileDialogBox();
 
       if (file != null) {
-        FirstStart firstStart = new FirstStart(daoFactory, new FilteredUnigram());
-        firstStart.createStorage();
-        firstStart.fillStorage(firstStart.readXlsxFile(file));
-        firstStart.trainAndSaveRecognizers(config.getDbPath());
+        LogWindow logWindow = new LogWindow();
+        logWindow.show();
 
-        // todo: add log window
+        // handle file and update log window in separate thread
+        //
+
+        Task<Void> task = new Task<Void>() {
+          @Override
+          protected Void call() throws Exception {
+            FirstStart firstStart = new FirstStart(daoFactory, new FilteredUnigram());
+
+            firstStart.createStorage();
+            logWindow.addText("Storage created. Wait for storage filling...");
+
+            firstStart.fillStorage(firstStart.readXlsxFile(file));
+            logWindow.addText("Storage filled. Wait for recognizer training...");
+
+            firstStart.trainAndSaveRecognizers(config.getDbPath());
+            logWindow.addText("Recognizer trained. All tasks finished.");
+            logWindow.addText("\nPlease restart the program.");
+
+            return null;
+          }
+        };
+        new Thread(task).start();
       }
 
-      Platform.exit();
       return;
     }
-
-    // start program
+    // todo: change learn to train
+    // everything is ok (Storage is filled, recognizer is trained) -> start program
     buildForm(primaryStage);
   }
 
