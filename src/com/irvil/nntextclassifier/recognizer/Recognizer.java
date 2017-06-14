@@ -73,7 +73,7 @@ public class Recognizer implements Observable {
     network.addLayer(new BasicLayer(null, true, inputLayerSize));
 
     // hidden layer
-    network.addLayer(new BasicLayer(new ActivationSigmoid(), true, inputLayerSize / 3));
+    network.addLayer(new BasicLayer(new ActivationSigmoid(), true, inputLayerSize / 2));
 
     // output layer
     network.addLayer(new BasicLayer(new ActivationSigmoid(), false, outputLayerSize));

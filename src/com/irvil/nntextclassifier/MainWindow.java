@@ -80,7 +80,7 @@ public class MainWindow extends Application {
     //
 
     if (!isDBFilled(daoFactory) || !loadLearnedRecognizers(daoFactory, nGramStrategy)) {
-      infoMsg("You start program first time. Please, choose XLSX file with data to recognizer training.");
+      infoMsg("You start program first time. Please, choose XLSX file with data for recognizer training.");
 
       File file = openFileDialogBox();
 
