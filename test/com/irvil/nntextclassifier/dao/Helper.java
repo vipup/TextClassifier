@@ -9,7 +9,7 @@ import java.util.*;
 
 class Helper {
   static void fillStorageWithTestData(StorageCreator storageCreator, CharacteristicDAO characteristicDAO, IncomingCallDAO incomingCallDAO, VocabularyWordDAO vocabularyWordDAO) throws Exception {
-    //storageCreator.createStorage();
+    storageCreator.createStorage();
     storageCreator.clearStorage();
 
     // fill Module characteristic
