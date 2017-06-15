@@ -101,6 +101,7 @@ public class MainWindow extends Application {
             firstStart.createStorage();
             firstStart.fillStorage(firstStart.readXlsxFile(file));
             firstStart.trainAndSaveRecognizers(config.getDbPath());
+            logWindow.update("\nPlease restart the program.");
             return null;
           }
         };

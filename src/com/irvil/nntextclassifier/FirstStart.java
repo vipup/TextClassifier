@@ -65,8 +65,6 @@ class FirstStart implements Observable {
       recognizer.saveTrainedRecognizer(new File(pathToSave + "/" + recognizer.toString()));
     }
 
-    notifyObservers("\nPlease restart the program.");
-    //todo: fix exceptions
     Recognizer.shutdown();
   }
 
