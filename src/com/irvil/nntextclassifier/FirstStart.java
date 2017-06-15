@@ -74,7 +74,7 @@ class FirstStart implements Observable {
     StorageCreator storageCreator = daoFactory.storageCreator();
     storageCreator.createStorage();
     storageCreator.clearStorage();
-    notifyObservers("Storage created. Wait for storage filling...");
+    notifyObservers("Storage created. Wait...");
   }
 
   List<IncomingCall> readXlsxFile(File xlsxFile) {
@@ -130,7 +130,7 @@ class FirstStart implements Observable {
 
     try {
       daoFactory.incomingCallDAO().addAll(incomingCalls);
-      notifyObservers("Incoming calls filled. Wait for recognizer training...");
+      notifyObservers("Incoming calls saved. Wait...");
     } catch (EmptyRecordException | NotExistsException e) {
       notifyObservers(e.getMessage());
     }
@@ -145,7 +145,7 @@ class FirstStart implements Observable {
     for (Characteristic characteristic : characteristics) {
       try {
         daoFactory.characteristicDAO().addCharacteristic(characteristic);
-        notifyObservers("Characteristics '" + characteristic.getName() + "' filled. Wait for Incoming calls filling...");
+        notifyObservers("Characteristics '" + characteristic.getName() + "' saved. Wait...");
       } catch (EmptyRecordException | AlreadyExistsException e) {
         notifyObservers(e.getMessage());
       }
@@ -177,7 +177,7 @@ class FirstStart implements Observable {
 
     try {
       daoFactory.vocabularyWordDAO().addAll(getVocabularyFromIncomingCallsTexts(incomingCalls));
-      notifyObservers("Vocabulary filled. Wait for Characteristics filling...");
+      notifyObservers("Vocabulary saved. Wait...");
     } catch (EmptyRecordException | AlreadyExistsException e) {
       notifyObservers(e.getMessage());
     }

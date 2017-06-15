@@ -125,7 +125,7 @@ public class Recognizer implements Observable {
 
   public void saveTrainedRecognizer(File trainedNetwork) {
     saveObject(trainedNetwork, network);
-    notifyObservers("Trained Recognizer for Characteristics '" + characteristic.getName() + "' saved...");
+    notifyObservers("Trained Recognizer for Characteristics '" + characteristic.getName() + "' saved. Wait...");
   }
 
   public String getCharacteristicName() {
@@ -149,11 +149,11 @@ public class Recognizer implements Observable {
 
     do {
       train.iteration();
-      notifyObservers("Errors: " + String.format("%.2f", train.getError() * 100) + "%");
+      notifyObservers("Training Recognizer for Characteristics '" + characteristic.getName() + "'. Errors: " + String.format("%.2f", train.getError() * 100) + "%. Wait...");
     } while (train.getError() > 0.01);
 
     train.finishTraining();
-    notifyObservers("Recognizer for Characteristics '" + characteristic.getName() + "' trained...");
+    notifyObservers("Recognizer for Characteristics '" + characteristic.getName() + "' trained. Wait...");
   }
 
   private double[][] getInput(List<IncomingCall> incomingCalls) {
