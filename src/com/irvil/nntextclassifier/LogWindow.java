@@ -1,6 +1,7 @@
 package com.irvil.nntextclassifier;
 
 import com.irvil.nntextclassifier.observer.Observer;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
@@ -29,6 +30,6 @@ class LogWindow implements Observer {
 
   @Override
   public void update(String text) {
-    textAreaLog.appendText(text + "\n");
+    Platform.runLater(() -> textAreaLog.appendText(text + "\n"));
   }
 }
