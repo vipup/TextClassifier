@@ -13,7 +13,6 @@ import com.irvil.nntextclassifier.ngram.NGramStrategySimpleFactory;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -92,9 +91,9 @@ public class MainWindow extends Application {
         // log window do not update if we run this code in main thread
         //
 
-        Task<Void> task = new Task<Void>() {
+        Thread t = new Thread() {
           @Override
-          protected Void call() throws Exception {
+          public void run() {
             FirstStart firstStart = new FirstStart(daoFactory, nGramStrategy);
             firstStart.addObserver(logWindow);
 
@@ -102,10 +101,11 @@ public class MainWindow extends Application {
             firstStart.fillStorage(firstStart.readXlsxFile(file));
             firstStart.trainAndSaveRecognizers(config.getDbPath());
             logWindow.update("\nPlease restart the program.");
-            return null;
           }
         };
-        new Thread(task).start();
+
+        t.setUncaughtExceptionHandler((th, ex) -> logWindow.update(ex.toString()));
+        t.start();
       }
 
       return;
