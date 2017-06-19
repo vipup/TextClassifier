@@ -79,7 +79,7 @@ class FirstStart implements Observable {
     List<IncomingCall> incomingCalls = new ArrayList<>();
 
     try (XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile))) {
-      XSSFSheet sheet = excelFile.getSheetAt(1);
+      XSSFSheet sheet = excelFile.getSheetAt(0);
 
       // create Characteristics catalog
       // first row contains Characteristics names from second to last columns
