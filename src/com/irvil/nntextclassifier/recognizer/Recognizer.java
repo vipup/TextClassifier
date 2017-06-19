@@ -14,6 +14,7 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.persist.PersistError;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,7 +55,11 @@ public class Recognizer implements Observable {
       this.network = createNeuralNetwork();
     } else {
       // load neural network from file
-      this.network = (BasicNetwork) loadObject(trainedNetwork);
+      try {
+        this.network = (BasicNetwork) loadObject(trainedNetwork);
+      } catch (PersistError e) {
+        throw new IllegalArgumentException();
+      }
     }
   }
 
