@@ -216,13 +216,11 @@ public class Recognizer implements Observable {
   }
 
   private VocabularyWord findWordInVocabulary(String word) {
-    for (VocabularyWord vw : vocabulary) {
-      if (vw.getValue().equals(word)) {
-        return vw;
-      }
+    try {
+      return vocabulary.get(vocabulary.indexOf(new VocabularyWord(word)));
+    } catch (NullPointerException | IndexOutOfBoundsException e) {
+      return null;
     }
-
-    return null;
   }
 
   @Override

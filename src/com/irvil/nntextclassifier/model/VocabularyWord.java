@@ -20,4 +20,14 @@ public class VocabularyWord {
   public String getValue() {
     return value;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return ((o instanceof VocabularyWord) && (this.value.equals(((VocabularyWord) o).getValue())));
+  }
+
+  @Override
+  public int hashCode() {
+    return this.value.hashCode();
+  }
 }
