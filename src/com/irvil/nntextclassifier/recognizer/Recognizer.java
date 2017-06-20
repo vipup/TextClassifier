@@ -24,7 +24,6 @@ import java.util.Set;
 import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
-// todo: create Test class
 public class Recognizer implements Observable {
   private final Characteristic characteristic;
   private final int inputLayerSize;
