@@ -2,9 +2,6 @@ package com.irvil.nntextclassifier;
 
 import com.irvil.nntextclassifier.dao.*;
 import com.irvil.nntextclassifier.dao.factories.DAOFactory;
-import com.irvil.nntextclassifier.dao.factories.JDBCDAOFactory;
-import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
-import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.IncomingCall;
@@ -31,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+
+// todo: analyze all methods
 public class MainWindow extends Application {
   private LogWindow logWindow;
   private Config config = Config.getInstance();
@@ -71,7 +70,7 @@ public class MainWindow extends Application {
     // create DAO factory and NGramStrategy using settings from config file
     //
 
-    daoFactory = getDaoFactory();
+    daoFactory = DAOFactory.getDaoFactory(config);
     nGramStrategy = NGramStrategySimpleFactory.getStrategy(config.getNGramStrategy());
 
     if (daoFactory == null || nGramStrategy == null) {
@@ -167,33 +166,6 @@ public class MainWindow extends Application {
 
   private boolean isDBFolderExists() {
     return new File(config.getDbPath()).exists();
-  }
-
-  private DAOFactory getDaoFactory() {
-    DAOFactory daoFactory = null;
-
-    // create DAO factory depends on config values
-    //
-
-    try {
-      if (config.getDaoType().equals("jdbc")) {
-        // create connector depends on config value
-        //
-
-        JDBCConnector jdbcConnector = null;
-
-        if (config.getDBMSType().equals("sqlite")) {
-          jdbcConnector = new JDBCSQLiteConnector(config.getDbPath() + "/" + config.getSQLiteDbFileName());
-        }
-
-        // create factory
-        daoFactory = new JDBCDAOFactory(jdbcConnector);
-      }
-    } catch (IllegalArgumentException e) {
-      return null;
-    }
-
-    return daoFactory;
   }
 
   private void errorMsg(String text) {
@@ -326,8 +298,8 @@ public class MainWindow extends Application {
     primaryStage.show();
   }
 
-// Event handlers
-//
+  // Event handlers
+  //
 
   private class RecognizeBtnPressEvent implements EventHandler<ActionEvent> {
     @Override

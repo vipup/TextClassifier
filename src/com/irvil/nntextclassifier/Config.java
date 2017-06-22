@@ -32,23 +32,23 @@ public class Config {
     return properties.size() > 0;
   }
 
-  String getDbPath() {
+  public String getDbPath() {
     return getProperty("db_path");
   }
 
-  String getDaoType() {
+  public String getDaoType() {
     return getProperty("dao_type");
   }
 
-  String getDBMSType() {
+  public String getDBMSType() {
     return getProperty("dbms_type");
   }
 
-  String getSQLiteDbFileName() {
+  public String getSQLiteDbFileName() {
     return getProperty("sqlite_db_filename");
   }
 
-  String getNGramStrategy() {
+  public String getNGramStrategy() {
     return getProperty("ngram_strategy");
   }
 
