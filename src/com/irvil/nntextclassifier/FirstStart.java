@@ -77,47 +77,6 @@ class FirstStart implements Observable {
     notifyObservers("Storage created. Wait...");
   }
 
-  List<IncomingCall> readXlsxFile(File xlsxFile) {
-    List<IncomingCall> incomingCalls = new ArrayList<>();
-
-    try (XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile))) {
-      XSSFSheet sheet = excelFile.getSheetAt(0);
-
-      // create Characteristics catalog
-      // first row contains Characteristics names from second to last columns
-      //
-
-      List<Characteristic> characteristics = new ArrayList<>();
-
-      for (int i = 1; i < sheet.getRow(0).getLastCellNum(); i++) {
-        characteristics.add(new Characteristic(sheet.getRow(0).getCell(i).getStringCellValue()));
-      }
-
-      // fill IncomingCalls
-      // start from second row
-      //
-
-      for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-        Map<Characteristic, CharacteristicValue> characteristicsValues = new HashMap<>();
-
-        for (int j = 1; j < sheet.getRow(i).getLastCellNum(); j++) {
-          characteristicsValues.put(characteristics.get(j - 1), new CharacteristicValue(sheet.getRow(i).getCell(j).getStringCellValue()));
-        }
-
-        // exclude empty rows
-        if (!sheet.getRow(i).getCell(0).getStringCellValue().equals("")) {
-          incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
-        }
-      }
-
-      return incomingCalls;
-    } catch (IOException e) {
-      notifyObservers(e.getMessage());
-    }
-
-    return null;
-  }
-
   void fillStorage(List<IncomingCall> incomingCalls) {
     fillVocabulary(incomingCalls);
     fillCharacteristics(incomingCalls);

@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class VocabularyBuilder {
+class VocabularyBuilder {
   private NGramStrategy nGram;
 
-  public VocabularyBuilder(NGramStrategy nGram) {
+  VocabularyBuilder(NGramStrategy nGram) {
     this.nGram = nGram;
   }
 

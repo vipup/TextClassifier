@@ -27,6 +27,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,7 +99,13 @@ public class MainWindow extends Application {
             firstStart.addObserver(logWindow);
 
             firstStart.createStorage();
-            firstStart.fillStorage(firstStart.readXlsxFile(file));
+
+            try {
+              firstStart.fillStorage(new FileToIncomingCallsConverter().readXlsxFile(file));
+            } catch (IOException e) {
+              logWindow.update(e.getMessage());
+            }
+
             firstStart.trainAndSaveRecognizers(config.getDbPath());
             logWindow.update("\nPlease restart the program.");
           }
