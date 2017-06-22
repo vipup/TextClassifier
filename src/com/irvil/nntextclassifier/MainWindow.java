@@ -79,10 +79,13 @@ public class MainWindow extends Application {
       return;
     }
 
+    List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
+    List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
+
     // check if it is first start
     //
 
-    if (!isDBFilled() || !loadLearnedRecognizers()) {
+    if (!loadLearnedRecognizers(characteristics, vocabulary)) {
       infoMsg("You start program first time. Please, choose XLSX file with data for recognizer training.");
 
       File file = openFileDialogBox();
@@ -209,19 +212,15 @@ public class MainWindow extends Application {
     alert.showAndWait();
   }
 
-  private boolean isDBFilled() {
-    return (daoFactory.characteristicDAO().getAllCharacteristics().size() != 0 &&
-        daoFactory.vocabularyWordDAO().getAll().size() != 0);
-  }
+  private boolean loadLearnedRecognizers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
+    if (characteristics.size() == 0 || vocabulary.size() == 0) {
+      return false;
+    }
 
-  private boolean loadLearnedRecognizers() {
+    // load trained recognizers for each Characteristic from DB
+    //
+
     try {
-      List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
-      List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
-
-      // load trained recognizers for each Characteristic from DB
-      //
-
       for (Characteristic characteristic : characteristics) {
         File trainedRecognizer = new File(config.getDbPath() + "/" + characteristic.getName() + "RecognizerNeuralNetwork");
         recognizers.add(new Recognizer(trainedRecognizer, characteristic, vocabulary, nGramStrategy));
@@ -238,9 +237,6 @@ public class MainWindow extends Application {
   }
 
   private void trainAndSaveRecognizers(List<IncomingCall> incomingCallsForTrain) {
-    // train Recognizer for each Characteristic from DB
-    //
-
     for (Recognizer recognizer : recognizers) {
       recognizer.train(incomingCallsForTrain);
       recognizer.saveTrainedRecognizer(new File(config.getDbPath() + "/" + recognizer.toString()));
@@ -266,9 +262,6 @@ public class MainWindow extends Application {
   private List<Characteristic> saveCharacteristicsToStorage(List<IncomingCall> incomingCalls) {
     CharacteristicDAO characteristicDAO = daoFactory.characteristicDAO();
     Set<Characteristic> characteristics = getCharacteristicsCatalog(incomingCalls);
-
-    // save characteristics to Storage
-    //
 
     for (Characteristic characteristic : characteristics) {
       try {
