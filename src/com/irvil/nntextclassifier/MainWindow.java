@@ -1,5 +1,6 @@
 package com.irvil.nntextclassifier;
 
+import com.irvil.nntextclassifier.dao.*;
 import com.irvil.nntextclassifier.dao.factories.DAOFactory;
 import com.irvil.nntextclassifier.dao.factories.JDBCDAOFactory;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
@@ -28,11 +29,13 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MainWindow extends Application {
+  private LogWindow logWindow;
   private Config config = Config.getInstance();
+  private DAOFactory daoFactory;
+  private NGramStrategy nGramStrategy;
 
   private FlowPane root;
   private TextArea textAreaIncomingCall;
@@ -59,7 +62,7 @@ public class MainWindow extends Application {
     //
 
     if (!isDBFolderExists()) {
-      if (!FirstStart.createDbFolder(config.getDbPath())) {
+      if (!createDbFolder(config.getDbPath())) {
         errorMsg("Can't create folder.");
         return;
       }
@@ -68,8 +71,8 @@ public class MainWindow extends Application {
     // create DAO factory and NGramStrategy using settings from config file
     //
 
-    DAOFactory daoFactory = getDaoFactory();
-    NGramStrategy nGramStrategy = NGramStrategySimpleFactory.getStrategy(config.getNGramStrategy());
+    daoFactory = getDaoFactory();
+    nGramStrategy = NGramStrategySimpleFactory.getStrategy(config.getNGramStrategy());
 
     if (daoFactory == null || nGramStrategy == null) {
       errorMsg("Oops, it seems there is an error in config file.");
@@ -79,13 +82,13 @@ public class MainWindow extends Application {
     // check if it is first start
     //
 
-    if (!isDBFilled(daoFactory) || !loadLearnedRecognizers(daoFactory, nGramStrategy)) {
+    if (!isDBFilled() || !loadLearnedRecognizers()) {
       infoMsg("You start program first time. Please, choose XLSX file with data for recognizer training.");
 
       File file = openFileDialogBox();
 
       if (file != null) {
-        LogWindow logWindow = new LogWindow();
+        logWindow = new LogWindow();
         logWindow.show();
 
         // handle file and update log window in separate thread
@@ -95,18 +98,34 @@ public class MainWindow extends Application {
         Thread t = new Thread() {
           @Override
           public void run() {
-            FirstStart firstStart = new FirstStart(daoFactory, nGramStrategy);
-            firstStart.addObserver(logWindow);
+            createStorage();
 
-            firstStart.createStorage();
+            // read incoming calls from file
+            //
+
+            List<IncomingCall> incomingCalls = null;
 
             try {
-              firstStart.fillStorage(new FileToIncomingCallsConverter().readXlsxFile(file));
+              incomingCalls = new FileToIncomingCallsConverter().readXlsxFile(file);
             } catch (IOException e) {
               logWindow.update(e.getMessage());
             }
 
-            firstStart.trainAndSaveRecognizers(config.getDbPath());
+            // save data to storage
+            //
+
+            List<VocabularyWord> vocabulary = saveVocabularyToStorage(incomingCalls);
+            List<Characteristic> characteristics = saveCharacteristicsToStorage(incomingCalls);
+            List<IncomingCall> incomingCallsForTrain = saveIncomingCallsToStorage(incomingCalls);
+
+            // create and train recognizers
+            //
+
+            createRecognizers(characteristics, vocabulary);
+            trainAndSaveRecognizers(incomingCallsForTrain);
+
+            //
+
             logWindow.update("\nPlease restart the program.");
           }
         };
@@ -120,6 +139,21 @@ public class MainWindow extends Application {
 
     // everything is ok (Storage is filled, recognizer is trained) -> start program
     buildForm(primaryStage);
+  }
+
+  private void createRecognizers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
+    for (Characteristic characteristic : characteristics) {
+      Recognizer recognizer = new Recognizer(characteristic, vocabulary, nGramStrategy);
+      recognizer.addObserver(logWindow);
+      recognizers.add(recognizer);
+    }
+  }
+
+  private void createStorage() {
+    StorageCreator storageCreator = daoFactory.storageCreator();
+    storageCreator.createStorage();
+    storageCreator.clearStorage();
+    logWindow.update("Storage created. Wait...");
   }
 
   private File openFileDialogBox() {
@@ -175,14 +209,12 @@ public class MainWindow extends Application {
     alert.showAndWait();
   }
 
-  private boolean isDBFilled(DAOFactory daoFactory) {
-    List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
-    List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
-
-    return (characteristics.size() != 0 && vocabulary.size() != 0);
+  private boolean isDBFilled() {
+    return (daoFactory.characteristicDAO().getAllCharacteristics().size() != 0 &&
+        daoFactory.vocabularyWordDAO().getAll().size() != 0);
   }
 
-  private boolean loadLearnedRecognizers(DAOFactory daoFactory, NGramStrategy nGramStrategy) {
+  private boolean loadLearnedRecognizers() {
     try {
       List<Characteristic> characteristics = daoFactory.characteristicDAO().getAllCharacteristics();
       List<VocabularyWord> vocabulary = daoFactory.vocabularyWordDAO().getAll();
@@ -199,6 +231,89 @@ public class MainWindow extends Application {
     }
 
     return true;
+  }
+
+  private boolean createDbFolder(String path) {
+    return new File(path).mkdir();
+  }
+
+  private void trainAndSaveRecognizers(List<IncomingCall> incomingCallsForTrain) {
+    // train Recognizer for each Characteristic from DB
+    //
+
+    for (Recognizer recognizer : recognizers) {
+      recognizer.train(incomingCallsForTrain);
+      recognizer.saveTrainedRecognizer(new File(config.getDbPath() + "/" + recognizer.toString()));
+    }
+
+    Recognizer.shutdown();
+  }
+
+  private List<IncomingCall> saveIncomingCallsToStorage(List<IncomingCall> incomingCalls) {
+    IncomingCallDAO incomingCallDAO = daoFactory.incomingCallDAO();
+
+    try {
+      incomingCallDAO.addAll(incomingCalls);
+      logWindow.update("Incoming calls saved. Wait...");
+    } catch (EmptyRecordException | NotExistsException e) {
+      logWindow.update(e.getMessage());
+    }
+
+    // return incoming calls from DB
+    return incomingCallDAO.getAll();
+  }
+
+  private List<Characteristic> saveCharacteristicsToStorage(List<IncomingCall> incomingCalls) {
+    CharacteristicDAO characteristicDAO = daoFactory.characteristicDAO();
+    Set<Characteristic> characteristics = getCharacteristicsCatalog(incomingCalls);
+
+    // save characteristics to Storage
+    //
+
+    for (Characteristic characteristic : characteristics) {
+      try {
+        characteristicDAO.addCharacteristic(characteristic);
+        logWindow.update("Characteristics '" + characteristic.getName() + "' saved. Wait...");
+      } catch (EmptyRecordException | AlreadyExistsException e) {
+        logWindow.update(e.getMessage());
+      }
+    }
+
+    // return Characteristics with IDs
+    return characteristicDAO.getAllCharacteristics();
+  }
+
+  private Set<Characteristic> getCharacteristicsCatalog(List<IncomingCall> incomingCalls) {
+    Map<Characteristic, Characteristic> characteristics = new HashMap<>();
+
+    for (IncomingCall incomingCall : incomingCalls) {
+      // for all incoming calls characteristic values
+      //
+
+      for (Map.Entry<Characteristic, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
+        // add characteristic to catalog
+        characteristics.put(entry.getKey(), entry.getKey());
+
+        // add characteristic value to possible values
+        characteristics.get(entry.getKey()).addPossibleValue(entry.getValue());
+      }
+    }
+
+    return characteristics.keySet();
+  }
+
+  private List<VocabularyWord> saveVocabularyToStorage(List<IncomingCall> incomingCalls) {
+    VocabularyWordDAO vocabularyWordDAO = daoFactory.vocabularyWordDAO();
+
+    try {
+      vocabularyWordDAO.addAll(new VocabularyBuilder(nGramStrategy).getVocabulary(incomingCalls));
+      logWindow.update("Vocabulary saved. Wait...");
+    } catch (EmptyRecordException | AlreadyExistsException e) {
+      logWindow.update(e.getMessage());
+    }
+
+    // return vocabulary with IDs
+    return vocabularyWordDAO.getAll();
   }
 
   private void buildForm(Stage primaryStage) {
@@ -218,8 +333,8 @@ public class MainWindow extends Application {
     primaryStage.show();
   }
 
-  // Event handlers
-  //
+// Event handlers
+//
 
   private class RecognizeBtnPressEvent implements EventHandler<ActionEvent> {
     @Override
