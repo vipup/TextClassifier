@@ -17,6 +17,11 @@ class VocabularyBuilder {
   }
 
   List<VocabularyWord> getVocabulary(List<IncomingCall> incomingCalls) {
+    if (incomingCalls == null ||
+        incomingCalls.size() == 0) {
+      throw new IllegalArgumentException();
+    }
+
     Map<String, Integer> uniqueValues = new HashMap<>();
     List<VocabularyWord> vocabulary = new ArrayList<>();
 
@@ -39,7 +44,7 @@ class VocabularyBuilder {
     //
 
     for (Map.Entry<String, Integer> entry : uniqueValues.entrySet()) {
-      if (entry.getValue() > 3) {
+      if (entry.getValue() > 1) {
         vocabulary.add(new VocabularyWord(entry.getKey()));
       }
     }
