@@ -14,9 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// todo: add test
 class ExcelFileReader {
   List<ClassifiableText> xlsxToClassifiableTexts(File xlsxFile) throws IOException {
+    if (xlsxFile == null) {
+      throw new IllegalArgumentException();
+    }
+
     List<ClassifiableText> classifiableTexts = new ArrayList<>();
 
     try (XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile))) {
