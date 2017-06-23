@@ -28,8 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-
-// todo: analyze all methods
 public class MainWindow extends Application {
   private LogWindow logWindow;
   private Config config = Config.getInstance();
@@ -55,16 +53,6 @@ public class MainWindow extends Application {
     if (!config.isLoaded()) {
       errorMsg("Config file is not found or it is empty.");
       return;
-    }
-
-    // create Storage folder
-    //
-
-    if (!isDBFolderExists()) {
-      if (!createDbFolder(config.getDbPath())) {
-        errorMsg("Can't create folder.");
-        return;
-      }
     }
 
     // create DAO factory and NGramStrategy using settings from config file
@@ -101,17 +89,7 @@ public class MainWindow extends Application {
           @Override
           public void run() {
             createStorage();
-
-            // read classifiable text from file
-            //
-
-            List<ClassifiableText> classifiableTexts = null;
-
-            try {
-              classifiableTexts = new ExcelFileReader().xlsxToClassifiableTexts(file);
-            } catch (IOException e) {
-              logWindow.update(e.getMessage());
-            }
+            List<ClassifiableText> classifiableTexts = getClassifiableTexts(file);
 
             // save data to storage
             //
@@ -143,29 +121,10 @@ public class MainWindow extends Application {
     buildForm(primaryStage);
   }
 
-  private void createRecognizers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
-    for (Characteristic characteristic : characteristics) {
-      Recognizer recognizer = new Recognizer(characteristic, vocabulary, nGramStrategy);
-      recognizer.addObserver(logWindow);
-      recognizers.add(recognizer);
-    }
-  }
-
-  private void createStorage() {
-    StorageCreator storageCreator = daoFactory.storageCreator();
-    storageCreator.createStorage();
-    storageCreator.clearStorage();
-    logWindow.update("Storage created. Wait...");
-  }
-
   private File openFileDialogBox() {
     FileChooser fileChooser = new FileChooser();
     fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("*.xlsx", "*.xlsx"));
     return fileChooser.showOpenDialog(null);
-  }
-
-  private boolean isDBFolderExists() {
-    return new File(config.getDbPath()).exists();
   }
 
   private void errorMsg(String text) {
@@ -184,12 +143,40 @@ public class MainWindow extends Application {
     alert.showAndWait();
   }
 
+  private List<ClassifiableText> getClassifiableTexts(File file) {
+    List<ClassifiableText> classifiableTexts = new ArrayList<>();
+
+    try {
+      classifiableTexts = new ExcelFileReader().xlsxToClassifiableTexts(file);
+    } catch (IOException e) {
+      logWindow.update(e.getMessage());
+    }
+
+    return classifiableTexts;
+  }
+
+  private void createRecognizers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
+    for (Characteristic characteristic : characteristics) {
+      Recognizer recognizer = new Recognizer(characteristic, vocabulary, nGramStrategy);
+      recognizer.addObserver(logWindow);
+      recognizers.add(recognizer);
+    }
+  }
+
+  private void createStorage() {
+    StorageCreator storageCreator = daoFactory.storageCreator();
+    storageCreator.createStorageFolder(config.getDbPath());
+    storageCreator.createStorage();
+    storageCreator.clearStorage();
+    logWindow.update("Storage created. Wait...");
+  }
+
   private boolean loadLearnedRecognizers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
     if (characteristics.size() == 0 || vocabulary.size() == 0) {
       return false;
     }
 
-    // load trained recognizers for each Characteristic from DB
+    // load trained recognizers for each Characteristics
     //
 
     try {
@@ -204,13 +191,9 @@ public class MainWindow extends Application {
     return true;
   }
 
-  private boolean createDbFolder(String path) {
-    return new File(path).mkdir();
-  }
-
-  private void trainAndSaveRecognizers(List<ClassifiableText> classifiableTextForTrainForTrain) {
+  private void trainAndSaveRecognizers(List<ClassifiableText> classifiableTextForTrain) {
     for (Recognizer recognizer : recognizers) {
-      recognizer.train(classifiableTextForTrainForTrain);
+      recognizer.train(classifiableTextForTrain);
       recognizer.saveTrainedRecognizer(new File(config.getDbPath() + "/" + recognizer.toString()));
     }
 
@@ -232,8 +215,9 @@ public class MainWindow extends Application {
   }
 
   private List<Characteristic> saveCharacteristicsToStorage(List<ClassifiableText> classifiableTexts) {
-    CharacteristicDAO characteristicDAO = daoFactory.characteristicDAO();
     Set<Characteristic> characteristics = getCharacteristicsCatalog(classifiableTexts);
+
+    CharacteristicDAO characteristicDAO = daoFactory.characteristicDAO();
 
     for (Characteristic characteristic : characteristics) {
       try {
