@@ -88,7 +88,9 @@ public class MainWindow extends Application {
           @Override
           public void run() {
             createStorage();
-            List<ClassifiableText> classifiableTexts = getClassifiableTexts(file);
+
+            // read first sheet from a file
+            List<ClassifiableText> classifiableTexts = getClassifiableTexts(file, 1);
 
             // save data to storage
             //
@@ -102,8 +104,7 @@ public class MainWindow extends Application {
 
             createRecognizers(characteristics, vocabulary);
             trainAndSaveRecognizers(classifiableTextForTrain);
-
-            //
+            checkRecognizersAccuracy(file);
 
             logWindow.update("\nPlease restart the program.");
           }
@@ -118,6 +119,30 @@ public class MainWindow extends Application {
 
     // everything is ok (Storage is filled, recognizer is trained) -> start program
     buildForm(primaryStage);
+  }
+
+  private void checkRecognizersAccuracy(File file) {
+    logWindow.update("\n");
+
+    // read second sheet from a file
+    List<ClassifiableText> classifiableTexts = getClassifiableTexts(file, 2);
+
+    for (Recognizer recognizer : recognizers) {
+      Characteristic characteristic = new Characteristic(recognizer.getCharacteristicName());
+      int correctlyRecognized = 0;
+
+      for (ClassifiableText classifiableText : classifiableTexts) {
+        CharacteristicValue idealValue = classifiableText.getCharacteristicValue(characteristic);
+        CharacteristicValue recognizedValue = recognizer.recognize(classifiableText);
+
+        if (recognizedValue.getValue().equals(idealValue.getValue())) {
+          correctlyRecognized++;
+        }
+      }
+
+      double accuracy = ((double)correctlyRecognized / classifiableTexts.size()) * 100;
+      logWindow.update(String.format("Accuracy of Recognizer for '" + characteristic.getName() + "' characteristic: %.2f%%", accuracy));
+    }
   }
 
   private File openFileDialogBox() {
@@ -142,11 +167,11 @@ public class MainWindow extends Application {
     alert.showAndWait();
   }
 
-  private List<ClassifiableText> getClassifiableTexts(File file) {
+  private List<ClassifiableText> getClassifiableTexts(File file, int sheetNumber) {
     List<ClassifiableText> classifiableTexts = new ArrayList<>();
 
     try {
-      classifiableTexts = new ExcelFileReader().xlsxToClassifiableTexts(file);
+      classifiableTexts = new ExcelFileReader().xlsxToClassifiableTexts(file, sheetNumber);
     } catch (IOException e) {
       logWindow.update(e.getMessage());
     }

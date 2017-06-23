@@ -15,7 +15,7 @@ public class ExcelFileReaderTest {
 
   @Test
   public void xlsxToClassifiableTexts() throws Exception {
-    List<ClassifiableText> classifiableTexts = excelFileReader.xlsxToClassifiableTexts(new File("./test_db/test.xlsx"));
+    List<ClassifiableText> classifiableTexts = excelFileReader.xlsxToClassifiableTexts(new File("./test_db/test.xlsx"), 1);
 
     assertEquals(classifiableTexts.size(), 3);
 
@@ -37,11 +37,11 @@ public class ExcelFileReaderTest {
 
   @Test(expected = FileNotFoundException.class)
   public void xlsxToClassifiableTextsNotExistingFile() throws Exception {
-    excelFileReader.xlsxToClassifiableTexts(new File("./test_db/test1.xlsx"));
+    excelFileReader.xlsxToClassifiableTexts(new File("./test_db/test1.xlsx"), 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void xlsxToClassifiableTextsNotExistingFile1() throws Exception {
-    excelFileReader.xlsxToClassifiableTexts(null);
+    excelFileReader.xlsxToClassifiableTexts(null, 1);
   }
 }
