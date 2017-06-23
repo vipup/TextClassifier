@@ -7,8 +7,10 @@ public class NGramStrategySimpleFactory {
         return new Unigram();
       case "filtered_unigram":
         return new FilteredUnigram();
+      case "bigram":
+        return new Bigram(new Unigram());
       case "filtered_bigram":
-        return new FilteredBigram();
+        return new Bigram(new FilteredUnigram());
       default:
         return null;
     }
