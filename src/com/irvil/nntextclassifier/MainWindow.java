@@ -7,7 +7,6 @@ import com.irvil.nntextclassifier.model.CharacteristicValue;
 import com.irvil.nntextclassifier.model.ClassifiableText;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
-import com.irvil.nntextclassifier.ngram.NGramStrategySimpleFactory;
 import com.irvil.nntextclassifier.recognizer.Recognizer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -59,7 +58,7 @@ public class MainWindow extends Application {
     //
 
     daoFactory = DAOFactory.getDaoFactory(config);
-    nGramStrategy = NGramStrategySimpleFactory.getStrategy(config.getNGramStrategy());
+    nGramStrategy = NGramStrategy.getStrategy(config.getNGramStrategy());
 
     if (daoFactory == null || nGramStrategy == null) {
       errorMsg("Oops, it seems there is an error in config file.");
