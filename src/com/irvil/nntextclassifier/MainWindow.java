@@ -29,7 +29,7 @@ import java.util.*;
 
 public class MainWindow extends Application {
   private LogWindow logWindow;
-  private Config config = Config.getInstance();
+  private final Config config = Config.getInstance();
   private DAOFactory daoFactory;
   private NGramStrategy nGramStrategy;
 
@@ -38,7 +38,7 @@ public class MainWindow extends Application {
   private Button btnRecognize;
   private Label lblCharacteristics;
 
-  private List<Recognizer> recognizers = new ArrayList<>();
+  private final List<Recognizer> recognizers = new ArrayList<>();
 
   public static void main(String[] args) {
     launch(args);

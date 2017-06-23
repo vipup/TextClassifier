@@ -1,7 +1,7 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
-import com.irvil.nntextclassifier.dao.EmptyRecordException;
 import com.irvil.nntextclassifier.dao.ClassifiableTextDAO;
+import com.irvil.nntextclassifier.dao.EmptyRecordException;
 import com.irvil.nntextclassifier.dao.NotExistsException;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.model.Characteristic;

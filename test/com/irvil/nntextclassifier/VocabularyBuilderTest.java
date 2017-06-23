@@ -11,7 +11,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class VocabularyBuilderTest {
-  private VocabularyBuilder vocabularyBuilder = new VocabularyBuilder(new FilteredUnigram());
+  private final VocabularyBuilder vocabularyBuilder = new VocabularyBuilder(new FilteredUnigram());
 
   @Test
   public void getVocabulary() throws Exception {

@@ -2,7 +2,7 @@ package com.irvil.nntextclassifier.model;
 
 public class CharacteristicValue {
   private int id;
-  private String value;
+  private final String value;
 
   public CharacteristicValue(int id, String value) {
     this.id = id;

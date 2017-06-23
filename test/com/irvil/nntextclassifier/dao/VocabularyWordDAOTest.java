@@ -21,7 +21,7 @@ public abstract class VocabularyWordDAOTest {
     Helper.fillStorageWithTestData(storageCreator, characteristicDAO, classifiableTextDAO, vocabularyWordDAO);
   }
 
-  public abstract void initializeDAO();
+  protected abstract void initializeDAO();
 
   @Test
   public void getAll() throws Exception {

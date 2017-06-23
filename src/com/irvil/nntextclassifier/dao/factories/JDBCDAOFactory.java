@@ -5,15 +5,15 @@ import com.irvil.nntextclassifier.dao.ClassifiableTextDAO;
 import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCCharacteristicDAO;
-import com.irvil.nntextclassifier.dao.jdbc.JDBCDBCreator;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCClassifiableTextDAO;
+import com.irvil.nntextclassifier.dao.jdbc.JDBCDBCreator;
 import com.irvil.nntextclassifier.dao.jdbc.JDBCVocabularyWordDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 
 public class JDBCDAOFactory implements DAOFactory {
   private JDBCConnector connector;
 
-  public JDBCDAOFactory(JDBCConnector connector) {
+  JDBCDAOFactory(JDBCConnector connector) {
     if (connector == null) {
       throw new IllegalArgumentException();
     }

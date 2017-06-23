@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class Characteristic {
   private int id;
-  private String name;
+  private final String name;
   private Set<CharacteristicValue> possibleValues;
 
   private Characteristic(int id, String name, Set<CharacteristicValue> possibleValues) {

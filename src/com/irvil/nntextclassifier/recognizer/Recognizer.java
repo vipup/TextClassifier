@@ -31,7 +31,7 @@ public class Recognizer implements Observable {
   private final BasicNetwork network;
   private final List<VocabularyWord> vocabulary;
   private final NGramStrategy nGramStrategy;
-  private List<Observer> observers = new ArrayList<>();
+  private final List<Observer> observers = new ArrayList<>();
 
   public Recognizer(File trainedNetwork, Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGramStrategy) {
     if (characteristic == null ||

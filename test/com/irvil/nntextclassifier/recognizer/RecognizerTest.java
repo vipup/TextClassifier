@@ -19,8 +19,8 @@ public class RecognizerTest {
   private Recognizer recognizer;
   private Characteristic characteristic;
   private List<VocabularyWord> vocabulary;
-  private File trainedRecognizer = new File("./test_db/MethodRecognizerNeuralNetwork");
-  private NGramStrategy nGramStrategy = new FilteredUnigram();
+  private final File trainedRecognizer = new File("./test_db/MethodRecognizerNeuralNetwork");
+  private final NGramStrategy nGramStrategy = new FilteredUnigram();
 
   @Before
   public void loadFromFile() {

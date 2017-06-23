@@ -24,7 +24,7 @@ public abstract class CharacteristicDAOTest {
     Helper.fillStorageWithTestData(storageCreator, characteristicDAO, classifiableTextDAO, vocabularyWordDAO);
   }
 
-  public abstract void initializeDAO();
+  protected abstract void initializeDAO();
 
   @Test
   public void getAllCharacteristics() throws Exception {

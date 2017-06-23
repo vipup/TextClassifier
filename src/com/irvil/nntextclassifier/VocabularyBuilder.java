@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 class VocabularyBuilder {
-  private NGramStrategy nGramStrategy;
+  private final NGramStrategy nGramStrategy;
 
   VocabularyBuilder(NGramStrategy nGramStrategy) {
     this.nGramStrategy = nGramStrategy;

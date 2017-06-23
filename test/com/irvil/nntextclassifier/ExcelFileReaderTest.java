@@ -8,10 +8,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ExcelFileReaderTest {
-  private ExcelFileReader excelFileReader = new ExcelFileReader();
+  private final ExcelFileReader excelFileReader = new ExcelFileReader();
 
   @Test
   public void xlsxToClassifiableTexts() throws Exception {
