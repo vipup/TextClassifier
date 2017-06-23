@@ -2,7 +2,7 @@ package com.irvil.nntextclassifier;
 
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
-import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.ClassifiableText;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -14,9 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class FileToIncomingCallsConverter {
-  List<IncomingCall> readXlsxFile(File xlsxFile) throws IOException {
-    List<IncomingCall> incomingCalls = new ArrayList<>();
+// todo: add test
+class ExcelFileReader {
+  List<ClassifiableText> xlsxToClassifiableTexts(File xlsxFile) throws IOException {
+    List<ClassifiableText> classifiableTexts = new ArrayList<>();
 
     try (XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile))) {
       XSSFSheet sheet = excelFile.getSheetAt(0);
@@ -31,7 +32,7 @@ class FileToIncomingCallsConverter {
         characteristics.add(new Characteristic(sheet.getRow(0).getCell(i).getStringCellValue()));
       }
 
-      // fill IncomingCalls
+      // fill ClassifiableTexts
       // start from second row
       //
 
@@ -44,11 +45,11 @@ class FileToIncomingCallsConverter {
 
         // exclude empty rows
         if (!sheet.getRow(i).getCell(0).getStringCellValue().equals("")) {
-          incomingCalls.add(new IncomingCall(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
+          classifiableTexts.add(new ClassifiableText(sheet.getRow(i).getCell(0).getStringCellValue(), characteristicsValues));
         }
       }
 
-      return incomingCalls;
+      return classifiableTexts;
     }
   }
 }

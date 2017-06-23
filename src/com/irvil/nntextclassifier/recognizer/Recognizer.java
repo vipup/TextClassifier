@@ -2,7 +2,7 @@ package com.irvil.nntextclassifier.recognizer;
 
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
-import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.ClassifiableText;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import com.irvil.nntextclassifier.observer.Observable;
@@ -88,11 +88,11 @@ public class Recognizer implements Observable {
     return network;
   }
 
-  public CharacteristicValue recognize(IncomingCall incomingCall) {
+  public CharacteristicValue recognize(ClassifiableText classifiableText) {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
-    network.compute(getTextAsVectorOfWords(incomingCall), output);
+    network.compute(getTextAsVectorOfWords(classifiableText), output);
     Encog.getInstance().shutdown();
 
     return convertVectorToCharacteristic(output);
@@ -136,14 +136,14 @@ public class Recognizer implements Observable {
     return characteristic.getName();
   }
 
-  public void train(List<IncomingCall> incomingCalls) {
+  public void train(List<ClassifiableText> classifiableTexts) {
     // prepare input and ideal vectors
-    // input <- IncomingCall text vector
+    // input <- ClassifiableText text vector
     // ideal <- characteristicValue vector
     //
 
-    double[][] input = getInput(incomingCalls);
-    double[][] ideal = getIdeal(incomingCalls);
+    double[][] input = getInput(classifiableTexts);
+    double[][] ideal = getIdeal(classifiableTexts);
 
     // train
     //
@@ -160,31 +160,31 @@ public class Recognizer implements Observable {
     notifyObservers("Recognizer for Characteristics '" + characteristic.getName() + "' trained. Wait...");
   }
 
-  private double[][] getInput(List<IncomingCall> incomingCalls) {
-    double[][] input = new double[incomingCalls.size()][inputLayerSize];
+  private double[][] getInput(List<ClassifiableText> classifiableTexts) {
+    double[][] input = new double[classifiableTexts.size()][inputLayerSize];
 
-    // convert all incoming call texts to vectors
+    // convert all classifiable texts to vectors
     //
 
     int i = 0;
 
-    for (IncomingCall incomingCall : incomingCalls) {
-      input[i++] = getTextAsVectorOfWords(incomingCall);
+    for (ClassifiableText classifiableText : classifiableTexts) {
+      input[i++] = getTextAsVectorOfWords(classifiableText);
     }
 
     return input;
   }
 
-  private double[][] getIdeal(List<IncomingCall> incomingCalls) {
-    double[][] ideal = new double[incomingCalls.size()][outputLayerSize];
+  private double[][] getIdeal(List<ClassifiableText> classifiableTexts) {
+    double[][] ideal = new double[classifiableTexts.size()][outputLayerSize];
 
-    // convert all incoming call characteristics to vectors
+    // convert all classifiable text characteristics to vectors
     //
 
     int i = 0;
 
-    for (IncomingCall incomingCall : incomingCalls) {
-      ideal[i++] = getCharacteristicAsVector(incomingCall);
+    for (ClassifiableText classifiableText : classifiableTexts) {
+      ideal[i++] = getCharacteristicAsVector(classifiableText);
     }
 
     return ideal;
@@ -193,17 +193,17 @@ public class Recognizer implements Observable {
   // example:
   // count = 5; id = 4;
   // vector = {0, 0, 0, 1, 0}
-  private double[] getCharacteristicAsVector(IncomingCall incomingCall) {
+  private double[] getCharacteristicAsVector(ClassifiableText classifiableText) {
     double[] vector = new double[outputLayerSize];
-    vector[incomingCall.getCharacteristicValue(characteristic).getId() - 1] = 1;
+    vector[classifiableText.getCharacteristicValue(characteristic).getId() - 1] = 1;
     return vector;
   }
 
-  private double[] getTextAsVectorOfWords(IncomingCall incomingCall) {
+  private double[] getTextAsVectorOfWords(ClassifiableText classifiableText) {
     double[] vector = new double[inputLayerSize];
 
     // convert text to nGram
-    Set<String> uniqueValues = nGram.getNGram(incomingCall.getText());
+    Set<String> uniqueValues = nGram.getNGram(classifiableText.getText());
 
     // create vector
     //

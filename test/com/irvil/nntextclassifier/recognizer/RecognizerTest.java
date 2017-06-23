@@ -2,7 +2,7 @@ package com.irvil.nntextclassifier.recognizer;
 
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
-import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.ClassifiableText;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
@@ -109,24 +109,24 @@ public class RecognizerTest {
 
   @Test
   public void recognize() throws Exception {
-    IncomingCall icGet = new IncomingCall("Returns the element at the specified position in this list");
-    CharacteristicValue cvGet = recognizer.recognize(icGet);
+    ClassifiableText ctGet = new ClassifiableText("Returns the element at the specified position in this list");
+    CharacteristicValue cvGet = recognizer.recognize(ctGet);
 
     assertEquals(cvGet.getId(), 1);
     assertEquals(cvGet.getValue(), "get");
 
     //
 
-    IncomingCall icSet = new IncomingCall("Replaces the element at the specified position in this list with the specified element (optional operation)");
-    CharacteristicValue cvSet = recognizer.recognize(icSet);
+    ClassifiableText ctSet = new ClassifiableText("Replaces the element at the specified position in this list with the specified element (optional operation)");
+    CharacteristicValue cvSet = recognizer.recognize(ctSet);
 
     assertEquals(cvSet.getId(), 2);
     assertEquals(cvSet.getValue(), "set");
 
     //
 
-    IncomingCall icAdd = new IncomingCall("Inserts the specified element at the specified position in this list (optional operation). Shifts the element currently at that position (if any) and any subsequent elements to the right (adds one to their indices)");
-    CharacteristicValue cvAdd = recognizer.recognize(icAdd);
+    ClassifiableText ctAdd = new ClassifiableText("Inserts the specified element at the specified position in this list (optional operation). Shifts the element currently at that position (if any) and any subsequent elements to the right (adds one to their indices)");
+    CharacteristicValue cvAdd = recognizer.recognize(ctAdd);
 
     assertEquals(cvAdd.getId(), 3);
     assertEquals(cvAdd.getValue(), "add");
@@ -148,31 +148,31 @@ public class RecognizerTest {
     // create list for train
     //
 
-    List<IncomingCall> incomingCalls = new ArrayList<>();
+    List<ClassifiableText> classifiableTexts = new ArrayList<>();
 
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
     characteristics.put(new Characteristic("Method"), new CharacteristicValue(1, "get"));
-    incomingCalls.add(new IncomingCall("shifts right any this operation", characteristics));
+    classifiableTexts.add(new ClassifiableText("shifts right any this operation", characteristics));
 
     characteristics = new HashMap<>();
     characteristics.put(new Characteristic("Method"), new CharacteristicValue(3, "add"));
-    incomingCalls.add(new IncomingCall("that at returns", characteristics));
+    classifiableTexts.add(new ClassifiableText("that at returns", characteristics));
 
     // make sure recognizer is stupid
     //
 
-    assertNotEquals(recognizer.recognize(incomingCalls.get(0)).getValue(), "get");
-    assertNotEquals(recognizer.recognize(incomingCalls.get(1)).getValue(), "add");
+    assertNotEquals(recognizer.recognize(classifiableTexts.get(0)).getValue(), "get");
+    assertNotEquals(recognizer.recognize(classifiableTexts.get(1)).getValue(), "add");
 
     // train
-    recognizer.train(incomingCalls);
+    recognizer.train(classifiableTexts);
 
     // make sure recognizer became smart
     //
 
-    assertEquals(recognizer.recognize(incomingCalls.get(0)).getValue(), "get");
-    assertEquals(recognizer.recognize(incomingCalls.get(1)).getValue(), "add");
-    assertEquals(recognizer.recognize(new IncomingCall("shifts right sdawwda any this operation")).getValue(), "get");
+    assertEquals(recognizer.recognize(classifiableTexts.get(0)).getValue(), "get");
+    assertEquals(recognizer.recognize(classifiableTexts.get(1)).getValue(), "add");
+    assertEquals(recognizer.recognize(new ClassifiableText("shifts right sdawwda any this operation")).getValue(), "get");
   }
 
   @Test

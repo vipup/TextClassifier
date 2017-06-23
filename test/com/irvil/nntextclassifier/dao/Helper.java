@@ -2,13 +2,13 @@ package com.irvil.nntextclassifier.dao;
 
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
-import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.ClassifiableText;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 
 import java.util.*;
 
 class Helper {
-  static void fillStorageWithTestData(StorageCreator storageCreator, CharacteristicDAO characteristicDAO, IncomingCallDAO incomingCallDAO, VocabularyWordDAO vocabularyWordDAO) throws Exception {
+  static void fillStorageWithTestData(StorageCreator storageCreator, CharacteristicDAO characteristicDAO, ClassifiableTextDAO classifiableTextDAO, VocabularyWordDAO vocabularyWordDAO) throws Exception {
     storageCreator.createStorage();
     storageCreator.clearStorage();
 
@@ -29,27 +29,27 @@ class Helper {
     possibleValues.add(new CharacteristicValue("User 3"));
     characteristicDAO.addCharacteristic(new Characteristic("Handler", possibleValues));
 
-    // fill incoming calls
+    // fill classifiable texts
     //
 
-    List<IncomingCall> incomingCalls = new ArrayList<>();
+    List<ClassifiableText> classifiableTexts = new ArrayList<>();
 
     Map<Characteristic, CharacteristicValue> characteristics1 = new HashMap<>();
     characteristics1.put(new Characteristic("Module"), new CharacteristicValue("PM"));
     characteristics1.put(new Characteristic("Handler"), new CharacteristicValue("User 1"));
-    incomingCalls.add(new IncomingCall("text text", characteristics1));
+    classifiableTexts.add(new ClassifiableText("text text", characteristics1));
 
     Map<Characteristic, CharacteristicValue> characteristics2 = new HashMap<>();
     characteristics2.put(new Characteristic("Module"), new CharacteristicValue("MM"));
     characteristics2.put(new Characteristic("Handler"), new CharacteristicValue("User 2"));
-    incomingCalls.add(new IncomingCall("text1 text1", characteristics2));
+    classifiableTexts.add(new ClassifiableText("text1 text1", characteristics2));
 
     Map<Characteristic, CharacteristicValue> characteristics3 = new HashMap<>();
     characteristics3.put(new Characteristic("Module"), new CharacteristicValue("MM"));
     characteristics3.put(new Characteristic("Handler"), new CharacteristicValue("User 2"));
-    incomingCalls.add(new IncomingCall("text1 text1", characteristics3));
+    classifiableTexts.add(new ClassifiableText("text1 text1", characteristics3));
 
-    incomingCallDAO.addAll(incomingCalls);
+    classifiableTextDAO.addAll(classifiableTexts);
 
     // fill vocabulary
     List<VocabularyWord> vocabulary = new ArrayList<>();

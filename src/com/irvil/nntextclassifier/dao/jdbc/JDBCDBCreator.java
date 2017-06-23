@@ -31,10 +31,10 @@ public class JDBCDBCreator implements StorageCreator {
         "( `Id` INTEGER PRIMARY KEY AUTOINCREMENT, `Name` TEXT UNIQUE )");
     sqlQueries.add("CREATE TABLE IF NOT EXISTS CharacteristicsValues " +
         "( `Id` INTEGER, `CharacteristicsNameId` INTEGER, `Value` TEXT, PRIMARY KEY(`Id`,`CharacteristicsNameId`,`Value`) )");
-    sqlQueries.add("CREATE TABLE IF NOT EXISTS IncomingCalls " +
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS ClassifiableTexts " +
         "( `Id` INTEGER PRIMARY KEY AUTOINCREMENT, `Text` TEXT )");
-    sqlQueries.add("CREATE TABLE IF NOT EXISTS IncomingCallsCharacteristics " +
-        "( `IncomingCallId` INTEGER, `CharacteristicsNameId` INTEGER, `CharacteristicsValueId` INTEGER, PRIMARY KEY(`IncomingCallId`,`CharacteristicsNameId`,`CharacteristicsValueId`) )");
+    sqlQueries.add("CREATE TABLE IF NOT EXISTS ClassifiableTextsCharacteristics " +
+        "( `ClassifiableTextId` INTEGER, `CharacteristicsNameId` INTEGER, `CharacteristicsValueId` INTEGER, PRIMARY KEY(`ClassifiableTextId`,`CharacteristicsNameId`,`CharacteristicsValueId`) )");
     sqlQueries.add("CREATE TABLE IF NOT EXISTS Vocabulary " +
         "( `Id` INTEGER PRIMARY KEY AUTOINCREMENT, `Value` TEXT UNIQUE )");
 
@@ -47,14 +47,14 @@ public class JDBCDBCreator implements StorageCreator {
 
     sqlQueries.add("DELETE FROM CharacteristicsNames");
     sqlQueries.add("DELETE FROM CharacteristicsValues");
-    sqlQueries.add("DELETE FROM IncomingCalls");
-    sqlQueries.add("DELETE FROM IncomingCallsCharacteristics");
+    sqlQueries.add("DELETE FROM ClassifiableTexts");
+    sqlQueries.add("DELETE FROM ClassifiableTextsCharacteristics");
     sqlQueries.add("DELETE FROM Vocabulary");
 
     // reset autoincrement keys
     sqlQueries.add("DELETE FROM sqlite_sequence WHERE name IN " +
-        "('CharacteristicsNames', 'CharacteristicsValues', 'IncomingCalls', " +
-        "'IncomingCallsCharacteristics', 'Vocabulary')");
+        "('CharacteristicsNames', 'CharacteristicsValues', 'ClassifiableTexts', " +
+        "'ClassifiableTextsCharacteristics', 'Vocabulary')");
 
     executeQueries(sqlQueries);
   }

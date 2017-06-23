@@ -4,7 +4,7 @@ import com.irvil.nntextclassifier.dao.*;
 import com.irvil.nntextclassifier.dao.factories.DAOFactory;
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
-import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.ClassifiableText;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.NGramStrategy;
 import com.irvil.nntextclassifier.ngram.NGramStrategySimpleFactory;
@@ -37,7 +37,7 @@ public class MainWindow extends Application {
   private NGramStrategy nGramStrategy;
 
   private FlowPane root;
-  private TextArea textAreaIncomingCall;
+  private TextArea textAreaClassifiableText;
   private Button btnRecognize;
   private Label lblCharacteristics;
 
@@ -102,13 +102,13 @@ public class MainWindow extends Application {
           public void run() {
             createStorage();
 
-            // read incoming calls from file
+            // read classifiable text from file
             //
 
-            List<IncomingCall> incomingCalls = null;
+            List<ClassifiableText> classifiableTexts = null;
 
             try {
-              incomingCalls = new FileToIncomingCallsConverter().readXlsxFile(file);
+              classifiableTexts = new ExcelFileReader().xlsxToClassifiableTexts(file);
             } catch (IOException e) {
               logWindow.update(e.getMessage());
             }
@@ -116,15 +116,15 @@ public class MainWindow extends Application {
             // save data to storage
             //
 
-            List<VocabularyWord> vocabulary = saveVocabularyToStorage(incomingCalls);
-            List<Characteristic> characteristics = saveCharacteristicsToStorage(incomingCalls);
-            List<IncomingCall> incomingCallsForTrain = saveIncomingCallsToStorage(incomingCalls);
+            List<VocabularyWord> vocabulary = saveVocabularyToStorage(classifiableTexts);
+            List<Characteristic> characteristics = saveCharacteristicsToStorage(classifiableTexts);
+            List<ClassifiableText> classifiableTextForTrain = saveClassifiableTextsToStorage(classifiableTexts);
 
             // create and train recognizers
             //
 
             createRecognizers(characteristics, vocabulary);
-            trainAndSaveRecognizers(incomingCallsForTrain);
+            trainAndSaveRecognizers(classifiableTextForTrain);
 
             //
 
@@ -208,32 +208,32 @@ public class MainWindow extends Application {
     return new File(path).mkdir();
   }
 
-  private void trainAndSaveRecognizers(List<IncomingCall> incomingCallsForTrain) {
+  private void trainAndSaveRecognizers(List<ClassifiableText> classifiableTextForTrainForTrain) {
     for (Recognizer recognizer : recognizers) {
-      recognizer.train(incomingCallsForTrain);
+      recognizer.train(classifiableTextForTrainForTrain);
       recognizer.saveTrainedRecognizer(new File(config.getDbPath() + "/" + recognizer.toString()));
     }
 
     Recognizer.shutdown();
   }
 
-  private List<IncomingCall> saveIncomingCallsToStorage(List<IncomingCall> incomingCalls) {
-    IncomingCallDAO incomingCallDAO = daoFactory.incomingCallDAO();
+  private List<ClassifiableText> saveClassifiableTextsToStorage(List<ClassifiableText> classifiableTexts) {
+    ClassifiableTextDAO classifiableTextDAO = daoFactory.classifiableTextDAO();
 
     try {
-      incomingCallDAO.addAll(incomingCalls);
-      logWindow.update("Incoming calls saved. Wait...");
+      classifiableTextDAO.addAll(classifiableTexts);
+      logWindow.update("Classifiable texts saved. Wait...");
     } catch (EmptyRecordException | NotExistsException e) {
       logWindow.update(e.getMessage());
     }
 
-    // return incoming calls from DB
-    return incomingCallDAO.getAll();
+    // return classifiable texts from DB
+    return classifiableTextDAO.getAll();
   }
 
-  private List<Characteristic> saveCharacteristicsToStorage(List<IncomingCall> incomingCalls) {
+  private List<Characteristic> saveCharacteristicsToStorage(List<ClassifiableText> classifiableTexts) {
     CharacteristicDAO characteristicDAO = daoFactory.characteristicDAO();
-    Set<Characteristic> characteristics = getCharacteristicsCatalog(incomingCalls);
+    Set<Characteristic> characteristics = getCharacteristicsCatalog(classifiableTexts);
 
     for (Characteristic characteristic : characteristics) {
       try {
@@ -248,14 +248,14 @@ public class MainWindow extends Application {
     return characteristicDAO.getAllCharacteristics();
   }
 
-  private Set<Characteristic> getCharacteristicsCatalog(List<IncomingCall> incomingCalls) {
+  private Set<Characteristic> getCharacteristicsCatalog(List<ClassifiableText> classifiableTexts) {
     Map<Characteristic, Characteristic> characteristics = new HashMap<>();
 
-    for (IncomingCall incomingCall : incomingCalls) {
-      // for all incoming calls characteristic values
+    for (ClassifiableText classifiableText : classifiableTexts) {
+      // for all classifiable texts characteristic values
       //
 
-      for (Map.Entry<Characteristic, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
+      for (Map.Entry<Characteristic, CharacteristicValue> entry : classifiableText.getCharacteristics().entrySet()) {
         // add characteristic to catalog
         characteristics.put(entry.getKey(), entry.getKey());
 
@@ -267,11 +267,11 @@ public class MainWindow extends Application {
     return characteristics.keySet();
   }
 
-  private List<VocabularyWord> saveVocabularyToStorage(List<IncomingCall> incomingCalls) {
+  private List<VocabularyWord> saveVocabularyToStorage(List<ClassifiableText> classifiableTexts) {
     VocabularyWordDAO vocabularyWordDAO = daoFactory.vocabularyWordDAO();
 
     try {
-      vocabularyWordDAO.addAll(new VocabularyBuilder(nGramStrategy).getVocabulary(incomingCalls));
+      vocabularyWordDAO.addAll(new VocabularyBuilder(nGramStrategy).getVocabulary(classifiableTexts));
       logWindow.update("Vocabulary saved. Wait...");
     } catch (EmptyRecordException | AlreadyExistsException e) {
       logWindow.update(e.getMessage());
@@ -282,8 +282,8 @@ public class MainWindow extends Application {
   }
 
   private void buildForm(Stage primaryStage) {
-    textAreaIncomingCall = new TextArea();
-    textAreaIncomingCall.setWrapText(true);
+    textAreaClassifiableText = new TextArea();
+    textAreaClassifiableText.setWrapText(true);
 
     btnRecognize = new Button("Recognize");
     btnRecognize.setOnAction(new RecognizeBtnPressEvent());
@@ -292,7 +292,7 @@ public class MainWindow extends Application {
 
     root = new FlowPane(Orientation.VERTICAL, 10, 10);
     root.setAlignment(Pos.BASELINE_CENTER);
-    root.getChildren().addAll(textAreaIncomingCall, btnRecognize, lblCharacteristics);
+    root.getChildren().addAll(textAreaClassifiableText, btnRecognize, lblCharacteristics);
 
     primaryStage.setScene(new Scene(root, 500, 300));
     primaryStage.show();
@@ -304,7 +304,7 @@ public class MainWindow extends Application {
   private class RecognizeBtnPressEvent implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
-      IncomingCall incomingCall = new IncomingCall(textAreaIncomingCall.getText());
+      ClassifiableText classifiableText = new ClassifiableText(textAreaClassifiableText.getText());
       StringBuilder recognizedCharacteristics = new StringBuilder();
 
       // start Recognizer for each Characteristic from DB
@@ -312,7 +312,7 @@ public class MainWindow extends Application {
 
       try {
         for (Recognizer recognizer : recognizers) {
-          CharacteristicValue recognizedValue = recognizer.recognize(incomingCall);
+          CharacteristicValue recognizedValue = recognizer.recognize(classifiableText);
           recognizedCharacteristics.append(recognizer.getCharacteristicName()).append(": ").append(recognizedValue.getValue()).append("\n");
         }
       } catch (Exception e) {

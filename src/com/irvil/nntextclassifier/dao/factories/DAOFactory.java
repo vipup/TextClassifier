@@ -2,14 +2,14 @@ package com.irvil.nntextclassifier.dao.factories;
 
 import com.irvil.nntextclassifier.Config;
 import com.irvil.nntextclassifier.dao.CharacteristicDAO;
-import com.irvil.nntextclassifier.dao.IncomingCallDAO;
+import com.irvil.nntextclassifier.dao.ClassifiableTextDAO;
 import com.irvil.nntextclassifier.dao.StorageCreator;
 import com.irvil.nntextclassifier.dao.VocabularyWordDAO;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCSQLiteConnector;
 
 public interface DAOFactory {
-  IncomingCallDAO incomingCallDAO();
+  ClassifiableTextDAO classifiableTextDAO();
 
   CharacteristicDAO characteristicDAO();
 

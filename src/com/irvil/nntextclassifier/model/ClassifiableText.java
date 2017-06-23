@@ -2,16 +2,16 @@ package com.irvil.nntextclassifier.model;
 
 import java.util.Map;
 
-public class IncomingCall {
+public class ClassifiableText {
   private final String text;
   private final Map<Characteristic, CharacteristicValue> characteristics;
 
-  public IncomingCall(String text, Map<Characteristic, CharacteristicValue> characteristics) {
+  public ClassifiableText(String text, Map<Characteristic, CharacteristicValue> characteristics) {
     this.text = text;
     this.characteristics = characteristics;
   }
 
-  public IncomingCall(String text) {
+  public ClassifiableText(String text) {
     this(text, null);
   }
 

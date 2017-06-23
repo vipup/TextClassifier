@@ -1,12 +1,12 @@
 package com.irvil.nntextclassifier.dao.jdbc;
 
 import com.irvil.nntextclassifier.dao.EmptyRecordException;
-import com.irvil.nntextclassifier.dao.IncomingCallDAO;
+import com.irvil.nntextclassifier.dao.ClassifiableTextDAO;
 import com.irvil.nntextclassifier.dao.NotExistsException;
 import com.irvil.nntextclassifier.dao.jdbc.connectors.JDBCConnector;
 import com.irvil.nntextclassifier.model.Characteristic;
 import com.irvil.nntextclassifier.model.CharacteristicValue;
-import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.ClassifiableText;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JDBCIncomingCallDAO implements IncomingCallDAO {
+public class JDBCClassifiableTextDAO implements ClassifiableTextDAO {
   private JDBCConnector connector;
 
-  public JDBCIncomingCallDAO(JDBCConnector connector) {
+  public JDBCClassifiableTextDAO(JDBCConnector connector) {
     if (connector == null) {
       throw new IllegalArgumentException();
     }
@@ -26,27 +26,27 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
   }
 
   @Override
-  public List<IncomingCall> getAll() {
-    List<IncomingCall> incomingCalls = new ArrayList<>();
+  public List<ClassifiableText> getAll() {
+    List<ClassifiableText> classifiableTexts = new ArrayList<>();
 
     try (Connection con = connector.getConnection()) {
-      String sqlSelect = "SELECT Id, Text FROM IncomingCalls";
+      String sqlSelect = "SELECT Id, Text FROM ClassifiableTexts";
       ResultSet rs = con.createStatement().executeQuery(sqlSelect);
 
       while (rs.next()) {
-        incomingCalls.add(new IncomingCall(rs.getString("Text"), getCharacteristicsValues(con, rs.getInt("Id"))));
+        classifiableTexts.add(new ClassifiableText(rs.getString("Text"), getCharacteristicsValues(con, rs.getInt("Id"))));
       }
     } catch (SQLException ignored) {
     }
 
-    return incomingCalls;
+    return classifiableTexts;
   }
 
   @Override
-  public void addAll(List<IncomingCall> incomingCalls) throws EmptyRecordException, NotExistsException {
-    if (incomingCalls == null ||
-        incomingCalls.size() == 0) {
-      throw new EmptyRecordException("Incoming calls is null or empty");
+  public void addAll(List<ClassifiableText> classifiableTexts) throws EmptyRecordException, NotExistsException {
+    if (classifiableTexts == null ||
+        classifiableTexts.size() == 0) {
+      throw new EmptyRecordException("Classifiable texts is null or empty");
     }
 
     try (Connection con = connector.getConnection()) {
@@ -55,30 +55,30 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
       // prepare sql query
       //
 
-      String sqlInsert = "INSERT INTO IncomingCalls (Text) VALUES (?)";
+      String sqlInsert = "INSERT INTO ClassifiableTexts (Text) VALUES (?)";
       PreparedStatement statement = con.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
 
       //
 
-      for (IncomingCall incomingCall : incomingCalls) {
+      for (ClassifiableText classifiableText : classifiableTexts) {
         // check
         //
 
-        if (incomingCall == null ||
-            incomingCall.getText().equals("") ||
-            incomingCall.getCharacteristics() == null ||
-            incomingCall.getCharacteristics().size() == 0) {
-          throw new EmptyRecordException("Incoming call is null or empty");
+        if (classifiableText == null ||
+            classifiableText.getText().equals("") ||
+            classifiableText.getCharacteristics() == null ||
+            classifiableText.getCharacteristics().size() == 0) {
+          throw new EmptyRecordException("Classifiable text is null or empty");
         }
 
-        if (!fillCharacteristicNamesAndValuesIDs(con, incomingCall)) {
+        if (!fillCharacteristicNamesAndValuesIDs(con, classifiableText)) {
           throw new NotExistsException("Characteristic value not exists");
         }
 
         // insert
         //
 
-        statement.setString(1, incomingCall.getText());
+        statement.setString(1, classifiableText.getText());
         statement.executeUpdate();
         ResultSet generatedKeys = statement.getGeneratedKeys();
 
@@ -86,8 +86,8 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
           // save all characteristics to DB
           //
 
-          for (Map.Entry<Characteristic, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
-            insertToIncomingCallsCharacteristicsTable(con, generatedKeys.getInt(1), entry.getKey(), entry.getValue());
+          for (Map.Entry<Characteristic, CharacteristicValue> entry : classifiableText.getCharacteristics().entrySet()) {
+            insertToClassifiableTextsCharacteristicsTable(con, generatedKeys.getInt(1), entry.getKey(), entry.getValue());
           }
         }
       }
@@ -99,22 +99,22 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     }
   }
 
-  private Map<Characteristic, CharacteristicValue> getCharacteristicsValues(Connection con, int incomingCallId) throws SQLException {
+  private Map<Characteristic, CharacteristicValue> getCharacteristicsValues(Connection con, int classifiableTextId) throws SQLException {
     Map<Characteristic, CharacteristicValue> characteristics = new HashMap<>();
 
     String sqlSelect = "SELECT CharacteristicsNames.Id AS CharacteristicId, " +
         "CharacteristicsNames.Name AS CharacteristicName, " +
         "CharacteristicsValues.Id AS CharacteristicValueId, " +
         "CharacteristicsValues.Value AS CharacteristicValue " +
-        "FROM IncomingCallsCharacteristics " +
+        "FROM ClassifiableTextsCharacteristics " +
         "LEFT JOIN CharacteristicsNames " +
-        "ON IncomingCallsCharacteristics.CharacteristicsNameId = CharacteristicsNames.Id " +
+        "ON ClassifiableTextsCharacteristics.CharacteristicsNameId = CharacteristicsNames.Id " +
         "LEFT JOIN CharacteristicsValues " +
-        "ON IncomingCallsCharacteristics.CharacteristicsValueId = CharacteristicsValues.Id " +
-        "AND IncomingCallsCharacteristics.CharacteristicsNameId = CharacteristicsValues.CharacteristicsNameId " +
-        "WHERE IncomingCallsCharacteristics.IncomingCallId = ?";
+        "ON ClassifiableTextsCharacteristics.CharacteristicsValueId = CharacteristicsValues.Id " +
+        "AND ClassifiableTextsCharacteristics.CharacteristicsNameId = CharacteristicsValues.CharacteristicsNameId " +
+        "WHERE ClassifiableTextsCharacteristics.ClassifiableTextId = ?";
     PreparedStatement statement = con.prepareStatement(sqlSelect);
-    statement.setInt(1, incomingCallId);
+    statement.setInt(1, classifiableTextId);
     ResultSet rs = statement.executeQuery();
 
     while (rs.next()) {
@@ -126,7 +126,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     return characteristics;
   }
 
-  private boolean fillCharacteristicNamesAndValuesIDs(Connection con, IncomingCall incomingCall) throws SQLException {
+  private boolean fillCharacteristicNamesAndValuesIDs(Connection con, ClassifiableText classifiableText) throws SQLException {
     String sqlSelect = "SELECT CharacteristicsNames.Id AS CharacteristicId, " +
         "CharacteristicsValues.Id AS CharacteristicValueId " +
         "FROM CharacteristicsValues JOIN CharacteristicsNames " +
@@ -134,7 +134,7 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
         "WHERE CharacteristicsNames.Name = ? AND CharacteristicsValues.Value = ?";
     PreparedStatement statement = con.prepareStatement(sqlSelect);
 
-    for (Map.Entry<Characteristic, CharacteristicValue> entry : incomingCall.getCharacteristics().entrySet()) {
+    for (Map.Entry<Characteristic, CharacteristicValue> entry : classifiableText.getCharacteristics().entrySet()) {
       statement.setString(1, entry.getKey().getName());
       statement.setString(2, entry.getValue().getValue());
       ResultSet rs = statement.executeQuery();
@@ -150,10 +150,10 @@ public class JDBCIncomingCallDAO implements IncomingCallDAO {
     return true;
   }
 
-  private void insertToIncomingCallsCharacteristicsTable(Connection con, int incomingCallId, Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
-    String sqlInsert = "INSERT INTO IncomingCallsCharacteristics (IncomingCallId, CharacteristicsNameId, CharacteristicsValueId) VALUES (?, ?, ?)";
+  private void insertToClassifiableTextsCharacteristicsTable(Connection con, int classifiableTextId, Characteristic characteristic, CharacteristicValue characteristicValue) throws SQLException {
+    String sqlInsert = "INSERT INTO ClassifiableTextsCharacteristics (ClassifiableTextId, CharacteristicsNameId, CharacteristicsValueId) VALUES (?, ?, ?)";
     PreparedStatement statement = con.prepareStatement(sqlInsert);
-    statement.setInt(1, incomingCallId);
+    statement.setInt(1, classifiableTextId);
     statement.setInt(2, characteristic.getId());
     statement.setInt(3, characteristicValue.getId());
     statement.executeUpdate();

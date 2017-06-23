@@ -1,6 +1,6 @@
 package com.irvil.nntextclassifier;
 
-import com.irvil.nntextclassifier.model.IncomingCall;
+import com.irvil.nntextclassifier.model.ClassifiableText;
 import com.irvil.nntextclassifier.model.VocabularyWord;
 import com.irvil.nntextclassifier.ngram.FilteredUnigram;
 import org.junit.Test;
@@ -15,13 +15,13 @@ public class VocabularyBuilderTest {
 
   @Test
   public void getVocabulary() throws Exception {
-    List<IncomingCall> incomingCalls = new ArrayList<>();
-    incomingCalls.add(new IncomingCall("qw we"));
-    incomingCalls.add(new IncomingCall("er we"));
-    incomingCalls.add(new IncomingCall("we rt"));
-    incomingCalls.add(new IncomingCall("er rt"));
+    List<ClassifiableText> classifiableTexts = new ArrayList<>();
+    classifiableTexts.add(new ClassifiableText("qw we"));
+    classifiableTexts.add(new ClassifiableText("er we"));
+    classifiableTexts.add(new ClassifiableText("we rt"));
+    classifiableTexts.add(new ClassifiableText("er rt"));
 
-    List<VocabularyWord> vocabulary = vocabularyBuilder.getVocabulary(incomingCalls);
+    List<VocabularyWord> vocabulary = vocabularyBuilder.getVocabulary(classifiableTexts);
 
     assertEquals(vocabulary.size(), 3);
     assertEquals(vocabulary.get(0).getValue(), "rt");
@@ -31,10 +31,10 @@ public class VocabularyBuilderTest {
 
   @Test
   public void getVocabularyOneValue() throws Exception {
-    List<IncomingCall> incomingCalls = new ArrayList<>();
-    incomingCalls.add(new IncomingCall("qw we"));
+    List<ClassifiableText> classifiableTexts = new ArrayList<>();
+    classifiableTexts.add(new ClassifiableText("qw we"));
 
-    List<VocabularyWord> vocabulary = vocabularyBuilder.getVocabulary(incomingCalls);
+    List<VocabularyWord> vocabulary = vocabularyBuilder.getVocabulary(classifiableTexts);
 
     assertEquals(vocabulary.size(), 0);
   }

@@ -10,7 +10,7 @@ public class JDBCCharacteristicDAOTest extends CharacteristicDAOTest {
     JDBCConnector jdbcConnector = new JDBCSQLiteConnector("./test_db/test.db");
     storageCreator = new JDBCDBCreator(jdbcConnector);
     characteristicDAO = new JDBCCharacteristicDAO(jdbcConnector);
-    incomingCallDAO = new JDBCIncomingCallDAO(jdbcConnector);
+    classifiableTextDAO = new JDBCClassifiableTextDAO(jdbcConnector);
     vocabularyWordDAO = new JDBCVocabularyWordDAO(jdbcConnector);
   }
 }

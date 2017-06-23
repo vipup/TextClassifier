@@ -15,13 +15,13 @@ import static org.junit.Assert.assertEquals;
 public abstract class CharacteristicDAOTest {
   protected StorageCreator storageCreator;
   protected CharacteristicDAO characteristicDAO;
-  protected IncomingCallDAO incomingCallDAO;
+  protected ClassifiableTextDAO classifiableTextDAO;
   protected VocabularyWordDAO vocabularyWordDAO;
 
   @Before
   public void setUp() throws Exception {
     initializeDAO();
-    Helper.fillStorageWithTestData(storageCreator, characteristicDAO, incomingCallDAO, vocabularyWordDAO);
+    Helper.fillStorageWithTestData(storageCreator, characteristicDAO, classifiableTextDAO, vocabularyWordDAO);
   }
 
   public abstract void initializeDAO();
