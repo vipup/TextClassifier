@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 class VocabularyBuilder {
-  private NGramStrategy nGram;
+  private NGramStrategy nGramStrategy;
 
-  VocabularyBuilder(NGramStrategy nGram) {
-    this.nGram = nGram;
+  VocabularyBuilder(NGramStrategy nGramStrategy) {
+    this.nGramStrategy = nGramStrategy;
   }
 
   List<VocabularyWord> getVocabulary(List<ClassifiableText> classifiableTexts) {
@@ -29,7 +29,7 @@ class VocabularyBuilder {
     //
 
     for (ClassifiableText classifiableText : classifiableTexts) {
-      for (String word : nGram.getNGram(classifiableText.getText())) {
+      for (String word : nGramStrategy.getNGram(classifiableText.getText())) {
         if (uniqueValues.containsKey(word)) {
           // increase counter
           uniqueValues.put(word, uniqueValues.get(word) + 1);

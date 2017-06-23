@@ -30,17 +30,17 @@ public class Recognizer implements Observable {
   private final int outputLayerSize;
   private final BasicNetwork network;
   private final List<VocabularyWord> vocabulary;
-  private final NGramStrategy nGram;
+  private final NGramStrategy nGramStrategy;
   private List<Observer> observers = new ArrayList<>();
 
-  public Recognizer(File trainedNetwork, Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
+  public Recognizer(File trainedNetwork, Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGramStrategy) {
     if (characteristic == null ||
         characteristic.getName().equals("") ||
         characteristic.getPossibleValues() == null ||
         characteristic.getPossibleValues().size() == 0 ||
         vocabulary == null ||
         vocabulary.size() == 0 ||
-        nGram == null) {
+        nGramStrategy == null) {
       throw new IllegalArgumentException();
     }
 
@@ -48,7 +48,7 @@ public class Recognizer implements Observable {
     this.vocabulary = vocabulary;
     this.inputLayerSize = vocabulary.size();
     this.outputLayerSize = characteristic.getPossibleValues().size();
-    this.nGram = nGram;
+    this.nGramStrategy = nGramStrategy;
 
     if (trainedNetwork == null) {
       this.network = createNeuralNetwork();
@@ -62,8 +62,8 @@ public class Recognizer implements Observable {
     }
   }
 
-  public Recognizer(Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGram) {
-    this(null, characteristic, vocabulary, nGram);
+  public Recognizer(Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGramStrategy) {
+    this(null, characteristic, vocabulary, nGramStrategy);
   }
 
   public static void shutdown() {
@@ -202,8 +202,8 @@ public class Recognizer implements Observable {
   private double[] getTextAsVectorOfWords(ClassifiableText classifiableText) {
     double[] vector = new double[inputLayerSize];
 
-    // convert text to nGram
-    Set<String> uniqueValues = nGram.getNGram(classifiableText.getText());
+    // convert text to nGramStrategy
+    Set<String> uniqueValues = nGramStrategy.getNGram(classifiableText.getText());
 
     // create vector
     //
