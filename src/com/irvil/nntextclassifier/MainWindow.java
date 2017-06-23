@@ -128,7 +128,7 @@ public class MainWindow extends Application {
     List<ClassifiableText> classifiableTexts = getClassifiableTexts(file, 2);
 
     for (Recognizer recognizer : recognizers) {
-      Characteristic characteristic = new Characteristic(recognizer.getCharacteristicName());
+      Characteristic characteristic = recognizer.getCharacteristic();
       int correctlyRecognized = 0;
 
       for (ClassifiableText classifiableText : classifiableTexts) {
@@ -321,7 +321,7 @@ public class MainWindow extends Application {
       try {
         for (Recognizer recognizer : recognizers) {
           CharacteristicValue recognizedValue = recognizer.recognize(classifiableText);
-          recognizedCharacteristics.append(recognizer.getCharacteristicName()).append(": ").append(recognizedValue.getValue()).append("\n");
+          recognizedCharacteristics.append(recognizer.getCharacteristic().getName()).append(": ").append(recognizedValue.getValue()).append("\n");
         }
       } catch (Exception e) {
         // it is possible if DB was edited manually

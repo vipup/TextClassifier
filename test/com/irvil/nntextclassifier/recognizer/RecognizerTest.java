@@ -140,7 +140,7 @@ public class RecognizerTest {
 
   @Test
   public void getCharacteristicName() throws Exception {
-    assertEquals(recognizer.getCharacteristicName(), "Method");
+    assertEquals(recognizer.getCharacteristic().getName(), "Method");
   }
 
   @Test

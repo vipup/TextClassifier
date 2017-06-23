@@ -132,8 +132,8 @@ public class Recognizer implements Observable {
     notifyObservers("Trained Recognizer for Characteristics '" + characteristic.getName() + "' saved. Wait...");
   }
 
-  public String getCharacteristicName() {
-    return characteristic.getName();
+  public Characteristic getCharacteristic() {
+    return characteristic;
   }
 
   public void train(List<ClassifiableText> classifiableTexts) {
