@@ -172,7 +172,7 @@ public class MainWindow extends Application {
 
     try {
       classifiableTexts = new ExcelFileReader().xlsxToClassifiableTexts(file, sheetNumber);
-    } catch (IOException e) {
+    } catch (IOException | EmptySheetException e) {
       logWindow.update(e.getMessage());
     }
 

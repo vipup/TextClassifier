@@ -16,14 +16,23 @@ import java.util.List;
 import java.util.Map;
 
 class ExcelFileReader {
-  List<ClassifiableText> xlsxToClassifiableTexts(File xlsxFile, int sheetNumber) throws IOException {
+  List<ClassifiableText> xlsxToClassifiableTexts(File xlsxFile, int sheetNumber) throws IOException, EmptySheetException {
     if (xlsxFile == null ||
         sheetNumber < 1) {
       throw new IllegalArgumentException();
     }
 
     try (XSSFWorkbook excelFile = new XSSFWorkbook(new FileInputStream(xlsxFile))) {
-      return getClassifiableTexts(excelFile.getSheetAt(sheetNumber - 1));
+      XSSFSheet sheet = excelFile.getSheetAt(sheetNumber - 1);
+
+      // at least two rows
+      if (sheet.getLastRowNum() > 0) {
+        return getClassifiableTexts(sheet);
+      } else {
+        throw new EmptySheetException();
+      }
+    } catch (IllegalArgumentException e) {
+      throw new EmptySheetException();
     }
   }
 
