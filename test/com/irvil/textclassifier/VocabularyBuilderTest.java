@@ -20,6 +20,10 @@ public class VocabularyBuilderTest {
     classifiableTexts.add(new ClassifiableText("er we"));
     classifiableTexts.add(new ClassifiableText("we rt"));
     classifiableTexts.add(new ClassifiableText("er rt"));
+    classifiableTexts.add(new ClassifiableText("qw we"));
+    classifiableTexts.add(new ClassifiableText("er we"));
+    classifiableTexts.add(new ClassifiableText("we rt"));
+    classifiableTexts.add(new ClassifiableText("er rt"));
 
     List<VocabularyWord> vocabulary = vocabularyBuilder.getVocabulary(classifiableTexts);
 
