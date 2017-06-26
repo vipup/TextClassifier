@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class RecognizerTest {
-  private final File trainedRecognizer = new File("./test_db/MethodRecognizerNeuralNetwork");
+  private final File trainedRecognizer = new File("./test_db/TestRecognizer");
   private final NGramStrategy nGramStrategy = new FilteredUnigram();
   private Recognizer recognizer;
   private Characteristic characteristic;
