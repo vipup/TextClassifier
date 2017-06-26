@@ -40,7 +40,7 @@ class VocabularyBuilder {
       }
     }
 
-    // convert uniqueValues to Vocabulary, excluding rare (frequency of use less then 4)
+    // convert uniqueValues to Vocabulary, excluding rare (frequency of use is 1)
     //
 
     for (Map.Entry<String, Integer> entry : uniqueValues.entrySet()) {
