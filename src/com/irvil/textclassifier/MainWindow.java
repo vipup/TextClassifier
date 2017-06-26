@@ -7,7 +7,7 @@ import com.irvil.textclassifier.model.CharacteristicValue;
 import com.irvil.textclassifier.model.ClassifiableText;
 import com.irvil.textclassifier.model.VocabularyWord;
 import com.irvil.textclassifier.ngram.NGramStrategy;
-import com.irvil.textclassifier.recognizer.Recognizer;
+import com.irvil.textclassifier.classifier.Classifier;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -29,13 +29,13 @@ import java.util.*;
 
 public class MainWindow extends Application {
   private final Config config = Config.getInstance();
-  private final List<Recognizer> recognizers = new ArrayList<>();
+  private final List<Classifier> classifiers = new ArrayList<>();
   private LogWindow logWindow;
   private DAOFactory daoFactory;
   private NGramStrategy nGramStrategy;
   private FlowPane root;
   private TextArea textAreaClassifiableText;
-  private Button btnRecognize;
+  private Button btnClassify;
   private Label lblCharacteristics;
 
   public static void main(String[] args) {
@@ -69,8 +69,8 @@ public class MainWindow extends Application {
     // check if it is first start
     //
 
-    if (!loadLearnedRecognizers(characteristics, vocabulary)) {
-      infoMsg("You start program first time. Please, choose XLSX file with data for recognizer training.");
+    if (!loadTrainedClassifiers(characteristics, vocabulary)) {
+      infoMsg("You start program first time. Please, choose XLSX file with data for classifier training.");
 
       File file = openFileDialogBox();
 
@@ -97,12 +97,12 @@ public class MainWindow extends Application {
             List<Characteristic> characteristics = saveCharacteristicsToStorage(classifiableTexts);
             List<ClassifiableText> classifiableTextForTrain = saveClassifiableTextsToStorage(classifiableTexts);
 
-            // create and train recognizers
+            // create and train classifiers
             //
 
-            createRecognizers(characteristics, vocabulary);
-            trainAndSaveRecognizers(classifiableTextForTrain);
-            checkRecognizersAccuracy(file);
+            createClassifiers(characteristics, vocabulary);
+            trainAndSaveClassifiers(classifiableTextForTrain);
+            checkClassifiersAccuracy(file);
 
             logWindow.update("\nPlease restart the program.");
           }
@@ -115,31 +115,31 @@ public class MainWindow extends Application {
       return;
     }
 
-    // everything is ok (Storage is filled, recognizer is trained) -> start program
+    // everything is ok (Storage is filled, classifier is trained) -> start program
     buildForm(primaryStage);
   }
 
-  private void checkRecognizersAccuracy(File file) {
+  private void checkClassifiersAccuracy(File file) {
     logWindow.update("\n");
 
     // read second sheet from a file
     List<ClassifiableText> classifiableTexts = getClassifiableTexts(file, 2);
 
-    for (Recognizer recognizer : recognizers) {
-      Characteristic characteristic = recognizer.getCharacteristic();
-      int correctlyRecognized = 0;
+    for (Classifier classifier : classifiers) {
+      Characteristic characteristic = classifier.getCharacteristic();
+      int correctlyClassified = 0;
 
       for (ClassifiableText classifiableText : classifiableTexts) {
         CharacteristicValue idealValue = classifiableText.getCharacteristicValue(characteristic);
-        CharacteristicValue recognizedValue = recognizer.recognize(classifiableText);
+        CharacteristicValue classifiedValue = classifier.classify(classifiableText);
 
-        if (recognizedValue.getValue().equals(idealValue.getValue())) {
-          correctlyRecognized++;
+        if (classifiedValue.getValue().equals(idealValue.getValue())) {
+          correctlyClassified++;
         }
       }
 
-      double accuracy = ((double) correctlyRecognized / classifiableTexts.size()) * 100;
-      logWindow.update(String.format("Accuracy of Recognizer for '" + characteristic.getName() + "' characteristic: %.2f%%", accuracy));
+      double accuracy = ((double) correctlyClassified / classifiableTexts.size()) * 100;
+      logWindow.update(String.format("Accuracy of Classifier for '" + characteristic.getName() + "' characteristic: %.2f%%", accuracy));
     }
   }
 
@@ -177,11 +177,11 @@ public class MainWindow extends Application {
     return classifiableTexts;
   }
 
-  private void createRecognizers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
+  private void createClassifiers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
     for (Characteristic characteristic : characteristics) {
-      Recognizer recognizer = new Recognizer(characteristic, vocabulary, nGramStrategy);
-      recognizer.addObserver(logWindow);
-      recognizers.add(recognizer);
+      Classifier classifier = new Classifier(characteristic, vocabulary, nGramStrategy);
+      classifier.addObserver(logWindow);
+      classifiers.add(classifier);
     }
   }
 
@@ -193,18 +193,18 @@ public class MainWindow extends Application {
     logWindow.update("Storage created. Wait...");
   }
 
-  private boolean loadLearnedRecognizers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
+  private boolean loadTrainedClassifiers(List<Characteristic> characteristics, List<VocabularyWord> vocabulary) {
     if (characteristics.size() == 0 || vocabulary.size() == 0) {
       return false;
     }
 
-    // load trained recognizers for each Characteristics
+    // load trained classifiers for each Characteristics
     //
 
     try {
       for (Characteristic characteristic : characteristics) {
-        File trainedRecognizer = new File(config.getDbPath() + "/" + characteristic.getName() + "RecognizerNeuralNetwork");
-        recognizers.add(new Recognizer(trainedRecognizer, characteristic, vocabulary, nGramStrategy));
+        File trainedClassifier = new File(config.getDbPath() + "/" + characteristic.getName() + "NeuralNetworkClassifier");
+        classifiers.add(new Classifier(trainedClassifier, characteristic, vocabulary, nGramStrategy));
       }
     } catch (Exception e) {
       return false;
@@ -213,13 +213,13 @@ public class MainWindow extends Application {
     return true;
   }
 
-  private void trainAndSaveRecognizers(List<ClassifiableText> classifiableTextForTrain) {
-    for (Recognizer recognizer : recognizers) {
-      recognizer.train(classifiableTextForTrain);
-      recognizer.saveTrainedRecognizer(new File(config.getDbPath() + "/" + recognizer.toString()));
+  private void trainAndSaveClassifiers(List<ClassifiableText> classifiableTextForTrain) {
+    for (Classifier classifier : classifiers) {
+      classifier.train(classifiableTextForTrain);
+      classifier.saveTrainedClassifier(new File(config.getDbPath() + "/" + classifier.toString()));
     }
 
-    Recognizer.shutdown();
+    Classifier.shutdown();
   }
 
   private List<ClassifiableText> saveClassifiableTextsToStorage(List<ClassifiableText> classifiableTexts) {
@@ -244,7 +244,7 @@ public class MainWindow extends Application {
     for (Characteristic characteristic : characteristics) {
       try {
         characteristicDAO.addCharacteristic(characteristic);
-        logWindow.update("Characteristics '" + characteristic.getName() + "' saved. Wait...");
+        logWindow.update("'" + characteristic.getName() + "' characteristic saved. Wait...");
       } catch (EmptyRecordException | AlreadyExistsException e) {
         logWindow.update(e.getMessage());
       }
@@ -291,14 +291,14 @@ public class MainWindow extends Application {
     textAreaClassifiableText = new TextArea();
     textAreaClassifiableText.setWrapText(true);
 
-    btnRecognize = new Button("Recognize");
-    btnRecognize.setOnAction(new RecognizeBtnPressEvent());
+    btnClassify = new Button("Classify");
+    btnClassify.setOnAction(new ClassifyBtnPressEvent());
 
     lblCharacteristics = new Label("");
 
     root = new FlowPane(Orientation.VERTICAL, 10, 10);
     root.setAlignment(Pos.BASELINE_CENTER);
-    root.getChildren().addAll(textAreaClassifiableText, btnRecognize, lblCharacteristics);
+    root.getChildren().addAll(textAreaClassifiableText, btnClassify, lblCharacteristics);
 
     primaryStage.setScene(new Scene(root, 500, 300));
     primaryStage.show();
@@ -307,27 +307,27 @@ public class MainWindow extends Application {
   // Event handlers
   //
 
-  private class RecognizeBtnPressEvent implements EventHandler<ActionEvent> {
+  private class ClassifyBtnPressEvent implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
       ClassifiableText classifiableText = new ClassifiableText(textAreaClassifiableText.getText());
-      StringBuilder recognizedCharacteristics = new StringBuilder();
+      StringBuilder classifiedCharacteristics = new StringBuilder();
 
-      // start Recognizer for each Characteristic from DB
+      // start Classifier for each Characteristic from DB
       //
 
       try {
-        for (Recognizer recognizer : recognizers) {
-          CharacteristicValue recognizedValue = recognizer.recognize(classifiableText);
-          recognizedCharacteristics.append(recognizer.getCharacteristic().getName()).append(": ").append(recognizedValue.getValue()).append("\n");
+        for (Classifier classifier : classifiers) {
+          CharacteristicValue classifiedValue = classifier.classify(classifiableText);
+          classifiedCharacteristics.append(classifier.getCharacteristic().getName()).append(": ").append(classifiedValue.getValue()).append("\n");
         }
       } catch (Exception e) {
         // it is possible if DB was edited manually
-        errorMsg("It seems that trained recognizer does not match Characteristics and Vocabulary. " +
-            "You need to retrain recognizer.");
+        errorMsg("It seems that trained classifier does not match Characteristics and Vocabulary. " +
+            "You need to retrain classifier.");
       }
 
-      lblCharacteristics.setText(recognizedCharacteristics.toString());
+      lblCharacteristics.setText(classifiedCharacteristics.toString());
     }
   }
 }

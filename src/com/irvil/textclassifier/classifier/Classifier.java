@@ -1,4 +1,4 @@
-package com.irvil.textclassifier.recognizer;
+package com.irvil.textclassifier.classifier;
 
 import com.irvil.textclassifier.model.Characteristic;
 import com.irvil.textclassifier.model.CharacteristicValue;
@@ -24,7 +24,7 @@ import java.util.Set;
 import static org.encog.persist.EncogDirectoryPersistence.loadObject;
 import static org.encog.persist.EncogDirectoryPersistence.saveObject;
 
-public class Recognizer implements Observable {
+public class Classifier implements Observable {
   private final Characteristic characteristic;
   private final int inputLayerSize;
   private final int outputLayerSize;
@@ -33,7 +33,7 @@ public class Recognizer implements Observable {
   private final NGramStrategy nGramStrategy;
   private final List<Observer> observers = new ArrayList<>();
 
-  public Recognizer(File trainedNetwork, Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGramStrategy) {
+  public Classifier(File trainedNetwork, Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGramStrategy) {
     if (characteristic == null ||
         characteristic.getName().equals("") ||
         characteristic.getPossibleValues() == null ||
@@ -62,7 +62,7 @@ public class Recognizer implements Observable {
     }
   }
 
-  public Recognizer(Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGramStrategy) {
+  public Classifier(Characteristic characteristic, List<VocabularyWord> vocabulary, NGramStrategy nGramStrategy) {
     this(null, characteristic, vocabulary, nGramStrategy);
   }
 
@@ -89,7 +89,7 @@ public class Recognizer implements Observable {
     return network;
   }
 
-  public CharacteristicValue recognize(ClassifiableText classifiableText) {
+  public CharacteristicValue classify(ClassifiableText classifiableText) {
     double[] output = new double[outputLayerSize];
 
     // calculate output vector
@@ -128,9 +128,9 @@ public class Recognizer implements Observable {
     return indexOfMaxValue + 1;
   }
 
-  public void saveTrainedRecognizer(File trainedNetwork) {
+  public void saveTrainedClassifier(File trainedNetwork) {
     saveObject(trainedNetwork, network);
-    notifyObservers("Trained Recognizer for Characteristics '" + characteristic.getName() + "' saved. Wait...");
+    notifyObservers("Trained Classifier for '" + characteristic.getName() + "' characteristic saved. Wait...");
   }
 
   public Characteristic getCharacteristic() {
@@ -154,11 +154,11 @@ public class Recognizer implements Observable {
 
     do {
       train.iteration();
-      notifyObservers("Training Recognizer for Characteristics '" + characteristic.getName() + "'. Errors: " + String.format("%.2f", train.getError() * 100) + "%. Wait...");
+      notifyObservers("Training Classifier for '" + characteristic.getName() + "' characteristic. Errors: " + String.format("%.2f", train.getError() * 100) + "%. Wait...");
     } while (train.getError() > 0.01);
 
     train.finishTraining();
-    notifyObservers("Recognizer for Characteristics '" + characteristic.getName() + "' trained. Wait...");
+    notifyObservers("Classifier for '" + characteristic.getName() + "' characteristic trained. Wait...");
   }
 
   private double[][] getInput(List<ClassifiableText> classifiableTexts) {
@@ -230,7 +230,7 @@ public class Recognizer implements Observable {
 
   @Override
   public String toString() {
-    return characteristic.getName() + "RecognizerNeuralNetwork";
+    return characteristic.getName() + "NeuralNetworkClassifier";
   }
 
   @Override

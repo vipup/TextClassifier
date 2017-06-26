@@ -1,4 +1,4 @@
-package com.irvil.textclassifier.recognizer;
+package com.irvil.textclassifier.classifier;
 
 import com.irvil.textclassifier.model.Characteristic;
 import com.irvil.textclassifier.model.CharacteristicValue;
@@ -15,10 +15,10 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public class RecognizerTest {
-  private final File trainedRecognizer = new File("./test_db/TestRecognizer");
+public class ClassifierTest {
+  private final File trainedClassifier = new File("./test_db/TestNeuralNetworkClassifier");
   private final NGramStrategy nGramStrategy = new FilteredUnigram();
-  private Recognizer recognizer;
+  private Classifier classifier;
   private Characteristic characteristic;
   private List<VocabularyWord> vocabulary;
 
@@ -66,51 +66,51 @@ public class RecognizerTest {
     vocabulary.add(new VocabularyWord(27, "operation"));
     vocabulary.add(new VocabularyWord(28, "inserts"));
 
-    // load trained recognizer
+    // load trained classifier
     //
 
-    recognizer = new Recognizer(trainedRecognizer, characteristic, vocabulary, nGramStrategy);
+    classifier = new Classifier(trainedClassifier, characteristic, vocabulary, nGramStrategy);
   }
 
   @Test
   public void createNetwork() {
-    new Recognizer(characteristic, vocabulary, nGramStrategy);
+    new Classifier(characteristic, vocabulary, nGramStrategy);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void nonexistentFile() {
-    new Recognizer(new File("./test_db/nonexistentFile"), characteristic, vocabulary, nGramStrategy);
+    new Classifier(new File("./test_db/nonexistentFile"), characteristic, vocabulary, nGramStrategy);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void nullCharacteristic() {
-    new Recognizer(trainedRecognizer, null, vocabulary, nGramStrategy);
+    new Classifier(trainedClassifier, null, vocabulary, nGramStrategy);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void emptyCharacteristic() {
-    new Recognizer(trainedRecognizer, new Characteristic("Test"), vocabulary, nGramStrategy);
+    new Classifier(trainedClassifier, new Characteristic("Test"), vocabulary, nGramStrategy);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void nullVocabulary() {
-    new Recognizer(trainedRecognizer, characteristic, null, nGramStrategy);
+    new Classifier(trainedClassifier, characteristic, null, nGramStrategy);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void emptyVocabulary() {
-    new Recognizer(trainedRecognizer, characteristic, new ArrayList<>(), nGramStrategy);
+    new Classifier(trainedClassifier, characteristic, new ArrayList<>(), nGramStrategy);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void nullNGram() {
-    new Recognizer(trainedRecognizer, characteristic, vocabulary, null);
+    new Classifier(trainedClassifier, characteristic, vocabulary, null);
   }
 
   @Test
-  public void recognize() throws Exception {
+  public void classify() throws Exception {
     ClassifiableText ctGet = new ClassifiableText("Returns the element at the specified position in this list");
-    CharacteristicValue cvGet = recognizer.recognize(ctGet);
+    CharacteristicValue cvGet = classifier.classify(ctGet);
 
     assertEquals(cvGet.getId(), 1);
     assertEquals(cvGet.getValue(), "get");
@@ -118,7 +118,7 @@ public class RecognizerTest {
     //
 
     ClassifiableText ctSet = new ClassifiableText("Replaces the element at the specified position in this list with the specified element (optional operation)");
-    CharacteristicValue cvSet = recognizer.recognize(ctSet);
+    CharacteristicValue cvSet = classifier.classify(ctSet);
 
     assertEquals(cvSet.getId(), 2);
     assertEquals(cvSet.getValue(), "set");
@@ -126,21 +126,21 @@ public class RecognizerTest {
     //
 
     ClassifiableText ctAdd = new ClassifiableText("Inserts the specified element at the specified position in this list (optional operation). Shifts the element currently at that position (if any) and any subsequent elements to the right (adds one to their indices)");
-    CharacteristicValue cvAdd = recognizer.recognize(ctAdd);
+    CharacteristicValue cvAdd = classifier.classify(ctAdd);
 
     assertEquals(cvAdd.getId(), 3);
     assertEquals(cvAdd.getValue(), "add");
   }
 
   @Test
-  public void saveTrainedRecognizer() throws Exception {
-    recognizer.saveTrainedRecognizer(new File("./test_db/TestSave"));
+  public void saveTrainedClassifier() throws Exception {
+    classifier.saveTrainedClassifier(new File("./test_db/TestSave"));
     assertEquals(new File("./test_db/TestSave").delete(), true);
   }
 
   @Test
   public void getCharacteristicName() throws Exception {
-    assertEquals(recognizer.getCharacteristic().getName(), "Method");
+    assertEquals(classifier.getCharacteristic().getName(), "Method");
   }
 
   @Test
@@ -158,40 +158,40 @@ public class RecognizerTest {
     characteristics.put(new Characteristic("Method"), new CharacteristicValue(3, "add"));
     classifiableTexts.add(new ClassifiableText("that at returns", characteristics));
 
-    // make sure recognizer is stupid
+    // make sure classifier is stupid
     //
 
-    assertNotEquals(recognizer.recognize(classifiableTexts.get(0)).getValue(), "get");
-    assertNotEquals(recognizer.recognize(classifiableTexts.get(1)).getValue(), "add");
+    assertNotEquals(classifier.classify(classifiableTexts.get(0)).getValue(), "get");
+    assertNotEquals(classifier.classify(classifiableTexts.get(1)).getValue(), "add");
 
     // train
-    recognizer.train(classifiableTexts);
+    classifier.train(classifiableTexts);
 
-    // make sure recognizer became smart
+    // make sure classifier became smart
     //
 
-    assertEquals(recognizer.recognize(classifiableTexts.get(0)).getValue(), "get");
-    assertEquals(recognizer.recognize(classifiableTexts.get(1)).getValue(), "add");
-    assertEquals(recognizer.recognize(new ClassifiableText("shifts right sdawwda any this operation")).getValue(), "get");
+    assertEquals(classifier.classify(classifiableTexts.get(0)).getValue(), "get");
+    assertEquals(classifier.classify(classifiableTexts.get(1)).getValue(), "add");
+    assertEquals(classifier.classify(new ClassifiableText("shifts right sdawwda any this operation")).getValue(), "get");
   }
 
   @Test
   public void toStringTest() throws Exception {
-    assertEquals(recognizer.toString(), "MethodRecognizerNeuralNetwork");
+    assertEquals(classifier.toString(), "MethodNeuralNetworkClassifier");
   }
 
   @Test
   public void notifyObservers() throws Exception {
     final String[] msg = {"Msg from observer"};
 
-    recognizer.addObserver((text) -> msg[0] = text);
-    recognizer.notifyObservers("Test msg");
+    classifier.addObserver((text) -> msg[0] = text);
+    classifier.notifyObservers("Test msg");
 
     assertEquals(msg[0], "Test msg");
   }
 
   @Test
   public void shutdown() throws Exception {
-    Recognizer.shutdown();
+    Classifier.shutdown();
   }
 }
