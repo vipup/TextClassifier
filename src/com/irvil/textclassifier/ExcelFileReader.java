@@ -29,10 +29,10 @@ class ExcelFileReader {
       if (sheet.getLastRowNum() > 0) {
         return getClassifiableTexts(sheet);
       } else {
-        throw new EmptySheetException();
+        throw new EmptySheetException("Excel sheet (#" + sheetNumber + ") is empty");
       }
     } catch (IllegalArgumentException e) {
-      throw new EmptySheetException();
+      throw new EmptySheetException("Excel sheet (#" + sheetNumber + ") is not found");
     }
   }
 
