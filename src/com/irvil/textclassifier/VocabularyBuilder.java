@@ -40,11 +40,11 @@ class VocabularyBuilder {
       }
     }
 
-    // convert uniqueValues to Vocabulary, excluding rare (frequency of use is 1)
+    // convert uniqueValues to Vocabulary, excluding infrequent
     //
 
     for (Map.Entry<String, Integer> entry : uniqueValues.entrySet()) {
-      if (entry.getValue() > 1) {
+      if (entry.getValue() > 3) {
         vocabulary.add(new VocabularyWord(entry.getKey()));
       }
     }
