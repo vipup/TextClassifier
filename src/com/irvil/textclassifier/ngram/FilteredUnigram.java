@@ -10,21 +10,17 @@ public class FilteredUnigram implements NGramStrategy {
   @Override
   public Set<String> getNGram(String text) {
     // get all significant words
-    String[] words = split(clean(text));
+    String[] words = clean(text).split("[ \n\t\r$+<>№=]");
 
     // remove endings of words
     for (int i = 0; i < words.length; i++) {
-      words[i] = doStem(words[i]);
+      words[i] = PorterStemmer.doStem(words[i]);
     }
 
     Set<String> uniqueValues = new LinkedHashSet<>(Arrays.asList(words));
     uniqueValues.removeIf(s -> s.equals(""));
 
     return uniqueValues;
-  }
-
-  private String[] split(String text) {
-    return text.split("[ \n\t\r$+<>№=]");
   }
 
   private String clean(String text) {
@@ -34,10 +30,5 @@ public class FilteredUnigram implements NGramStrategy {
     } else {
       return "";
     }
-  }
-
-  private String doStem(String word) {
-    // remove ending of word
-    return PorterStemmer.doStem(word);
   }
 }
