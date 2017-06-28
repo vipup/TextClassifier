@@ -13,6 +13,10 @@ class VocabularyBuilder {
   private final NGramStrategy nGramStrategy;
 
   VocabularyBuilder(NGramStrategy nGramStrategy) {
+    if (nGramStrategy == null) {
+      throw new IllegalArgumentException();
+    }
+
     this.nGramStrategy = nGramStrategy;
   }
 
