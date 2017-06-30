@@ -3,7 +3,7 @@ package com.irvil.textclassifier.ngram;
 import java.util.Set;
 
 public interface NGramStrategy {
-  static NGramStrategy getStrategy(String type) {
+  static NGramStrategy getNGramStrategy(String type) {
     switch (type) {
       case "unigram":
         return new Unigram();

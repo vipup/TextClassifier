@@ -56,7 +56,7 @@ public class MainWindow extends Application {
     //
 
     daoFactory = DAOFactory.getDaoFactory(config);
-    nGramStrategy = NGramStrategy.getStrategy(config.getNGramStrategy());
+    nGramStrategy = NGramStrategy.getNGramStrategy(config.getNGramStrategy());
 
     if (daoFactory == null || nGramStrategy == null) {
       errorMsg("Oops, it seems there is an error in config file.");
