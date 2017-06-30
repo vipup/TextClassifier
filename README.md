@@ -1,6 +1,6 @@
 # Text Classifier
 
-Program for text classification using neural networks.
+Application for text classification using neural networks.
 
 ## Prerequisites
 
