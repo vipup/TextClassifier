@@ -9,14 +9,20 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public abstract class NGramStrategyTest {
-  NGramStrategy nGramStrategy;
   String[] idealCyrillicText;
   String[] idealLatinText;
-
+  private NGramStrategy nGramStrategy;
   private Set<String> uniqueValues;
 
   @Before
-  abstract public void setUp();
+  public void setUp() {
+    nGramStrategy = getNGramStrategy();
+    initializeIdeal();
+  }
+
+  protected abstract void initializeIdeal();
+
+  protected abstract NGramStrategy getNGramStrategy();
 
   @Test
   public void getNGramCyrillicText() throws Exception {
